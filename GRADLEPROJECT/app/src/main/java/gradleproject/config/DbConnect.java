@@ -17,7 +17,7 @@ public class DbConnect {
     public static final void connection() {
         try {
             connection = DriverManager.getConnection(DB_URL);
-            System.out.println("Datavase Connected");
+            System.out.println("Database Connected");
         } catch (SQLException e) {
             e.printStackTrace();
         }
