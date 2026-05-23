@@ -117,6 +117,16 @@ public class DbInitialization {
                 """;
             stmt.execute(sqlRefunds);
 
+            String sqlTransactions = """
+                CREATE TABLE IF NOT EXISTS transactions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    amount REAL NOT NULL,
+                    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    status TEXT CHECK(status IN ('Success', 'Failed', 'Refunded'))
+                );
+                """;
+            stmt.execute(sqlTransactions);
+
             String sqlAuditLogs = """
                 CREATE TABLE IF NOT EXISTS audit_logs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
