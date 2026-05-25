@@ -42,6 +42,13 @@ Example:
 📍 Dilakukan di:
 Terminal (Git Bash / VS Code Terminal) di dalam folder project repository
 
+Clone repository (HANYA pertama kali):
+
+    git clone <url-repository>
+    cd <nama-folder-project>
+📍 Dilakukan saat pertama kali mengambil project dari GitHub
+
+
 Ambil update terbaru dari main:
 
     git checkout main

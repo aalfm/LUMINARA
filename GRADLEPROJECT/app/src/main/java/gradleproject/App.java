@@ -3,14 +3,14 @@
  */
 package gradleproject;
 import javafx.application.Application;
-import org.sqlite.core.DB;
 import javafx.stage.Stage;
 import gradleproject.config.DbConnect;
+import gradleproject.config.DbInitialization;
 
 public class App extends Application {
 
     public void start (Stage stage){
-        DbConnect.connection();
+        DbConnect.getConnection();
         stage.show();
     }
     public String getGreeting() {
@@ -18,6 +18,8 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
+        DbInitialization.initDatabase();
+        System.out.println("App started");
         launch ();
     }
 }
