@@ -1,0 +1,55 @@
+.root {
+    -fx-background-color: #F8F7F4;
+    -fx-font-family: poppins;
+}
+
+.sidebar{
+    -fx-background-color: #003A6C;
+    -fx-border-width: 30px 30px 30px 30px;
+    -fx-pref-width: 250px;
+    -fx-padding: 30px 20px;
+    -fx-spacing: 15px;
+}
+
+/* LOGO */
+.logo-text {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+/* MENU BUTTON */
+.menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-alignment: CENTER-LEFT;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 10px;
+}
+
+.menu-button:hover {
+    -fx-background-color: #0A4F8F;
+    -fx-cursor: hand;
+}
+
+/* ACTIVE MENU */
+.menu-active {
+    -fx-background-color: white;
+    -fx-text-fill: #003A6C;
+    -fx-font-weight: bold;
+}
+
+/* CONTENT */
+.content-area {
+    -fx-padding: 30px;
+}
+
+/* PAGE TITLE */
+.page-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #003A6C;
+}
+
+    
