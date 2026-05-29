@@ -1,0 +1,1136 @@
+.root {
+    font-family: "Poppins";
+    -fx-font-family: "Poppins";
+    background-color: #F8F7F4;
+    -fx-background-color: #F8F7F4;
+}
+
+.sidebar_admin {
+    background-color: #003A6C;
+    border-width: 0 1px 0 0;
+    min-width: 250px;
+    max-width: 250px;
+
+
+    -fx-background-radius: 0 20 20 0;
+    -fx-background-color: #003A6C; 
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 12, 0, 3, 3);
+    -fx-effect-radius: 0 20 20 0;
+    
+    /* TAMBAHKAN INI UNTUK MENGUNCI LEBAR SIDEBAR */
+    -fx-pref-width: 250px; 
+    -fx-min-width: 250px;
+    -fx-max-width: 250px;
+}
+
+.greeting-title {
+    font-family: "Poppins";
+    font-size: 32px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #003A6C; /* Biru gelap senada dengan sidebar */
+}
+
+.greeting-subtitle {
+    font-family: "Poppins";
+    font-size: 18px;
+    color: #003A6C;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 18px;
+    -fx-text-fill: #003A6C; /* Abu-abu gelap untuk teks pendukung */
+}
+
+/* --- WADAH KARTU UTAMA --- */
+
+/* --- KARTU KHUSUS RINGKASAN PENDAPATAN --- */
+.revenue-card {
+    background-color: #F8F7F4;
+    border-radius: 15px;
+    padding: 20px;
+
+    -fx-background-color: #F8F7F4;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 10, 0, 0, 4);
+    
+    /* Kita masukkan padding langsung ke CSS agar rapi */
+    -fx-padding: 20px 20px 20px 20px; 
+}
+
+.dashboard-card {
+    background-color: #F8F7F4;
+    border-radius: 15px;
+    padding: 15px;
+
+    -fx-background-color: #F8F7F4;
+    -fx-background-radius: 15;
+    -fx-padding: 15;
+    
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 10, 0, 0, 4);
+}
+
+/* --- TOMBOL LIHAT --- */
+.btn-lihat {
+    background-color: #F8931F; /* Oranye Luminara */
+    font-family: "Poppins";
+    font-size: 10px; /* Dikecilkan */
+    font-weight: bold;
+    padding: 3 12 3 12;
+    cursor: hand;
+
+    -fx-background-color: #F8931F; /* Oranye Luminara */
+    -fx-text-fill: white;
+    -fx-font-family: "Poppins";
+    -fx-font-size: 10px; /* Dikecilkan */
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-padding: 3 12 3 12;
+    -fx-cursor: hand;
+}
+
+.btn-lihat:hover {
+    background-color: #E07B10; /* Oranye lebih gelap saat hover */
+
+    -fx-background-color: #E07B10;
+}
+
+/* --- JUDUL KARTU --- */
+.card-title {
+    font-family: "Poppins";
+    font-size: 11px; /* Dikecilkan agar muat sejajar */
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 11px; /* Dikecilkan agar muat sejajar */
+    -fx-font-weight: bold;
+    -fx-text-fill: #003A6C;
+}
+
+/* --- KOTAK ANGKA BESAR --- */
+.card-number-box {
+    -fx-alignment: center;
+    -fx-background-radius: 8;
+}
+
+/* Warna Kotak Abu-abu */
+.box-gray {
+    background-color: #DDE2E5;
+
+    -fx-background-color: #DDE2E5;
+}
+
+/* Warna Kotak Oranye */
+.box-orange {
+    background-color: #F8931F;
+
+    -fx-background-color: #F8931F;
+}
+
+/* Teks Angkanya */
+.card-number-text {
+    font-family: "Poppins";
+    font-size: 28px; /* Dikecilkan dari 40px */
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 28px; /* Dikecilkan dari 40px */
+    -fx-font-weight: bold;
+    -fx-text-fill: #003A6C;
+}
+
+/* --- TEKS "Admin" DI BAWAH LOGO --- */
+.admin-subtitle {
+    font-family: "Poppins";
+    font-size: 13px;
+    font-weight: bold;
+
+    -fx-text-fill: #f8f7f4; /* Warna putih agar kontras dengan biru gelap */
+    -fx-font-family: "Poppins";
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* --- KOTAK MENU NAVIGASI --- */
+.menu-item {
+    padding: 10 13 10 18; /* Jarak ruang di dalam kotak menu */
+    cursor: hand;
+
+    -fx-padding: 10 13 10 18; /* Jarak ruang di dalam kotak menu */
+    -fx-background-radius: 8; /* Ujung kotak membulat */
+    -fx-cursor: hand;
+}
+
+/* Efek saat mouse mengambang di atas menu (Hover) */
+.menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Warna putih transparan untuk efek hover */
+    -fx-background-color: rgba(255, 255, 255, 0.1); 
+}
+
+/* Kotak menu yang sedang aktif (Beranda) */
+.menu-item-active {
+    background-color: #DDE2E5; /* Warna abu-abu terang */
+    -fx-background-color: #DDE2E5; /* Warna abu-abu terang */
+}
+
+/* Mencegah efek hover menimpa warna menu aktif */
+.menu-item-active:hover {
+    background-color: #DDE2E5; /* Tetap abu-abu terang saat hover */
+    -fx-background-color: #DDE2E5; 
+}
+
+/* --- TEKS MENU --- */
+.menu-text {
+    font-family: "Poppins";
+    font-size: 10px;    
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+/* Teks menu aktif (Berubah jadi biru agar kontras dengan abu-abu) */
+.menu-text-active {
+    font-family: "Poppins";
+    font-size: 10px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #003A6C; 
+}
+
+/* --- BARIS RINGKASAN PENDAPATAN --- */
+.revenue-row {
+    border-color: #DDE2E5; /* Warna abu-abu terang untuk garis dalam */
+    border-width: 1px 0 1px 0; /* Hanya garis atas dan bawah */
+    border-radius: 20px; /* Garis tetap lurus */
+    padding: 6 15 6 15; /* Jarak ruang di dalam garis (Atas, Kanan, Bawah, Kiri) */
+    background-color: transparent; /* Warna latar belakang tetap transparan */
+
+    -fx-border-color: #003A6C; /* Warna biru gelap garis luar */
+    -fx-border-width: 1px;
+    -fx-border-radius: 20px; /* Membuat sudut garis melengkung */
+    -fx-background-radius: 20px; 
+    -fx-padding: 6 15 6 15; /* Jarak ruang di dalam garis (Atas, Kanan, Bawah, Kiri) */
+    -fx-background-color: transparent;
+}
+
+/* Teks Bulan (Jan, Feb, dst) */
+.revenue-month {
+    font-family: "Poppins";
+    font-size: 12px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #003A6C;
+}
+
+/* Teks Nominal (Rp...) */
+.revenue-amount {
+    font-family: "Poppins Semibold";
+    font-size: 12px;
+    
+    -fx-font-family: "Poppins Semibold";
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748B; /* Warna abu-abu agar sedikit kontras dengan bulannya */
+}
+
+/* --- AKTIVITAS TERBARU --- */
+.section-title {
+    font-family: "Poppins";
+    font-size: 16px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins", "Arial";
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #003A6C;
+}
+
+.activity-row {
+    background-color: #FCDCAE; /* Warna latar oranye muda */
+    border-color: #F8931F;     /* Garis pinggir oranye */
+    border-width: 1px;
+    border-radius: 8px;
+    padding: 12px 18px 12px 18px; /* Ruang
+
+    -fx-background-color: #FCDCAE; /* Warna latar oranye muda */
+    -fx-border-color: #F8931F;     /* Garis pinggir oranye */
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 18px 12px 18px; /* Ruang lega di dalam kotak */
+}
+
+.activity-title {
+    font-family: "Poppins", "Arial";
+    font-size: 12px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins", "Arial";
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #003A6C;
+}
+
+.activity-subtitle {
+    font-family: "Poppins";
+    font-size: 11px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748B; /* Warna abu-abu */
+}
+
+.activity-time {
+    font-family: "Poppins";
+    font-size: 11px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins", "Arial";
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #003A6C;
+}
+
+.btn-lihat-aktivitas {
+    background-color: #F8931F;
+    font-family: "Poppins";
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4 12 4 12;
+    cursor: hand;
+
+    -fx-background-color: #F8931F;
+    -fx-text-fill: white;
+    -fx-font-family: "Poppins";
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+    -fx-padding: 4 12 4 12;
+    -fx-cursor: hand;
+}
+
+.btn-lihat-aktivitas:hover {
+    background-color: #D67B10;
+
+    -fx-background-color: #D67B10;
+}
+
+/* --- HALAMAN DAFTAR PENGGUNA --- */
+.user-row-box {
+    background-color: #FCDCAE;
+    border-color: #F8931F;
+    border-width: 1px;
+    border-radius: 20px;
+    padding: 8px 20px 8px 20px;
+
+    -fx-background-color: #FCDCAE;
+    -fx-border-color: #F8931F;
+    -fx-border-width: 1px;
+    -fx-border-radius: 20px; /* Lebih melengkung sesuai gambar */
+    -fx-background-radius: 20px;
+    -fx-padding: 8px 20px 8px 20px;
+}
+
+.user-name-text {
+    font-family: "Poppins";
+    font-size: 12px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: #003A6C;
+}
+
+.join-time-text {
+    font-family: "Poppins";
+    font-size: 11px;
+    padding: 0 20 0 0;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 11px;
+    -fx-text-fill: #003A6C; /* Biru tua sesuai gambar */
+    -fx-padding: 0 20 0 0;
+}
+
+/* Pagination */
+.btn-pagination {
+    background-color: #E2E8F0;
+    border-radius: 50%;
+    min-width: 30px;
+    min-height: 30px;
+    font-size: 12px;
+    cursor: hand;
+
+    -fx-background-color: #E2E8F0;
+    -fx-background-radius: 50%;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.btn-pagination-active {
+    background-color: #F8931F;
+    border-radius: 50%;
+    min-width: 30px;
+    min-height: 30px;
+    font-weight: bold;
+
+    -fx-background-color: #F8931F;
+    -fx-text-fill: white;
+    -fx-background-radius: 50%;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-font-weight: bold;
+}
+
+/* --- HALAMAN ACARA BERLANGSUNG --- */
+.event-orange-tab {
+    background-color: #F8931F;
+    font-family: "Poppins";
+    font-weight: bold;
+    font-size: 13px;
+    padding: 8px 25px 8px 25px;
+
+    -fx-background-color: #F8931F; /* Oranye tegas Luminara */
+    -fx-text-fill: #003A6C;        /* Teks biru tua */
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 25px 8px 25px;
+    -fx-background-radius: 12px 12px 0 0; /* Melengkung hanya di atas */
+}
+
+.event-blue-container {
+    background-color: #F8F7F4;
+    padding: 25px;
+
+    -fx-background-color: #003A6C; /* Biru tua khas tema */
+    -fx-padding: 25px;
+    -fx-background-radius: 0 20px 20px 20px; /* Siku di kiri atas agar menyatu dengan tab */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 15, 0, 0, 6);
+}
+
+.event-white-card {
+    background-color: #F8F7F4;
+    border-radius: 15px;
+    padding: 15px;
+
+    -fx-background-color: #F8F7F4;
+    -fx-background-radius: 15px;
+    -fx-padding: 15px;
+}
+
+.event-field-header {
+    font-family: "Poppins";
+    font-size: 12px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: #003A6C;
+}
+
+.event-field-value {
+    font-family: "Poppins";
+    font-size: 12px;
+    padding: 0 0 4px 0; /* Memberi jarak ke field berikutnya */
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 12px;
+    -fx-text-fill: #1E3A5F; /* Biru gelap regular */
+    -fx-padding: 0 0 4px 0; /* Memberi jarak ke field berikutnya */
+}
+
+/* --- HALAMAN PENDING / MENUGGU KONFIRMASI --- */
+.confirm-white-card {
+    background-color: #F8F7F4;
+    border-radius: 15px;
+
+    -fx-background-color: #F8F7F4;
+    -fx-background-radius: 20px; /* Lengkungan sudut mengikuti tema kontainer luar */
+}
+
+.confirm-table-header {
+    font-family: "Poppins";
+    font-size: 13px;
+    font-weight: bold;
+    padding: 5px 0 5px 0;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #003A6C;
+    -fx-padding: 5px 0 5px 0;
+}
+
+.confirm-divider {
+    border-color: #DDE2E5; /* Warna abu-abu terang untuk garis pembatas */
+    border-width: 1px 0 0 0; /* Hanya garis atas*/
+    padding: 0 0 5px 0; /* Jarak ke konten berikutnya agar tidak terlalu rapat */
+
+    -fx-border-color: #64748B transparent transparent transparent; /* Garis pembatas tipis abu-abu kebiruan */
+    -fx-border-width: 1px;
+    -fx-pref-height: 1px;
+    -fx-padding: 0 0 5px 0;
+}
+
+.btn-tolak {
+    background-color: #F8F7F4;
+    border-color: #64748B;
+    border-width: 1px;
+    border-radius: 5px;
+    padding: 6px 20px 6px 20px;
+    font-family: "Poppins";
+    font-size: 11px;
+    font-weight: bold;
+    cursor: hand;
+
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #003A6C;
+    -fx-border-color: #64748B;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 6px 20px 6px 20px;
+    -fx-font-family: "Poppins";
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 4, 0, 0, 1);
+}
+
+.btn-tolak:hover {
+    background-color: #F8F7F4; /* Highlight abu-abu tipis saat kursor di atasnya */
+
+    -fx-background-color: #F1F5F9; /* Highlight abu-abu tipis saat kursor di atasnya */
+}
+
+/* --- HALAMAN AKTIVITAS TERBARU (FULL LIST) --- */
+.activity-row-full {
+    background-color: #FCDCAE; /* Peach/Oranye Muda */
+    border-color: #F8931F;     /* Border Oranye Tegas */
+    border-width: 1px;
+    border-radius: 15px;       /* Lengkungan sudut */
+    padding: 10px 20px 10px 20px;
+
+    -fx-background-color: #FCDCAE; /* Peach/Oranye Muda */
+    -fx-border-color: #F8931F;     /* Border Oranye Tegas */
+    -fx-border-width: 1px;
+    -fx-border-radius: 15px;       /* Lengkungan sudut */
+    -fx-background-radius: 15px;
+    -fx-padding: 10px 20px 10px 20px;
+}
+
+.activity-title-text {
+    font-family: "Poppins";
+    font-size: 12px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: #003A6C; /* Biru Tua */
+}
+
+.activity-subtitle-text {
+    font-family: "Poppins";
+    font-size: 11px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 10px;
+    -fx-text-fill: #64748B; /* Abu-abu kebiruan */
+}
+
+.activity-time-text {
+    font-family: "Poppins";
+    font-size: 11px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-text-fill: #003A6C;
+}
+
+/* Pagination Style */
+.btn-pagination {
+    background-color: #E2E8F0;
+    min-width: 30px;
+    cursor: hand;
+
+    -fx-background-color: #FCDCAE;
+    -fx-text-fill: #003A6C;
+    -fx-background-radius: 5px;
+    -fx-min-width: 30px;
+    -fx-cursor: hand;
+}
+
+.btn-pagination-active {
+    background-color: #F8931F;
+    font-weight: bold;
+    min-width: 30px;
+    cursor: hand;
+
+    -fx-background-color: #F8931F;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-min-width: 30px;
+    -fx-cursor: hand;
+}
+
+/* --- HALAMAN MANAJEMEN PENGGUNA (TABEL) --- */
+.btn-mini-lihat {
+    background-color: #F8931F;
+    font-family: "Poppins";
+    font-size: 9px;
+    font-weight: bold;
+    padding: 2 10 2 10;
+    cursor: hand;
+
+    -fx-background-color: #F8931F;
+    -fx-text-fill: white;
+    -fx-font-family: "Poppins";
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 2px 10px 2px 10px;
+    -fx-cursor: hand;
+}
+
+.management-table-container {
+    background-color: #F8FAFC;
+    border-color: #E2E8F0;
+    border-width: 1px;
+    border-radius: 20px;
+
+    -fx-background-color: #F8FAFC; 
+    -fx-background-radius: 20px;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 20px;
+}
+
+.management-table-header {
+    background-color: #CBD5E1;
+    padding: 12px 25px 12px 25px;
+
+    -fx-background-color: #CBD5E1; /* Warna abu-abu kebiruan di kepala tabel */
+    -fx-padding: 12px 25px 12px 25px;
+    -fx-background-radius: 20px 20px 0 0;
+}
+
+.table-header-text {
+    font-family: "Poppins";
+    font-weight: bold;
+    font-size: 12px;
+    
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: #1E3A5F;
+}
+
+.table-row-name {
+    font-family: "Poppins";
+    font-weight: bold;
+    font-size: 13px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #003A6C;
+}
+
+.table-row-email {
+    font-family: "Poppins";
+    font-size: 11px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748B;
+}
+
+.table-row-date {
+    font-family: "Poppins";
+    font-size: 11px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 12px;
+    -fx-text-fill: #334155;
+}
+
+.table-row-status {
+    font-family: "Poppins";
+    font-weight: bold;
+    font-size: 12px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: #334155;
+}
+
+/* --- HALAMAN MANAJEMEN PENGGUNA (TABEL) --- */
+.btn-mini-lihat {
+    background-color: #F8931F;
+    font-family: "Poppins";
+    font-size: 9px;
+    font-weight: bold;
+    padding: 2 10 2 10;
+    cursor: hand;
+
+    -fx-background-color: #F8931F;
+    -fx-text-fill: #F8F7F4;
+    -fx-font-family: "Poppins";
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 2px 10px 2px 10px;
+    -fx-cursor: hand;
+}
+
+.management-table-container {
+    background-color: #F8FAFC;
+    border-color: #E2E8F0;
+    border-width: 1px;
+    border-radius: 20px;
+
+    -fx-background-color: #F8FAFC; 
+    -fx-background-radius: 20px;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 20px;
+}
+
+.management-table-header {
+    background-color: #CBD5E1;
+    padding: 12px 25px 12px 25px;
+
+    -fx-background-color: #CBD5E1; /* Warna abu-abu kebiruan di kepala tabel */
+    -fx-padding: 12px 25px 12px 25px;
+    -fx-background-radius: 20px 20px 0 0;
+}
+
+.table-header-text {
+    font-family: "Poppins";
+    font-weight: bold;
+    font-size: 12px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: #1E3A5F;
+}
+
+.table-row-name {
+    font-family: "Poppins";
+    font-weight: bold;
+    font-size: 13px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #003A6C;
+}
+
+.table-row-email {
+    font-family: "Poppins";
+    font-size: 11px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748B;
+}
+
+.table-row-date {
+    font-family: "Poppins";
+    font-size: 11px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 12px;
+    -fx-text-fill: #334155;
+}
+
+.table-row-status {
+    font-family: "Poppins";
+    font-weight: bold;
+    font-size: 12px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: #334155;
+}
+
+/* --- GAYA TAMPILAN SUB-MENU SIDEBAR --- */
+.submenu-item {
+    margin: 0 0 0 0;
+
+    -fx-background-radius: 10px;
+    -fx-margin: 0 0 0 0;
+}
+
+.submenu-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    -fx-background-color: rgba(255, 255, 255, 0.08); /* Efek sorot transparan lembut saat kursor lewat */
+}
+
+.submenu-item-active {
+    background-color: rgba(255, 255, 255, 0.15); /* Tanda pil transparan untuk sub-menu yang aktif */
+    
+    -fx-background-color: rgba(255, 255, 255, 0.15); /* Tanda pil transparan untuk sub-menu yang aktif */
+}
+
+.submenu-text {
+    font-family: "Poppins";
+    font-weight: bold;
+    font-size: 10px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 10px;
+    -fx-text-fill: #CBD5E1; /* Warna putih abu-abu soft saat tidak aktif */
+}
+
+.submenu-text-active {
+    font-family: "Poppins";
+    font-size: 11px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-text-fill: #F8931F; /* Menyala oranye khas tema Luminara saat dipilih! */
+}
+
+/* =========================================
+   STYLE UNTUK PROFIL PENGGUNA (GAMBAR 1)
+========================================= */
+
+.card-orange-wrapper {
+    background-color: #F8931F;
+
+    -fx-background-color: #F8931F;
+    -fx-background-radius: 20px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}
+
+.detail-card-title {
+    Font-family: "Poppins";
+    font-size: 18px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0A3B5C; 
+}
+
+.card-blue-wrapper {
+    background-color: #0A3B5C;
+    padding: 30px;
+
+    -fx-background-color: #0A3B5C;
+    -fx-background-radius: 20px;
+    -fx-padding: 30px; 
+}
+
+.card-white-content {
+    background-color: #F8F7F4;
+    padding: 25px 40px 40px 40px;
+
+    -fx-background-color: #F8F7F4;
+    -fx-background-radius: 15px;
+    -fx-padding: 25px 40px 40px 40px;
+}
+
+.detail-inner-header {
+    font-family: "Poppins";
+    font-size: 15px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0A3B5C;
+}
+
+.detail-separator-line {
+    background-color: #CBD5E1;
+    min-height: 1.5px;
+    max-height: 1.5px;
+
+    -fx-background-color: #CBD5E1; 
+    -fx-min-height: 1.5px;
+    -fx-max-height: 1.5px;
+}
+
+.detail-data-title {
+    font-family: "Poppins";
+    font-size: 14px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0A3B5C;
+}
+
+.detail-data-value {
+    font-family: "Poppins";
+    font-size: 14px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 14px;
+    -fx-text-fill: #0A3B5C;
+}
+
+.btn-status-aktif {
+    background-color: #F8931F;
+    font-family: "Poppins";
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 30px 6px 30px;
+    cursor: hand;
+
+    -fx-background-color: #F8931F;
+    -fx-text-fill: white;
+    -fx-font-family: "Poppins";
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 6px 30px;
+    -fx-cursor: hand;
+}
+
+.btn-status-aktif:hover {
+    background-color: #e0851c;
+    -fx-background-color: #e0851c;
+}
+
+/* =========================================
+   STYLE UNTUK DETAIL PENGGUNA (GAMBAR 2)
+========================================= */
+
+.detail-header-container {
+    background-color: #D1D9E0;
+    -fx-background-color: #D1D9E0; 
+    -fx-background-radius: 10px;
+}
+
+.detail-header-text {
+    font-family: "Poppins";
+    font-size: 13px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0A3B5C; 
+}
+
+.detail-body-container {
+    background-color: #0A3B5C;
+
+    -fx-background-color: #0A3B5C; 
+    -fx-background-radius: 20px;
+}
+
+.detail-row-card {
+    background-color: #F8F9FA;
+
+    -fx-background-color: #F8F9FA;
+    -fx-background-radius: 15px;
+}
+
+.detail-row-name {
+    font-family: "Poppins";
+    font-size: 13px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0A3B5C;
+}
+
+.detail-row-text {
+    font-family: "Poppins";
+    font-size: 12px;
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 12px;
+    -fx-text-fill: #1E3A5F;
+}
+
+.btn-blokir {
+    background-color: #F8931F;
+    font-family: "Poppins";
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px 15px;
+    cursor: hand;
+
+    -fx-background-color: #F8931F;
+    -fx-text-fill: white;
+    -fx-font-family: "Poppins";
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12px;
+    -fx-padding: 4px 15px;
+    -fx-cursor: hand;
+}
+
+.btn-blokir:hover {
+    background-color: #e0851c;
+
+    -fx-background-color: #e0851c; 
+}
+
+/* Tombol Pagination (< dan >) untuk kedua halaman */
+.btn-page-inactive {
+    background-color: #E2E8F0;
+    font-family: "Poppins";
+    font-weight: bold;
+    padding: 5px 12px;
+    cursor: hand;
+
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: #64748B;
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 5px 12px;
+    -fx-cursor: hand;
+}
+
+.btn-page-active {
+    background-color: #F8931F;
+    font-family: "Poppins";
+    font-weight: bold;
+    padding: 5px 12px;
+    cursor: hand;
+
+    -fx-background-color: #F8931F;
+    -fx-text-fill: white;
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 5px 12px;
+    -fx-cursor: hand;
+}
+
+/* =========================================
+   STYLE TOMBOL DETAIL (BARIS DAFTAR PENGGUNA & PENYELENGGARA)
+========================================= */
+.btn-detail {
+    background-color: #F8931F;
+    font-family: "Poppins";
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px 20px;
+    cursor: hand;
+
+    -fx-background-color: #F8931F;
+    -fx-text-fill: #F8F7F4;
+    -fx-font-family: "Poppins";
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 5px 20px;
+    -fx-cursor: hand;
+}
+
+.btn-detail:hover {
+    background-color: #e0851c;
+
+    -fx-background-color: #e0851c; /* Oranye sedikit lebih gelap saat disentuh */
+}
+
+/* Container Utama Kartu Acara */
+.event-card {
+    background-color: #F8F7F4;
+    padding: 20px;
+
+    -fx-background-color: #F8F7F4;
+    -fx-background-radius: 15;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+    -fx-padding: 20;
+    -fx-alignment: center-left;
+}
+
+/* Ikon Kotak di sebelah kiri */
+.event-icon-box {
+    background-color: #CCD5DA;
+    min-width: 80;
+    min-height: 80;
+
+    -fx-background-color: #CCD5DA;
+    -fx-background-radius: 10;
+    -fx-min-width: 80;
+    -fx-min-height: 80;
+    -fx-alignment: center;
+}
+
+/* Teks Kategori (Festival, Musik, dll) */
+.event-category-text {
+    font-family: "Poppins";
+    font-size: 12px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 24px;
+    -fx-text-fill: #003A6C;
+}
+
+/* Angka Jumlah */
+.event-count-text {
+    font-family: "Poppins";
+    font-size: 36px;
+    font-weight: bold;
+
+    -fx-font-family: "Poppins";
+    -fx-font-weight: bold;
+    -fx-font-size: 36px;
+    -fx-text-fill: #003A6C;
+}
+
+/* Garis Putus-putus Oranye di tengah */
+.event-divider {
+    border-color: #FF9800;
+    border-style: dashed;
+    border-width: 0 2 0 0; /* Hanya garis kanan */
+    -fx-border-color: #FF9800;
+    -fx-border-style: dashed;
+    -fx-border-width: 0 2 0 0; /* Hanya garis kanan */
+}
+
+/* Tombol Detail Kecil */
+.btn-detail-small {
+    background-color: #FF9800;
+    font-family: "Poppins";
+    font-size: 10px;
+    padding: 3 10;
+
+    -fx-background-color: #FF9800;
+    -fx-text-fill: white;
+    -fx-font-size: 10px;
+    -fx-background-radius: 5;
+    -fx-padding: 3 10;
+}
