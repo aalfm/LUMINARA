@@ -1,0 +1,1484 @@
+/* Padding bagian dalam pembungkus konten */
+.content-box {
+    padding: 40px;
+    -fx-padding: 40px;
+}
+
+/* Pengaturan Gaya Teks Tagline */
+.tagline-text {
+    font-family: "Poppins";
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff; /* Warna putih */
+
+    -fx-font-family: "Poppins";
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff; /* Warna putih */
+    -fx-text-alignment: center;
+    -fx-line-spacing: 6px;
+}
+
+/* Pengaturan Tombol "Mulai Jelajahi" */
+.explore-button {
+    background-color: #ff9100;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 12px 45px;
+    cursor: hand;
+    /* Ukuran tombol atas-bawah & kiri-kanan */
+
+
+    -fx-background-color: #ff9100; /* Warna jingga/orange */
+    -fx-text-fill: #ffffff;         /* Teks putih */
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 45px;         /* Ukuran tombol atas-bawah & kiri-kanan */
+    -fx-background-radius: 6px;     /* Kelengkungan sudut tombol */
+    -fx-cursor: hand;               /* Mengubah ikon kursor saat diarahkan */
+}
+
+/* Efek Transisi Warna Saat Tombol Didekati Mouse (Hover) */
+.explore-button:hover {
+    background-color: #e68200; /* Jingga yang lebih gelap */
+
+    -fx-background-color: #e68200; /* Jingga yang lebih gelap */
+
+}
+
+
+
+
+/* ==================== SCENE 2 STYLES ==================== */
+
+.scene2-root {
+    background-color: #F8F7F4; /* Warna dasar krem terang sesuai gambar */
+    padding: 20px;
+
+    -fx-background-color: #F8F7F4; /* Warna dasar krem terang sesuai gambar */
+    -fx-padding: 20px;
+}
+
+/* Area Kiri: Gambar Background Melengkung */
+.left-banner {
+    background-image: url("/aset/gambarLuminara/gambar-bg.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+    max-width: 440px; /* Batas lebar gambar kiri */
+
+    -fx-background-image: url("/aset/gambarLuminara/gambar-bg.png"); /* Menggunakan aset gambar yang sama */
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-radius: 30px; /* Sudut melengkung halus di ujung */
+    -fx-max-width: 440px; /* Batas lebar gambar kiri */
+    
+    /* Efek overlay biru gelap tipis di atas gambar */
+    background-color: linear-gradient(to bottom, rgba(24, 43, 64, 0.5), rgba(24, 43, 64, 0.75));
+    background-blend-mode: multiply;
+
+    -fx-background-color: linear-gradient(to bottom, rgba(24, 43, 64, 0.5), rgba(24, 43, 64, 0.75));
+    -fx-background-blend-mode: multiply;
+}
+
+.left-tagline {
+    text-fill:#ff9100; /* Warna orange menyesuaikan aksen */
+    font-family: "Segoe UI", Arial;
+    font-size: 13px;
+    font-weight: bold;
+
+    -fx-text-fill: #FF9100; /* Warna orange menyesuaikan aksen */
+    -fx-font-family: "Segoe UI", Arial;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* Area Kanan: Konten */
+.right-content {
+    padding: 20px 40px 20px 50px; /* Padding atas, kanan, bawah, kiri */
+
+    -fx-padding: 20px 40px 20px 50px;
+}
+
+/* Pagination Dots */
+.dot-inactive {
+    background-color: transparent;
+    border-color: #0A192F;
+    border-width: 1.5px;
+    
+    -fx-background-color: transparent;
+    -fx-border-color: #0A192F;
+    -fx-border-width: 1.5px;
+    -fx-background-radius: 50%;
+    -fx-pref-width: 10px;
+    -fx-pref-height: 10px;
+}
+
+.dot-active {
+    background-color: #0A192F;
+    
+    -fx-background-color: #0A192F;
+    -fx-background-radius: 50%;
+    -fx-pref-width: 10px;
+    -fx-pref-height: 10px;
+}
+
+/* Tipografi Utama */
+.main-title {
+    font_family: "Segoe UI", Arial, sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: #003060; /* Biru tua gelap pekat */
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 32px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #003060; /* Biru tua gelap pekat */
+}
+
+.sub-title {
+    font_family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    color: #2C5282; /* Biru medium */
+    max-width: 550px;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #2C5282; /* Biru medium */
+    -fx-max-width: 550px;
+}
+
+.section-heading {
+    
+    font-size: 16px;
+    font-weight: bold;
+    
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #003060;
+}
+
+/* Tags Kategori */
+.category-tag {
+    background-color: #FBD38D;
+    
+    padding: 6px 16px;
+
+    -fx-background-color: #FBD38D; /* Warna dasar kuning/orange pastel */
+    -fx-background-radius: 15px;
+    -fx-padding: 6px 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0.0, 0, 2);
+}
+
+/* Kartu Review/Testimoni */
+.testimonial-card {
+    background-color: #0A3C73;
+    
+    -fx-background-color: #0A3C73; /* Warna biru gelap pekat untuk kartu */
+    -fx-background-radius: 12px;
+    -fx-padding: 15px;
+    -fx-max-width: 180px;
+    -fx-pref-height: 150px;
+}
+
+.avatar-circle {
+    background-color: #ffffff;
+    
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 50%;
+    -fx-pref-width: 28px;
+    -fx-pref-height: 28px;
+}
+
+.card-review-text {
+    
+    font-family: "Segoe UI", Arial;
+    font-size: 11px;
+    
+    -fx-text-fill: #E2E8F0;
+    -fx-font-family: "Segoe UI", Arial;
+    -fx-font-size: 11px;
+    -fx-line-spacing: 3px;
+}
+
+/* Tombol Navigasi Bawah */
+.btn-back {
+    background-color: white;
+    
+    font-family: "Segoe UI", Arial;
+    font-weight: bold;
+    border-color: #CBD5E0;
+    border-radius: 6px;
+    padding: 10px 40px;
+
+
+    -fx-background-color: white;
+    -fx-text-fill: #4A5568;
+    -fx-font-family: "Segoe UI", Arial;
+    -fx-font-weight: bold;
+    -fx-border-color: #CBD5E0;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 10px 40px;
+}
+
+.btn-back:hover {
+    background-color: #EDF2F7;
+
+    -fx-background-color: #EDF2F7;
+}
+
+.btn-next {
+    background-color: #FF9100;
+
+    font-family: "Segoe UI", Arial;
+    font-weight: bold;
+    padding: 10px 40px;
+
+
+    -fx-background-color: #FF9100; /* Orange khas */
+    -fx-text-fill: white;
+    -fx-font-family: "Segoe UI", Arial;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 10px 40px;
+    -fx-effect: dropshadow(gaussian, rgba(255, 145, 0, 0.3), 8, 0.0, 0, 3);
+}
+
+.btn-next:hover {
+    background-color: #E68200;
+
+    -fx-background-color: #E68200;
+}
+
+
+
+/* IntroPage 3 Styles */
+.intro3-title {
+    font-size: 40px;
+    font-weight: bold;
+    
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-text-alignment: center;
+}
+
+.intro3-subtitle {
+    font-size: 18px;
+
+    -fx-font-size: 18px;
+    -fx-text-fill: white;
+}
+
+.intro3-footer {
+    font-size: 14px;
+    
+    font-style: italic;
+
+    -fx-font-size: 14px;
+    -fx-text-fill: white;
+    -fx-font-style: italic;
+}
+
+/* Tombol Peran (Orange/Gold sesuai gambar) */
+.btn-role {
+    background-color: #E67E22;
+    
+    font-weight: bold;
+    padding: 10 25;
+    
+    cursor: hand;
+
+    -fx-background-color: #E67E22;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 25;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.btn-role:hover {
+    background-color: #D35400;
+
+    -fx-background-color: #D35400;
+}
+
+/* Tombol Admin (Kuning sesuai gambar) */
+.btn-role-admin {
+    background-color: #F1C40F;
+    
+    font-weight: bold;
+    padding: 10 25;
+    
+    cursor: hand;
+
+    -fx-background-color: #F1C40F;
+    -fx-text-fill: #2C3E50;
+    -fx-font-weight: bold;
+    -fx-padding: 10 25;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+/* Tombol Kembali (Outline Putih) */
+.btn-back-outline {
+    background-color: transparent;
+    border-color:white;
+    border-width: 2;
+    
+    font-weight: bold;
+    padding: 8 25;
+    
+    cursor: hand;
+
+    -fx-background-color: transparent;
+    -fx-border-color: white;
+    -fx-border-width: 2;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 25;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.btn-back-outline:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Dot ke-3 yang aktif */
+.dot-active {
+    background-color: white;
+    
+    -fx-background-color: white;
+    -fx-pref-width: 10;
+    -fx-pref-height: 10;
+    -fx-background-radius: 5;
+}
+
+.dot-inactive {
+    background-color: rgba(255, 255, 255, 0.3);
+    
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+    -fx-pref-width: 10;
+    -fx-pref-height: 10;
+    -fx-background-radius: 5;
+}
+
+
+/* ==========================================================================
+   STYLE KHUSUS HALAMAN DAFTAR (SIGN UP)
+   ========================================================================== */
+
+.signup-root {
+    background-color: #ffffff;
+    padding: 20px;
+
+    -fx-background-color: #ffffff;
+    -fx-padding: 25px;
+}
+
+.signup-left-content {
+    /* Mengontrol susunan teks di atas banner kain tenun */
+}
+
+.signup-left-title {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #ffffff;
+}
+
+.signup-left-sub {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #f7fafc;
+    -fx-line-spacing: 4px;
+}
+
+.signup-right-content {
+    padding: 20px 40px 20px 60px;
+
+    -fx-padding: 20px 40px 20px 60px;
+}
+
+.signup-form-title {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 32px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #003060;
+}
+
+.signup-form-sub {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    text-fill:#4A5568;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #4A5568;
+}
+
+.form-field-label {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+
+    padding:4px 0 0 0;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #003060;
+    -fx-padding: 4px 0 0 0;
+}
+
+.form-text-input {
+    background-color: #F3F4F6;
+    
+    border-color: #E2E8F0;
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 13px;
+
+
+    -fx-background-color: #F3F4F6;
+    -fx-background-radius: 8px;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 8px;
+    -fx-padding: 11px 14px;
+    -fx-font-size: 13px;
+    -fx-text-fill: #1A202C;
+}
+
+.form-text-input:focused {
+    background-color: #ffffff;
+    border-color: #ff9100;
+    border-width: 1.5px;
+
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ff9100;
+    -fx-border-width: 1.5px;
+}
+
+.btn-signup-submit {
+    background-color: #ff9100;
+    
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-weight: bold;
+    font-size: 14px;
+    
+    padding: 12px;
+
+    -fx-background-color: #ff9100;
+    -fx-text-fill: #ffffff;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+}
+
+.btn-signup-submit:hover {
+    background-color: #e68200;
+
+    -fx-background-color: #e68200;
+}
+
+.form-line {
+    background-color: #E2E8F0;
+
+    -fx-background-color: #E2E8F0;
+    -fx-pref-height: 1px;
+}
+
+.label-or {
+    
+    font-size: 13px;
+
+    -fx-text-fill: #A0AEC0;
+    -fx-font-size: 13px;
+}
+
+.lbl-have-account {
+    
+    font-size: 13px;
+    font-weight: bold;
+
+    -fx-text-fill: #4A5568;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.link-login-redirect {
+
+    font-size: 13px;
+    font-weight: bold;
+    
+    padding: 0;
+
+    -fx-text-fill: #003060;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-underline: false;
+    -fx-padding: 0;
+}
+
+
+
+/* ==========================================================================
+   STYLE KHUSUS HALAMAN MASUK (SIGN IN)
+   ========================================================================== */
+
+.signin-root {
+    background-color: #ffffff;
+    padding: 25px;
+
+    -fx-background-color: #ffffff;
+    -fx-padding: 25px;
+}
+
+.signin-left-title {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #ffffff;
+}
+
+.signin-left-sub {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #f7fafc;
+    -fx-line-spacing: 4px;
+}
+
+.signin-right-content {
+    padding: 20px 40px 20px 60px;
+
+    -fx-padding: 20px 40px 20px 60px;
+}
+
+.signin-form-title {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 32px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #003060;
+}
+
+.signin-form-sub {
+    
+    font-size: 14px;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #4A5568;
+}
+
+.btn-signin-submit {
+    background-color: #ff9100;
+    
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-weight: bold;
+    font-size: 14px;
+    
+    padding: 12px;
+
+    -fx-background-color: #ff9100;
+    -fx-text-fill: #ffffff;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+}
+
+.btn-signin-submit:hover {
+    background-color: #e68200;
+
+    -fx-background-color: #e68200;
+}
+
+.lbl-no-account {
+
+    font-size: 13px;
+    font-weight: bold;
+
+    -fx-text-fill: #4A5568;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.link-signup-redirect {
+    text: fill #003060;
+    font-size: 13px;
+    font-weight: bold;
+    
+    padding: 0;
+    
+    -fx-text-fill: #003060;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-underline: false;
+    -fx-padding: 0;
+}
+
+.link-signup-redirect:hover {
+
+
+    -fx-text-fill: #ff9100;
+}
+
+
+/* ==========================================================================
+   STYLE UNTUK HALAMAN DASHBOARD UTAMA
+   ========================================================================== */
+
+.dashboard-root {
+    background-color: #0A2540;
+
+    -fx-background-color: #0A2540;
+}
+
+/* Penataan Area Komponen Navigasi Kiri (Sidebar) */
+.sidebar {
+    background-color: #003060;
+
+    -fx-background-color: #003060; /* Warna biru tua pekat */
+    -fx-background-radius: 0px 30px 30px 0px; /* Lengkungan melengkung di sisi kanan sidebar */
+}
+
+.sidebar-role-text {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    
+    padding: 0 0 0 4px;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-text-fill: #A0AEC0;
+    -fx-padding: 0 0 0 4px;
+}
+
+/* Desain Tombol Menu Biasa */
+.sidebar-btn {
+    background-color: transparent;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    
+
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+}
+
+.sidebar-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Desain Tombol Menu Saat Dipilih Aktif (Tentang Kami) */
+.sidebar-btn-active {
+    background-color: #E2E8F0;
+    
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    
+
+    -fx-background-color: #E2E8F0; /* Latar belakang abu terang menyala */
+    -fx-text-fill: #003060; /* Teks berubah biru tua kontras */
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+}
+
+/* Teks Sapaan Selamat Datang Kanan */
+.greeting-welcome {
+    font-family:"Segoe UI", Arial, sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #ffffff;
+}
+
+.greeting-sub {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #E2E8F0;
+}
+
+/* Kontainer Putih Utama Melayang */
+.main-card {
+    background-color: #ffffff;
+    border-radius: 20px;
+
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 20px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.15), 15, 0, 0, 5);
+}
+
+.card-title {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #003060;
+}
+
+.card-desc {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #4A5568;
+    -fx-line-spacing: 5px;
+}
+
+/* Area Statistik Tengah */
+.stats-box {
+    border-color:#E2E8F0;
+    border-width: 0px 0px 1px 0px; /* Hanya garis pembatas bawah tipis */
+    padding: 0px 0px 25px 0px;
+
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 0px 0px 1px 0px; /* Hanya garis pembatas bawah tipis */
+    -fx-padding: 0px 0px 25px 0px;
+}
+
+/* Section Kategori */
+.category-section-title {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #003060;
+}
+
+/* Efek Bayangan Kartu Kategori Grid */
+.category-card {
+    
+    cursor: hand;
+
+    -fx-effect: dropshadow(two-pass-box, rgba(0, 0, 0, 0.1), 6, 0.0, 0, 3);
+    -fx-cursor: hand;
+}
+
+
+
+/* ==========================================================================
+   STYLE UNTUK HALAMAN PREVIEW BUDAYA (GRID CARD)
+   ========================================================================= */
+
+.budaya-header-title {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+
+    padding: 0 0 10px 0;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 32px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 0 0 10px 0;
+}
+
+/* Menghilangkan border bawaan ScrollPane agar transparan menyatu background */
+.budaya-scroll-pane {
+    background-color: transparent;
+    background: transparent;
+    border-color: transparent;
+
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-hbar-policy: never; /* Sembunyikan scroll horizontal */
+    -fx-vbar-policy: as-needed;
+}
+
+/* Desain Dasar Kontainer Kartu Budaya */
+.budaya-card {
+    background-color: #ffffff;
+    
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.15), 10, 0, 0, 4);
+}
+
+.budaya-card-info {
+    background-color: #ffffff;
+
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 0px 0px 16px 16px;
+}
+
+.budaya-card-title {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 15px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #003060;
+}
+
+.budaya-card-desc {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 11px;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 11px;
+    -fx-text-fill: #4A5568;
+    -fx-line-spacing: 3px;
+}
+
+/* Tombol Oranye Mini "Lihat Detail" */
+.budaya-btn-detail {
+    background-color: #ff9100;
+    
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    
+    padding: 6px 14px;
+
+    -fx-background-color: #ff9100;
+    -fx-text-fill: #ffffff;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 14px;
+}
+
+.budaya-btn-detail:hover {
+    background-color: #e68200;
+
+    -fx-background-color: #e68200;
+}
+
+
+/* ==========================================================================
+   STYLE UNTUK HALAMAN DETAIL BUDAYA (DETAIL COMPONENT)
+   ========================================================================== */
+
+/* Bingkai Kotak Biru Luar */
+.detail-outer-card {
+    background-color: #003060; /* Biru tua khas Luminara */
+
+    -fx-background-color: #003060; /* Biru tua khas Luminara */
+    -fx-background-radius: 24px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 15, 0, 0, 6);
+}
+
+/* Kotak Putih Utama Dalam */
+.detail-inner-card {
+    background-color: #fcfbf9; /* Putih porselen bersih tipis */
+    
+    padding: 15px;
+
+    -fx-background-color: #fcfbf9; /* Putih porselen bersih tipis */
+    -fx-background-radius: 20px;
+    -fx-padding: 15px;
+}
+
+/* Aturan Khusus Banner Gambar Atas */
+.detail-image-banner {
+
+    -fx-effect: dropshadow(two-pass-box, rgba(0, 0, 0, 0.08), 8, 0, 0, 2);
+}
+
+/* Judul Artikel */
+.detail-content-title {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #003060;
+}
+
+/* Deskripsi Paragraf */
+.detail-content-desc {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 11.5px;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 11.5px;
+    -fx-text-fill: #2D3748;
+    -fx-line-spacing: 4px;
+    -fx-text-alignment: justify;
+}
+
+/* Penataan Grid Metadata Event */
+.detail-meta-title {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #003060;
+}
+
+.detail-meta-value {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 11px;
+    
+    font-weight: bold;
+
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 11px;
+    -fx-text-fill: #4A5568;
+    -fx-font-weight: bold;
+}
+
+/* Label Badge Oranye Melayang Kiri Atas */
+.detail-floating-badge {
+-fx-background-color: #ff9100;
+    
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    padding: 6px 30px 6px 30px;
+    
+    effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.15), 5, 0, 0, 2);
+
+    -fx-background-color: #ff9100;
+    -fx-text-fill: #003060;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 15px;
+    -fx-font-weight: 800;
+    -fx-padding: 6px 30px 6px 30px;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.15), 5, 0, 0, 2);
+}
+
+/* Tombol Oranye "Kembali" */
+.detail-btn-back {
+    background-color: #ff9100;
+    
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    
+    padding: 7px 22px 7px 22px;
+
+    -fx-background-color: #ff9100;
+    -fx-text-fill: #ffffff;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 7px 22px 7px 22px;
+}
+
+.detail-btn-back:hover {
+    background-color: #e68200;
+
+    -fx-background-color: #e68200;
+}
+
+
+
+/* ==================== DESAIN OVERLAY DETAIL POPUP ==================== */
+
+/* Tag Atas Oranye Melengkung */
+.detail-category-tag {
+    background-color: #FF9900;
+    
+    font-weight: bold;
+    font-size: 14px;
+    padding: 6px 20px 6px 20px;
+    
+    margin: 0;
+
+    -fx-background-color: #FF9900;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 6px 20px 6px 20px;
+    -fx-background-radius: 12px 12px 0px 0px;
+    -fx-margin: 0;
+}
+
+/* Bingkai Luar Kotak Besar Biru Tua */
+.detail-blue-container {
+    background-color: #0F4C81;
+    
+    padding: 25px;
+    
+
+    -fx-background-color: #0F4C81;
+    -fx-background-radius: 0px 24px 24px 24px;
+    -fx-padding: 25px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 15, 0, 0, 5);
+}
+
+/* Kartu Putih Utama di Dalam Bingkai Biru */
+.detail-inner-white-card {
+    background-color: #F8F9FA;
+    background-radius: 18px;
+    padding: 20px;
+
+    -fx-background-color: #F8F9FA;
+    -fx-background-radius: 18px;
+    -fx-padding: 20px;
+}
+
+/* Mengosongkan border scroll agar menyatu bersih */
+.detail-internal-scroll {
+    background-color: transparent;
+    
+    padding: 0;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+.detail-internal-scroll .viewport {
+    background-color: transparent;
+    -fx-background-color: transparent;
+}
+
+/* Tipografi Judul Besar & Deskripsi Artikel */
+.detail-main-title {
+    font-size: 18px;
+    font-weight: bold;
+    
+    font-family: "System";
+
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #002B49;
+    -fx-font-family: "System";
+}
+
+.detail-main-desc {
+    font-size: 11px;
+
+
+    -fx-font-size: 11px;
+    -fx-text-fill: #003366;
+    -fx-line-spacing: 4px;
+    -fx-text-alignment: justify;
+}
+
+/* Tombol Oranye Aksi Kembali */
+.detail-btn-kembali {
+    background-color: #FF9900;
+    
+    font-weight: bold;
+    font-size: 11px;
+    padding: 6px 22px 6px 22px;
+    
+
+    -fx-background-color: #FF9900;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-padding: 6px 22px 6px 22px;
+    -fx-background-radius: 8px;
+}
+
+.detail-btn-kembali:hover {
+    background-color: #E08800;
+    -fx-background-color: #E08800;
+}
+
+/* ==================== DESAIN HALAMAN KARTU ULASAN ==================== */
+
+/* Bingkai Putih Kartu Testimonial */
+.ulasan-card {
+    background-color: white;
+    
+
+    -fx-background-color: white;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.08), 10, 0, 0, 4);
+}
+
+/* Tipografi Nama Pengguna */
+.ulasan-card-name {
+    font-size: 13px;
+    font-weight: bold;
+    
+
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #002B49;
+}
+
+/* Warna Deretan Bintang Oranye */
+.ulasan-card-stars {
+    
+    font-size: 14px;
+
+    -fx-text-fill: #FF9900;
+    -fx-font-size: 14px;
+}
+
+/* Kotak Kontainer Teks Komentar (Abu-abu Muda) */
+.ulasan-comment-box {
+    background-color: #EEF2F6;
+    background-radius: 12px;
+
+    -fx-background-color: #EEF2F6;
+    -fx-background-radius: 12px;
+}
+
+/* Isi Teks Komentar Ulasan */
+.ulasan-comment-text {
+    font-size: 11px;
+
+    -fx-font-size: 11px;
+    -fx-text-fill: #4A5568;
+    -fx-line-spacing: 4px;
+}
+
+
+/* ==================== STRUKTUR UTAMA DAN SIDEBAR ==================== */
+.dashboard-root {
+    background-color: #0A2540;
+
+    -fx-background-color: #0A2540;
+}
+
+.sidebar {
+    background-color: rgba(0, 43, 73, 0.95);
+
+    -fx-background-color: rgba(0, 43, 73, 0.95);
+    -fx-background-radius: 0px 30px 30px 0px;
+}
+
+.sidebar-role-text {
+    font-size: 12px;
+    
+    font-weight: bold;
+
+    -fx-font-size: 12px;
+    -fx-text-fill: #E2E8F0;
+    -fx-font-weight: bold;
+}
+
+.sidebar-btn {
+    background-color: transparent;
+    
+    font-size: 13px;
+    font-weight: bold;
+
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+.sidebar-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    
+
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 10px;
+}
+
+.sidebar-btn-active {
+    background-color: #E2E8F0;
+    
+    font-size: 13px;
+    font-weight: bold;
+    
+
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: #002B49;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+}
+
+/* ==================== PENATAAN HALAMAN PREVIEW DAN GRID ==================== */
+.budaya-header-title {
+    font-size: 28px;
+    font-weight: bold;
+
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.budaya-scroll-pane {
+    background: transparent;
+    background-color: transparent;
+
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+    -fx-viewport-background-color: transparent;
+    -fx-hbar-policy: never;
+    -fx-vbar-policy: as-needed;
+}
+
+.budaya-card {
+    background-color: white;
+
+    -fx-background-color: white;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 5);
+}
+
+.budaya-card-image-box {
+    min-height: 160px;
+    max-height: 160px;
+
+    -fx-min-height: 160px;
+    -fx-max-height: 160px;
+}
+
+.budaya-card-info {
+    background-color: white;
+    background-radius: 0px 0px 16px 16px;
+
+    -fx-background-color: white;
+    -fx-background-radius: 0px 0px 16px 16px;
+}
+
+.budaya-card-title {
+    font-size: 14px;
+    font-weight: bold;
+
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #002B49;
+}
+
+.budaya-card-desc {
+    font-size: 10px;
+
+    -fx-font-size: 10px;
+    -fx-text-fill: #4A5568;
+    -fx-line-spacing: 3px;
+}
+
+.budaya-btn-detail {
+    background-color: #FF9900;
+    
+    font-size: 10px;
+    font-weight: bold;
+    
+    padding: 6px 14px;
+
+    -fx-background-color: #FF9900;
+    -fx-text-fill: white;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 6px 14px;
+}
+
+/* ==================== PENATAAN PANEL WINDOW DETAIL EVENT ==================== */
+.detail-overlay-container {
+    background-color: rgba(10, 37, 64, 0.4);
+    padding: 30px;
+
+    -fx-background-color: rgba(10, 37, 64, 0.4);
+    -fx-background-radius: 20px;
+    -fx-padding: 30px;
+}
+
+.detail-badge-label {
+    background-color: #FF9900;
+    
+    font-size: 14px;
+    font-weight: bold;
+    
+    padding: 8px 20px;
+
+    -fx-background-color: #FF9900;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px 10px 0px 0px;
+    -fx-padding: 8px 20px;
+}
+
+.detail-white-card {
+    background-color: white;
+    
+    padding: 25px;
+
+    -fx-background-color: white;
+    -fx-background-radius: 0px 20px 20px 20px;
+    -fx-padding: 25px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 8);
+}
+
+.detail-main-title {
+    font-size: 18px;
+    font-weight: bold;
+    
+
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #002B49;
+}
+
+.detail-main-desc {
+    font-size: 11px;
+
+    -fx-font-size: 11px;
+    -fx-text-fill: #2D3748;
+    -fx-line-spacing: 4px;
+}
+
+.detail-meta-title {
+    font-size: 14px;
+    font-weight: bold;
+    
+
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #002B49;
+}
+
+.detail-meta-value {
+    font-size: 11px;
+    
+
+    -fx-font-size: 11px;
+    -fx-text-fill: #4A5568;
+}
+
+.detail-btn-kembali {
+    background-color: #FF9900;
+
+    font-size: 11px;
+    font-weight: bold;
+    
+    padding: 7px 22px;
+
+    -fx-background-color: #FF9900;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 7px 22px;
+}
+
+/* ==================== PENATAAN HALAMAN MULAI EKSPLORASI ==================== */
+.eksplorasi-main-title {
+    font-size: 38px;
+    font-weight: 900;
+    
+
+    -fx-font-size: 38px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+}
+
+.eksplorasi-sub-title {
+    font-size: 16px;
+    font-weight: bold;
+
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.eksplorasi-btn-selanjutnya {
+    background-color: #FF9900;
+    
+    font-size: 13px;
+    font-weight: bold;
+    
+    padding: 10px 35px;
+
+    -fx-background-color: #FF9900;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 35px;
+}
+
+
+.sidebar-btn {
+    background-color: transparent;
+    font-family: "Segoe UI", "Helvetica Neue", Arial; /* Memastikan simbol unicode terbaca sempurna */
+    font-size: 14px;
+    font-weight: bold;
+
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial; /* Memastikan simbol unicode terbaca sempurna */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.sidebar-btn-active {
+    background-color: #E2E8F0;
+    
+    font-family: "Segoe UI", "Helvetica Neue", Arial;
+    font-size: 14px;
+    font-weight: bold;
+    
+
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: #002B49;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+}
