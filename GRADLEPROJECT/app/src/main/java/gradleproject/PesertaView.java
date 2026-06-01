@@ -1,26 +1,20 @@
 package gradleproject;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import gradleproject.dao.EventDAO;
+import gradleproject.dao.TicketDAO;
+import gradleproject.models.Event;
+import gradleproject.models.Ticket;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-// <-- TAMBAHKAN IMPORT INI AGAR GRIDPANE DIKENALI
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PesertaView extends StackPane {
 
     public ManajemenAcaraView mainDashboard;
-    
-    private VBox overviewContent;
-    private VBox detailContent;
-
-    // Node Detail Konten Peserta Dinamis
     private Label lblNamaAcaraPesertaHeader;
     private Label lblSubDetailAcaraPeserta;
     private Label lblTotalPesertaRingkasan;
@@ -28,283 +22,272 @@ public class PesertaView extends StackPane {
 
     public PesertaView(ManajemenAcaraView mainDashboard) {
         this.mainDashboard = mainDashboard;
+        
+        if (UserSession.getInstance() == null) {
+            System.out.println("SESSION NULL");
+            return;
+        }
         tampilkanOverview();
     }
 
     public void tampilkanOverview() {
         this.getChildren().clear();
-        this.getChildren().add(getPesertaOverviewContent());
-    }
 
-    public void tampilkanDetail(ManajemenAcaraView.AcaraMock data) {
-        this.getChildren().clear();
-        this.getChildren().add(getPesertaDetailContent());
-        
-        lblNamaAcaraPesertaHeader.setText(data.nama);
-        lblSubDetailAcaraPeserta.setText(data.lokasi + "   •   " + data.tanggal + "   •   " + data.waktu);
-        lblTotalPesertaRingkasan.setText(data.terdaftar + " / " + data.kuota);
+        VBox container = new VBox(20);
+        container.setPadding(new Insets(20, 40, 20, 40));
 
-        tabelPesertaRowsContainer.getChildren().clear();
-        
-        // LOGIKA DINAMIS: Generate jumlah baris sesuai jumlah peserta yang terdaftar
-        int jumlahPeserta = Integer.parseInt(data.terdaftar);
-        
-        // Array nama tiruan untuk variasi data
-        String[] daftarNamaTiruan = {
-            "Alifah", "Zahwa", "Syarief", "Fa'iq",
-        };
-        String[] daftarInisial = {"A", "Z", "S", "F"};
+        Label title = new Label("Daftar Acara Anda");
+        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #003A6C;");
 
-        for (int i = 0; i < jumlahPeserta; i++) {
-            // Variasi nama dan status agar tidak monoton
-            String nama = daftarNamaTiruan[i % daftarNamaTiruan.length] + (i >= daftarNamaTiruan.length ? " " + (i/7) : "");
-            String inisial = daftarInisial[i % daftarInisial.length];
-            String status = (i % 3 == 2) ? "Tidak Hadir" : "Hadir";
-            String warnaStatus = (i % 3 == 2) ? "#FF9412" : "#60E514";
-            String telp = "081234567" + String.format("%03d", i);
-            String email = nama.toLowerCase().replace(" ", "").replace(".", "") + "@gmail.com";
-            
-            tabelPesertaRowsContainer.getChildren().add(buatBarisPeserta(inisial, nama, telp, email, status, warnaStatus));
-        }
-    }
-
-    // =========================================================
-    // LAYOUT 1: PESERTA OVERVIEW (Tampilan Form Tabel Baru)
-    // =========================================================
-    private VBox getPesertaOverviewContent() {
-        overviewContent = new VBox(20);
-        overviewContent.setPadding(new Insets(40, 40, 20, 40));
-
-        VBox greetingBox = new VBox(5);
-        Label greeting = new Label("Hai, tim.");
-        greeting.getStyleClass().add("heading");
-        Label subGreeting = new Label("Ingat untuk atur kinerja acara kamu . . .");
-        subGreeting.getStyleClass().add("subheading");
-        greetingBox.getChildren().addAll(greeting, subGreeting);
-
-        // Header Table Menu Sesuai Gambar
         GridPane tableHeader = new GridPane();
         tableHeader.setPadding(new Insets(15, 20, 15, 20));
         tableHeader.setStyle("-fx-background-color: #E6ECF0; -fx-background-radius: 10;");
         setupOverviewTableConstraints(tableHeader);
 
-        Label col1 = new Label("Detail Acara");
-        Label col2 = new Label("Waktu");
-        Label col3 = new Label("Jumlah Peserta");
-        Label col4 = new Label("Keterangan");
+        Label h1 = new Label("Detail Acara"); h1.setStyle("-fx-font-weight: bold; -fx-text-fill: #495057;");
+        Label h2 = new Label("Waktu"); h2.setStyle("-fx-font-weight: bold; -fx-text-fill: #495057;");
+        Label h3 = new Label("Jumlah Peserta"); h3.setStyle("-fx-font-weight: bold; -fx-text-fill: #495057;");
+        Label h4 = new Label("Keterangan"); h4.setStyle("-fx-font-weight: bold; -fx-text-fill: #495057;");
+        tableHeader.add(h1, 0, 0); tableHeader.add(h2, 1, 0); tableHeader.add(h3, 2, 0); tableHeader.add(h4, 3, 0);
+
+        VBox listContainer = new VBox(10);
+        ScrollPane scroll = new ScrollPane(listContainer);
+        scroll.setFitToWidth(true);
+        scroll.setStyle("-fx-background-color: transparent;");
+        VBox.setVgrow(scroll, Priority.ALWAYS); 
         
-        String styleHeader = "-fx-font-weight: bold; -fx-text-fill: #002B5B; -fx-font-size: 14px; -fx-font-family: 'Poppins';";
-        col1.setStyle(styleHeader); col2.setStyle(styleHeader); 
-        col3.setStyle(styleHeader); col4.setStyle(styleHeader);
-        col3.setAlignment(Pos.CENTER); col4.setAlignment(Pos.CENTER);
-
-        tableHeader.add(col1, 0, 0); tableHeader.add(col2, 1, 0); 
-        tableHeader.add(col3, 2, 0); tableHeader.add(col4, 3, 0);
-
-        VBox listRowsContainer = new VBox(12);
-        listRowsContainer.setPadding(new Insets(10, 0, 10, 0));
-
-        ScrollPane scrollPane = new ScrollPane(listRowsContainer);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
-        VBox.setVgrow(scrollPane, Priority.ALWAYS);
-
-        // Load Data Pokok
-        List<ManajemenAcaraView.AcaraMock> daftarAcara = new ArrayList<>();
-        daftarAcara.add(new ManajemenAcaraView.AcaraMock("Makassar Traditional Costume Showcase", "2026, Mei 20-22", "19:00:00 - 22:00:00", "Trans Studio Mall Makassar", "11", "100"));
-        daftarAcara.add(new ManajemenAcaraView.AcaraMock("Legenda Makassar Storytelling Corner", "2026, Mei 19-21", "10:00:00 - 14:00:00", "Trans Studio Mall Makassar", "50", "50"));
-        daftarAcara.add(new ManajemenAcaraView.AcaraMock("Pappaseng Culture Fest", "2026, Mei 20-21", "16:00:00 - 20:00:00", "Kawasan Center Point of Indonesia (CPI)", "43", "50"));
-        daftarAcara.add(new ManajemenAcaraView.AcaraMock("Pelatihan Berbicara Bahasa Makassar", "2026, Mei 20", "09:00:00 - 11:00:00", "Benteng Rotterdam", "15", "20"));
-
-        for (ManajemenAcaraView.AcaraMock acara : daftarAcara) {
-            listRowsContainer.getChildren().add(buatBarisOverviewTabel(acara));
+        int organizerId = 0;
+        if (mainDashboard != null && mainDashboard.getCurrentOrganizer() != null) {
+            organizerId = mainDashboard.getCurrentOrganizer().getId();
+        } else {
+            System.out.println("DEBUG: Gagal! Organizer Profile belum dimuat.");
+            return;
         }
 
-        overviewContent.getChildren().addAll(greetingBox, tableHeader, scrollPane);
-        return overviewContent;
+        EventDAO eventDAO = new EventDAO();
+        List<Event> daftarAcara = eventDAO.findByOrganizerId(organizerId);
+
+        if (daftarAcara == null) daftarAcara = new ArrayList<>();
+        System.out.println("DEBUG EVENT SIZE: " + daftarAcara.size());
+
+        for (Event acara : daftarAcara) {
+            listContainer.getChildren().add(buatBarisOverviewTabel(acara));
+        }
+
+        container.getChildren().addAll(title, tableHeader, scroll);
+        this.getChildren().add(container);
     }
 
-    private GridPane buatBarisOverviewTabel(ManajemenAcaraView.AcaraMock data) {
+    private GridPane buatBarisOverviewTabel(Event acara) {
         GridPane row = new GridPane();
         row.setPadding(new Insets(15, 20, 15, 20));
-        row.setStyle("-fx-background-color: #F3F4F6; -fx-background-radius: 12; -fx-border-color: #DDE5EC; -fx-border-radius: 12; -fx-border-width: 1;");
+        row.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 12; -fx-border-color: #E2E8F0; -fx-border-radius: 12;");
         setupOverviewTableConstraints(row);
 
-        // Kolom 1: Detail Acara (Nama + Lokasi)
-        VBox detailBox = new VBox(4);
-        Label lblNama = new Label(data.nama);
-        lblNama.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #002B5B; -fx-font-family: 'Poppins';");
-        Label lblLokasi = new Label(data.lokasi);
-        lblLokasi.setStyle("-fx-font-size: 12px; -fx-text-fill: #70889F; -fx-font-family: 'Poppins';");
-        detailBox.getChildren().addAll(lblNama, lblLokasi);
+        Label lblNama = new Label(acara.getTitle());
+        lblNama.setStyle("-fx-font-weight: bold; -fx-text-fill: #003A6C; -fx-font-size: 14px;");
 
-        // Kolom 2: Waktu (Tanggal + Jam)
-        VBox waktuBox = new VBox(4);
-        Label lblTgl = new Label(data.tanggal);
-        lblTgl.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #002B5B; -fx-font-family: 'Poppins';");
-        Label lblJam = new Label(data.waktu);
-        lblJam.setStyle("-fx-font-size: 12px; -fx-text-fill: #70889F; -fx-font-family: 'Poppins';");
-        waktuBox.getChildren().addAll(lblTgl, lblJam);
+        String waktu = (acara.getEventDate() != null) ? acara.getEventDate().toString() : "-";
+        Label lblWaktu = new Label(waktu);
+        lblWaktu.setStyle("-fx-text-fill: #495057; -fx-font-size: 13px;");
 
-        // Kolom 3: Jumlah Peserta
-        Label lblRasio = new Label(data.terdaftar + "/" + data.kuota);
-        lblRasio.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #002B5B; -fx-font-family: 'Poppins';");
-        lblRasio.setAlignment(Pos.CENTER);
+        TicketDAO ticketDAO = new TicketDAO();
+        int jumlahPeserta = ticketDAO.countTicketsByEventId(acara.getId()); 
 
-        // Kolom 4: Keterangan (Tombol Aksi)
-        HBox btnWrapper = new HBox();
-        btnWrapper.setAlignment(Pos.CENTER);
+        Label lblPeserta = new Label(jumlahPeserta + " / " + acara.getQuota());
+        lblPeserta.setStyle("-fx-font-weight: bold; -fx-text-fill: #003A6C; -fx-font-size: 14px;");
+
         Button btnLihat = new Button("Lihat Peserta");
-        btnLihat.setStyle("-fx-background-color: #FF922B; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16 8 16; -fx-cursor: hand; -fx-font-family: 'Poppins';");
-        btnLihat.setOnAction(e -> tampilkanDetail(data));
-        btnWrapper.getChildren().add(btnLihat);
+        btnLihat.setStyle("-fx-background-color: #FF922B; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold;");
+        btnLihat.setOnAction(e -> tampilkanDetail(acara));
 
-        row.add(detailBox, 0, 0);
-        row.add(waktuBox, 1, 0);
-        row.add(lblRasio, 2, 0);
-        row.add(btnWrapper, 3, 0);
+        row.add(lblNama, 0, 0);
+        row.add(lblWaktu, 1, 0);
+        row.add(lblPeserta, 2, 0);
+        row.add(btnLihat, 3, 0);
 
         return row;
     }
 
-    // =========================================================
-    // LAYOUT: PESERTA DETAIL (Tabel Nama Peserta)
-    // =========================================================
+    private void setupOverviewTableConstraints(GridPane grid) {
+        ColumnConstraints c1 = new ColumnConstraints(); c1.setPercentWidth(40);
+        ColumnConstraints c2 = new ColumnConstraints(); c2.setPercentWidth(30);
+        ColumnConstraints c3 = new ColumnConstraints(); c3.setPercentWidth(15);
+        ColumnConstraints c4 = new ColumnConstraints(); c4.setPercentWidth(15);
+        grid.getColumnConstraints().setAll(c1, c2, c3, c4);
+    }
+
+    public void tampilkanDetail(Event acara) {
+        this.getChildren().clear();
+        this.getChildren().add(getPesertaDetailContent());
+
+        lblNamaAcaraPesertaHeader.setText(acara.getTitle());
+
+        String lokasi = (acara.getLocation() != null) ? acara.getLocation() : "-";
+        String waktu = (acara.getEventDate() != null) ? acara.getEventDate().toString() : "-";
+
+        lblSubDetailAcaraPeserta.setText(lokasi + "    " + waktu);
+
+        TicketDAO ticketDAO = new TicketDAO();
+        List<Ticket> daftarPeserta = ticketDAO.getTicketsByEventId(acara.getId());
+
+        if (daftarPeserta == null) daftarPeserta = new ArrayList<>();
+
+        lblTotalPesertaRingkasan.setText(daftarPeserta.size() + " / " + acara.getQuota());
+
+        tabelPesertaRowsContainer.getChildren().clear();
+
+        for (Ticket t : daftarPeserta) {
+            String namaAsli = t.getUserName() != null ? t.getUserName() : "Tanpa Nama";
+            
+            String inisial = "??";
+            String[] kata = namaAsli.trim().split("\\s+");
+            if (kata.length >= 2) {
+                inisial = (kata[0].substring(0, 1) + kata[1].substring(0, 1)).toUpperCase();
+            } else if (kata[0].length() > 0) {
+                inisial = (kata[0].length() > 1) ? kata[0].substring(0, 2).toUpperCase() : kata[0].toUpperCase();
+            }
+
+            tabelPesertaRowsContainer.getChildren().add(
+                buatBarisPeserta(t, inisial, namaAsli, t.getUserPhone(), t.getUserEmail())
+            );
+        }
+    }
+
     private VBox getPesertaDetailContent() {
-        detailContent = new VBox(20);
-        detailContent.setPadding(new Insets(40, 40, 20, 40));
+        VBox detailContent = new VBox(25);
+        detailContent.setPadding(new Insets(30, 40, 30, 40));
 
-        Button btnKembali = new Button(" < Kembali ke Semua Event");
-
-        btnKembali.getStyleClass().add("btn-kembali"); 
+        Button btnKembali = new Button("< Kembali ke Semua Event");
+        btnKembali.setStyle("-fx-background-color: #F8F9FA; -fx-text-fill: #003A6C; -fx-font-weight: bold; " +
+                            "-fx-cursor: hand; -fx-border-color: #E2E8F0; -fx-border-radius: 8; " +
+                            "-fx-background-radius: 8; -fx-padding: 8 15 8 15;");
         btnKembali.setOnAction(e -> tampilkanOverview());
-        detailContent.getChildren().add(btnKembali);
 
-        VBox bannerAcaraBox = new VBox(10);
-        bannerAcaraBox.setPadding(new Insets(20));
-        bannerAcaraBox.setStyle("-fx-background-color: #E6ECF0; -fx-background-radius: 15;");
+        HBox bannerContainer = new HBox(20);
+        bannerContainer.setAlignment(Pos.CENTER_LEFT);
 
-        HBox bannerSplit = new HBox();
-        bannerSplit.setAlignment(Pos.CENTER_LEFT);
+        VBox leftBox = new VBox(5);
+        leftBox.setPadding(new Insets(15, 20, 15, 20));
+        leftBox.setStyle("-fx-background-color: #E6ECF0; -fx-border-color: #003A6C; " +
+                         "-fx-border-radius: 8; -fx-background-radius: 8;");
+        HBox.setHgrow(leftBox, Priority.ALWAYS); 
 
-        VBox leftBanner = new VBox(6);
-        HBox.setHgrow(leftBanner, Priority.ALWAYS);
         lblNamaAcaraPesertaHeader = new Label();
-        lblNamaAcaraPesertaHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #003A6C; -fx-font-family: 'Poppins';");
-        lblSubDetailAcaraPeserta = new Label();
-        lblSubDetailAcaraPeserta.setStyle("-fx-font-size: 12px; -fx-text-fill: #495057; -fx-font-family: 'Poppins';");
-        leftBanner.getChildren().addAll(lblNamaAcaraPesertaHeader, lblSubDetailAcaraPeserta);
-
-        VBox rightBanner = new VBox(4);
-        rightBanner.setAlignment(Pos.CENTER_LEFT);
-        Label lblPesertaTitle = new Label("Peserta");
-        lblPesertaTitle.setStyle("-fx-font-size: 11px; -fx-text-fill: #6C757D; -fx-font-family: 'Poppins';");
-        lblTotalPesertaRingkasan = new Label();
-        lblTotalPesertaRingkasan.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #003A6C; -fx-font-family: 'Poppins';");
-        rightBanner.getChildren().addAll(lblPesertaTitle, lblTotalPesertaRingkasan);
+        lblNamaAcaraPesertaHeader.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #003A6C; -fx-font-family: 'Poppins';");
         
-        Region spacerLine = new Region();
-        spacerLine.setPrefSize(1, 35);
-        spacerLine.setStyle("-fx-background-color: #CED4DA;");
-        HBox.setMargin(spacerLine, new Insets(0, 20, 0, 20));
+        lblSubDetailAcaraPeserta = new Label();
+        lblSubDetailAcaraPeserta.setStyle("-fx-font-size: 13px; -fx-text-fill: #003A6C; -fx-font-family: 'Poppins';");
+        
+        leftBox.getChildren().addAll(lblNamaAcaraPesertaHeader, lblSubDetailAcaraPeserta);
 
-        bannerSplit.getChildren().addAll(leftBanner, spacerLine, rightBanner);
-        bannerAcaraBox.getChildren().add(bannerSplit);
-        detailContent.getChildren().add(bannerAcaraBox);
+        VBox rightBox = new VBox(2);
+        rightBox.setAlignment(Pos.CENTER);
+        rightBox.setPadding(new Insets(15, 40, 15, 40));
+        rightBox.setStyle("-fx-background-color: #E6ECF0; -fx-border-color: #003A6C; " +
+                          "-fx-border-radius: 8; -fx-background-radius: 8;");
 
-        tabelPesertaRowsContainer = new VBox(10);
-        tabelPesertaRowsContainer.setPadding(new Insets(10, 5, 10, 5));
+        Label lblPesertaTitle = new Label("Peserta");
+        lblPesertaTitle.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #003A6C; -fx-font-family: 'Poppins';");
+        
+        lblTotalPesertaRingkasan = new Label();
+        lblTotalPesertaRingkasan.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #003A6C; -fx-font-family: 'Poppins';");
+        
+        rightBox.getChildren().addAll(lblPesertaTitle, lblTotalPesertaRingkasan);
 
+        bannerContainer.getChildren().addAll(leftBox, rightBox);
+
+        tabelPesertaRowsContainer = new VBox(12);
         ScrollPane scrollTabel = new ScrollPane(tabelPesertaRowsContainer);
         scrollTabel.setFitToWidth(true);
-        scrollTabel.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
+        scrollTabel.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
         VBox.setVgrow(scrollTabel, Priority.ALWAYS);
 
-        detailContent.getChildren().add(scrollTabel);
+        detailContent.getChildren().addAll(btnKembali, bannerContainer, scrollTabel);
         return detailContent;
     }
 
-    private HBox buatBarisPeserta(String inisial, String nama, String telp, String email, String status, String warnaStatus) {
-        HBox row = new HBox(20);
+    private HBox buatBarisPeserta(Ticket ticket, String inisial, String nama, String telp, String email) {
+        HBox row = new HBox(20); 
         row.setAlignment(Pos.CENTER_LEFT);
-        row.setPadding(new Insets(15, 20, 15, 20));
-        row.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.03), 5, 0, 0, 2);");
+        row.setPadding(new Insets(15, 30, 15, 30));
+        row.setStyle("-fx-background-color: #F8F9FA; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 3);");
 
-        // 1. Avatar Bulat
-        StackPane avatarCircle = new StackPane();
-        avatarCircle.setPrefSize(40, 40); avatarCircle.setMinSize(40, 40);
-        avatarCircle.setStyle("-fx-background-color: #FFE8CC; -fx-background-radius: 50;");
+        StackPane avatar = new StackPane();
+        avatar.setPrefSize(45, 45);
+        avatar.setStyle("-fx-background-color: #FFD8A8; -fx-background-radius: 50;");
         Label lblInisial = new Label(inisial);
-        lblInisial.setStyle("-fx-font-weight: bold; -fx-text-fill: #D9480F; -fx-font-size: 13px; -fx-font-family: 'Poppins';");
-        avatarCircle.getChildren().add(lblInisial);
+        lblInisial.setStyle("-fx-font-weight: bold; -fx-text-fill: #D9480F; -fx-font-family: 'Poppins'; -fx-font-size: 16px;");
+        avatar.getChildren().add(lblInisial);
 
-        // 2. Kolom Nama Peserta
-        Label lblNama = new Label(nama);
-        lblNama.setStyle("-fx-font-weight: bold; -fx-text-fill: #212529; -fx-font-size: 14px; -fx-font-family: 'Poppins';");
-        lblNama.setPrefWidth(200);
-
-        // 3. Kolom Nomor Telepon
-        HBox telpContainer = new HBox(8);
-        telpContainer.setAlignment(Pos.CENTER_LEFT);
-        telpContainer.setPrefWidth(160);
-        ImageView iconTelp = dapetkanIconView("/aset/iconLuminara/icon-user.png", 14);
-        Label lblTelp = new Label(telp);
-        lblTelp.setStyle("-fx-text-fill: #495057; -fx-font-size: 13px; -fx-font-family: 'Poppins';");
-        if (iconTelp != null) telpContainer.getChildren().add(iconTelp);
-        telpContainer.getChildren().add(lblTelp);
-
-        // 4. Kolom Email
-        HBox emailContainer = new HBox(8);
-        emailContainer.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(emailContainer, Priority.ALWAYS);
-        ImageView iconEmail = dapetkanIconView("/aset/iconLuminara/icon-masuk-keluar.png", 14);
-        Label lblEmail = new Label(email);
-        lblEmail.setStyle("-fx-text-fill: #495057; -fx-font-size: 13px; -fx-font-family: 'Poppins';");
-        if (iconEmail != null) emailContainer.getChildren().add(iconEmail);
-        emailContainer.getChildren().add(lblEmail);
-
-        // 5. Status Kehadiran
-        HBox statusBox = new HBox(8);
-        statusBox.setAlignment(Pos.CENTER_LEFT);
-        statusBox.setPrefWidth(110);
+        Label lblNama = new Label(nama != null ? nama : "Tanpa Nama"); 
+        lblNama.setPrefWidth(180);
+        lblNama.setStyle("-fx-font-weight: bold; -fx-font-family: 'Poppins'; -fx-text-fill: #003A6C; -fx-font-size: 15px;");
         
-        Region dotStatus = new Region();
-        dotStatus.setPrefSize(8, 8); 
-        dotStatus.setMinSize(8, 8);
-        dotStatus.setStyle("-fx-background-color: " + warnaStatus + "; -fx-background-radius: 50;");
+        Label lblTelp = new Label(telp != null ? telp : "-"); 
+        lblTelp.setPrefWidth(150);
+        lblTelp.setStyle("-fx-font-family: 'Poppins'; -fx-text-fill: #003A6C; -fx-font-size: 14px;");
         
-        Label lblStatus = new Label(status);
-        lblStatus.setStyle("-fx-text-fill: " + warnaStatus + "; -fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Poppins';");
-        statusBox.getChildren().addAll(dotStatus, lblStatus);
+        Label lblEmail = new Label(email != null ? email : "-"); 
+        HBox.setHgrow(lblEmail, Priority.ALWAYS); 
+        lblEmail.setStyle("-fx-font-family: 'Poppins'; -fx-text-fill: #003A6C; -fx-font-size: 14px;");
 
-        row.getChildren().addAll(avatarCircle, lblNama, telpContainer, emailContainer, statusBox);
-        return row;
-    }
+        StackPane actionContainer = new StackPane();
+        actionContainer.setPrefWidth(100);
+        actionContainer.setAlignment(Pos.CENTER_RIGHT);
 
-    private ImageView dapetkanIconView(String path, double ukuran) {
+        int statusKehadiran = 0;
         try {
-            InputStream stream = getClass().getResourceAsStream(path);
-            if (stream != null) {
-                ImageView iv = new ImageView(new Image(stream));
-                iv.setFitWidth(ukuran);
-                iv.setFitHeight(ukuran);
-                iv.setPreserveRatio(true);
-                return iv;
-            }
+            statusKehadiran = ticket.getIsAttended(); // Membaca status riwayat database
         } catch (Exception e) {
-            System.out.println("Gagal memuat ikon: " + path);
+            System.err.println("Metode getIsAttended tidak ditemukan di Ticket.java. Gunakan status 0.");
         }
-        return null;
+
+        if (statusKehadiran == 1) {
+            actionContainer.getChildren().setAll(buatStatusIndicator(true));
+        } else if (statusKehadiran == 2) {
+            actionContainer.getChildren().setAll(buatStatusIndicator(false));
+        } else {
+            VBox btnBox = new VBox(5);
+            btnBox.setAlignment(Pos.CENTER);
+            Button btnHadir = new Button("Hadir");
+            Button btnTidak = new Button("Tidak");
+            btnHadir.setPrefSize(70, 25); btnTidak.setPrefSize(70, 25);
+            
+            btnHadir.setStyle("-fx-background-color: #FF922B; -fx-text-fill: white; -fx-background-radius: 15; -fx-font-size: 11px; -fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-cursor: hand;");
+            btnTidak.setStyle("-fx-background-color: #FFFFFF; -fx-text-fill: #718096; -fx-border-color: #CED4DA; -fx-border-radius: 15; -fx-background-radius: 15; -fx-font-size: 11px; -fx-font-family: 'Poppins'; -fx-cursor: hand;");
+
+            TicketDAO ticketDAO = new TicketDAO();
+
+            btnHadir.setOnAction(e -> {
+                if (ticketDAO.updateKehadiran(ticket.getId(), 1)) {
+                    actionContainer.getChildren().setAll(buatStatusIndicator(true));
+                }
+            });
+
+            btnTidak.setOnAction(e -> {
+                if (ticketDAO.updateKehadiran(ticket.getId(), 2)) {
+                    actionContainer.getChildren().setAll(buatStatusIndicator(false));
+                }
+            });
+
+            btnBox.getChildren().addAll(btnHadir, btnTidak);
+            actionContainer.getChildren().add(btnBox);
+        }
+
+        row.getChildren().addAll(avatar, lblNama, lblTelp, lblEmail, actionContainer);
+        return row; 
     }
 
-    // =========================================================================
-    // 🛠️ METHOD BARU: Mengatur Jangkauan Lebar Kolom Tabel Overview (Ditambahkan)
-    // =========================================================================
-    private void setupOverviewTableConstraints(GridPane grid) {
-        ColumnConstraints c1 = new ColumnConstraints(); c1.setPercentWidth(40); // Kolom 1 (Detail Acara)
-        ColumnConstraints c2 = new ColumnConstraints(); c2.setPercentWidth(30); // Kolom 2 (Waktu)
-        ColumnConstraints c3 = new ColumnConstraints(); c3.setPercentWidth(15); // Kolom 3 (Jumlah Peserta)
-        ColumnConstraints c4 = new ColumnConstraints(); c4.setPercentWidth(15); // Kolom 4 (Tombol Aksi)
-        grid.getColumnConstraints().setAll(c1, c2, c3, c4);
+    private HBox buatStatusIndicator(boolean isHadir) {
+        HBox indicator = new HBox(8);
+        indicator.setAlignment(Pos.CENTER_LEFT);
+        Region bar = new Region();
+        bar.setPrefSize(4, 25);
+        bar.setStyle("-fx-background-color: " + (isHadir ? "#60E514" : "#FF9412") + "; -fx-background-radius: 5;");
+        Label lblStatus = new Label(isHadir ? "Hadir" : "Tidak\nHadir");
+        lblStatus.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #002B5B; -fx-font-family: 'Poppins';");
+        indicator.getChildren().addAll(bar, lblStatus);
+        return indicator;
     }
 }

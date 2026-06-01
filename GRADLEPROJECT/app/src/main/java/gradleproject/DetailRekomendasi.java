@@ -17,10 +17,9 @@ import javafx.scene.shape.Rectangle;
 
 public class DetailRekomendasi {
 
-    // 👉 PERBAIKAN 1: Root utama diubah dari ScrollPane ke VBox agar header tetap mengunci di atas
-    private VBox view;
+    private VBox view; // Menggunakan VBox agar header atas tetap mengunci diam (Sticky)
 
-    public DetailRekomendasi() {
+    public DetailRekomendasi(gradleproject.models.Event acara) {
         // Kontainer vertikal utama
         view = new VBox(25);
         view.setPadding(new Insets(30, 40, 30, 60)); 
@@ -66,17 +65,21 @@ public class DetailRekomendasi {
         // 3. KARTU PUTIH INTI DETAIL EVENT
         // =====================================================================
         VBox whiteCard = new VBox(15);
-        whiteCard.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 15; -fx-padding: 20;");
+        whiteCard.setStyle("-fx-background-color: #F8F7F4; -fx-background-radius: 15; -fx-padding: 20;");
         whiteCard.setMaxWidth(Double.MAX_VALUE);
 
-        // A. Banner Gambar Atas
+        // A. Banner Gambar (Dinamis)
         StackPane imagePane = new StackPane();
         imagePane.setPrefHeight(200);
-        imagePane.setStyle("-fx-background-color: #E2E8F0; -fx-background-radius: 12;");
-        
         ImageView ivBanner = new ImageView();
         try {
-            Image img = new Image(getClass().getResourceAsStream("/aset/gambarLuminara/rekomendasi-kegiatan.png"));
+            // Ambil path gambar dari database
+            String pathGambar = (acara.getImagePath() != null && !acara.getImagePath().isEmpty()) 
+                                ? acara.getImagePath() : "/aset/gambarLuminara/event1.png";
+            
+            // Cek apakah itu file lokal atau resource
+            Image img = (pathGambar.startsWith("C:") || pathGambar.startsWith("D:")) ? new Image(new java.io.File(pathGambar).toURI().toString()) 
+                                                                                     : new Image(getClass().getResourceAsStream(pathGambar));
             ivBanner.setImage(img);
             ivBanner.setFitWidth(710); 
             ivBanner.setFitHeight(200);
@@ -85,43 +88,33 @@ public class DetailRekomendasi {
             clip.setArcWidth(25);
             clip.setArcHeight(25);
             ivBanner.setClip(clip);
-        } catch (Exception e) {
-            System.out.println("⚠️ Gagal memuat gambar utama detail rekomendasi!");
-        }
+        } catch (Exception e) { /* handle error */ }
         imagePane.getChildren().add(ivBanner);
 
-        // B. Judul Event Detail
-        Label lblEventTitle = new Label("Makassar Traditional Costume Showcase");
+        // B. Judul Event (Dinamis)
+        Label lblEventTitle = new Label(acara.getTitle());
         lblEventTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #0A3B5C;");
-        lblEventTitle.setPadding(new Insets(5, 0, 0, 0));
 
-        // C. Paragraf Deskripsi Panjang Terbaca
-        String deskripsiTeks = "Pementasan budaya yang menampilkan keindahan, filosofi, dan identitas masyarakat "
-                + "Makassar melalui pakaian adat tradisional Sulawesi Selatan. Acara ini berfokus pada "
-                + "visualisasi busana, kain sutra, dan aksesoris tradisional yang merepresentasikan nilai "
-                + "budaya, status sosial, serta kehormatan masyarakat lokal. Busana yang ditampilkan "
-                + "meliputi Baju Bodo untuk wanita, Baju Bella Dada untuk pria, serta Passapu sebagai penutup "
-                + "kepala khas Makassar. Showcase ini juga menampilkan keindahan kain sutra Lipa' Sabbe "
-                + "dan perhiasan emas tradisional yang memperkuat estetika budaya Makassar. Dalam "
-                + "konsep modern, pementasan dikemas dalam bentuk parade atau pertunjukan teatrikal "
-                + "dengan iringan musik tradisional and akustik, sehingga menghadirkan pengalaman "
-                + "budaya yang elegan, interaktif, dan penuh makna bagi penonton.";
-        
-        Label lblDescription = new Label(deskripsiTeks);
+        // C. Deskripsi (Dinamis)
+        Label lblDescription = new Label(acara.getDescription());
         lblDescription.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 11px; -fx-text-fill: #0A3B5C; -fx-line-spacing: 1.6;");
         lblDescription.setWrapText(true);
         lblDescription.setTextAlignment(javafx.scene.text.TextAlignment.JUSTIFY);
 
-        // D. Grid Metadata Parameter Informasi (Dua Kolom)
-        GridPane gridInfo = new GridPane();
-        gridInfo.setHgap(80); 
-        gridInfo.setVgap(12); 
-        gridInfo.setPadding(new Insets(10, 0, 10, 0));
+        // D. Metadata Grid (Dinamis dan Dirapikan)
+        java.text.SimpleDateFormat formatTanggal = new java.text.SimpleDateFormat("dd MMM yyyy, HH:mm");
+        String tanggalTampil = (acara.getEventDate() != null) ? formatTanggal.format(acara.getEventDate()) : "-";
+        
+        // 👉 PERBAIKAN: Deklarasi variabel hargaAsli agar bisa dipakai di UI dan Tombol
+        double hargaAsli = acara.getPrice() != null ? acara.getPrice() : 0;
+        String hargaTampilUI = (hargaAsli == 0) ? "Gratis" : "Rp" + String.format(java.util.Locale.forLanguageTag("id-ID"), "%,.0f", hargaAsli);
 
-        gridInfo.add(createMetaBlock("Lokasi:", "Trans Studio Mall Makassar"), 0, 0);
-        gridInfo.add(createMetaBlock("Tanggal:", "20-22 Mei 2026"), 1, 0);
-        gridInfo.add(createMetaBlock("Harga:", "Rp25.000"), 0, 1);
-        gridInfo.add(createMetaBlock("Kuota:", "100 orang"), 1, 1);
+        GridPane gridInfo = new GridPane();
+        gridInfo.setHgap(80); gridInfo.setVgap(12);
+        gridInfo.add(createMetaBlock("Lokasi:", acara.getLocation()), 0, 0);
+        gridInfo.add(createMetaBlock("Tanggal:", tanggalTampil), 1, 0);
+        gridInfo.add(createMetaBlock("Harga:", hargaTampilUI), 0, 1);
+        gridInfo.add(createMetaBlock("Kuota:", acara.getQuota() + " orang"), 1, 1);
 
         // E. Baris Tombol Aksi Kanan Bawah
         HBox actionRow = new HBox(12);
@@ -130,9 +123,18 @@ public class DetailRekomendasi {
 
         Button btnBeli = new Button("Beli Tiket");
         btnBeli.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 6 22;");
+        btnBeli.setCursor(javafx.scene.Cursor.HAND);
+        
+        // 👉 PERBAIKAN: Mengoper objek acara dan harga aktual ke halaman pemesanan tiket
         btnBeli.setOnAction(event -> {
-            if (DashboardUser.getInstance() != null) DashboardUser.getInstance().pindahKePesanTiket();
-        });
+        if (DashboardUser.getInstance() != null) {
+            // Casting ke int akan memotong desimal (25000.0 -> 25000)
+            int hargaInt = (int) (acara.getPrice() != null ? acara.getPrice() : 0);
+            String hargaTiketUntukSistem = String.valueOf(hargaInt);
+            
+            DashboardUser.getInstance().pindahKePesanTiket(acara, hargaTiketUntukSistem);
+        }
+    });
 
         Button btnKembali = new Button("Kembali");
         btnKembali.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 6 22;");
@@ -147,7 +149,6 @@ public class DetailRekomendasi {
         actionRow.getChildren().addAll(btnBeli, btnKembali);
         whiteCard.getChildren().addAll(imagePane, lblEventTitle, lblDescription, gridInfo, actionRow);
 
-        // 👉 PERBAIKAN 2: ScrollPane hanya diletakkan di bagian dalam sini membungkus kartu putih
         ScrollPane scrollInner = new ScrollPane(whiteCard);
         scrollInner.setFitToWidth(true);
         scrollInner.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Sembunyikan scrollbar sistem yang tebal
@@ -159,7 +160,6 @@ public class DetailRekomendasi {
         boxBlueContainer.getChildren().add(scrollInner);
         sectionDetail.getChildren().addAll(lblTabRekomendasi, boxBlueContainer); 
 
-        // 👉 PERBAIKAN 3: Memasukkan komponen langsung ke objek view utama tanpa ScrollPane luar
         view.getChildren().addAll(welcomeHeader, sectionDetail);
     }
 

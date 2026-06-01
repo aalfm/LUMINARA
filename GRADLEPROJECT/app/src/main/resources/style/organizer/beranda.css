@@ -11,9 +11,16 @@
     -fx-background-color: #003A6C;
     -fx-pref-width: 250px;
     padding: 30px 20px;
+    background-position: center bottom;
+    background-size: cover;
     -fx-padding: 30px 20px;
     -fx-background-radius: 0 25px 25px 0;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.15), 10, 0, 3, 0);
+    /* 1. Paksa gambar lengkungan untuk selalu menempel di posisi paling bawah */
+    -fx-background-position: center bottom; 
+    
+    /* 2. Pastikan gambar selalu pas (fit) di dalam sidebar tanpa terpotong */
+    -fx-background-size: cover; /* bisa juga coba ganti dengan 'contain' jika cover masih aneh */
 }
 
 /* Menu Utama Sidebar */
@@ -492,4 +499,33 @@
 }
 .btn-kembali:hover {
     -fx-text-fill: #002244;
+}
+
+.btn-toggle {
+    font-family: 'Poppins';
+    font-size: 11px;
+    cursor: hand;
+
+    -fx-font-family: 'Poppins';
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+    -fx-background-radius: 4px;
+}
+
+.btn-hadir-active {
+    background-color: #FF9800;
+    font-weight: bold;
+
+    -fx-background-color: #FF9800;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.btn-tidak-active {
+    background-color: #E2E8F0;
+    font-weight: bold;
+    
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: #495057;
+    -fx-font-weight: bold;
 }

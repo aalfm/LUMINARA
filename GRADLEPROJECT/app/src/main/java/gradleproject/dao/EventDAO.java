@@ -12,57 +12,65 @@ import java.util.List;
 
 public class EventDAO {
 
-    public boolean insert(Event event) {
-        // Menggunakan default value untuk beberapa kolom NOT NULL yang belum ada di model (seperti image_url, location)
-        String sql = "INSERT INTO events (organizer_id, title, detail_description, category, ticket_type, status, event_date, image_url, preview_text, location) VALUES (?, ?, ?, ?, ?, ?, ?, 'default.png', 'Preview', 'Online')";
-        try (Connection conn = DbConnect.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, event.getOrganizerId());
-            pstmt.setString(2, event.getTitle());
-            pstmt.setString(3, event.getDescription());
-            pstmt.setString(4, event.getCategory());
-            pstmt.setString(5, event.getTicketType());
-            pstmt.setString(6, event.getStatus());
-            pstmt.setTimestamp(7, event.getEventDate());
-            
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.err.println("Error insert event: " + e.getMessage());
-            return false;
-        }
+    // 🎯 PERUBAHAN: Ubah menjadi 'void' dan tambahkan 'throws SQLException'
+    // 🎯 PERUBAHAN: Ubah menjadi 'void' dan tambahkan 'throws SQLException'
+    public void insert(Event event) throws SQLException {
+    // SQL: 8 kolom pertama '?', kolom ke-9 '?'(image), kolom ke-10 'Preview', kolom ke-11 '?', kolom ke-12 '?'
+    String sql = "INSERT INTO events (organizer_id, title, detail_description, category, ticket_type, status, event_date, price, image_url, preview_text, location, kuota) " +
+             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Preview', ?, ?)";
+    
+    try (Connection conn = DbConnect.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        pstmt.setInt(1, event.getOrganizerId());
+        pstmt.setString(2, event.getTitle());
+        pstmt.setString(3, event.getDescription());
+        pstmt.setString(4, event.getCategory());
+        pstmt.setString(5, event.getTicketType());
+        pstmt.setString(6, event.getStatus());
+        pstmt.setTimestamp(7, event.getEventDate());
+        pstmt.setDouble(8, event.getPrice());
+        pstmt.setString(9, event.getImagePath());
+        pstmt.setString(10, event.getLocation());
+        pstmt.setInt(11, event.getQuota());
+        pstmt.executeUpdate(); 
     }
+}
 
     /**
      * Mencari acara spesifik berdasarkan ID.
      * Dibutuhkan oleh TicketingService untuk mengecek detail acara sebelum dibeli.
      */
     public Event findById(int id) {
-        String sql = "SELECT * FROM events WHERE id = ?";
-        try (Connection conn = DbConnect.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                return new Event(
-                    rs.getInt("id"),
-                    rs.getInt("organizer_id"),
-                    rs.getString("title"),
-                    rs.getString("detail_description"),
-                    rs.getString("category"),
-                    rs.getString("ticket_type"),
-                    rs.getString("status"),
-                    0, // dummy kuota
-                    rs.getTimestamp("event_date")
-                );
-            }
-        } catch (SQLException e) {
-            System.err.println("Error find event by id: " + e.getMessage());
+    String sql = "SELECT * FROM events WHERE id = ?";
+    try (Connection conn = DbConnect.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        pstmt.setInt(1, id);
+        ResultSet rs = pstmt.executeQuery();
+        
+        if (rs.next()) {
+            // 🎯 WAJIB ADA RETURN!
+            return new Event(
+                rs.getInt("id"),
+                rs.getInt("organizer_id"),
+                rs.getString("title"),
+                rs.getString("detail_description"),
+                rs.getString("category"),
+                rs.getString("ticket_type"),
+                rs.getString("status"),
+                rs.getInt("kuota"),
+                rs.getDouble("price"),
+                rs.getTimestamp("event_date"),
+                rs.getString("location"),
+                rs.getString("image_url")
+            );
         }
-        return null; // Kembalikan null jika acara tidak ditemukan
+    } catch (SQLException e) {
+        System.err.println("Error find event by id: " + e.getMessage());
     }
+    return null; // Akan return null jika ID tidak ada
+}
 
     /**
      * Mencari semua acara yang dibuat oleh Organizer tertentu.
@@ -112,8 +120,11 @@ public class EventDAO {
                     rs.getString("category"),
                     rs.getString("ticket_type"),
                     rs.getString("status"),
-                    0, // Quota tidak ada langsung di events, ini dummy untuk model
-                    rs.getTimestamp("event_date")
+                    rs.getInt("kuota"),
+                    rs.getDouble("price"),
+                    rs.getTimestamp("event_date"), 
+                    rs.getString("location"),
+                    rs.getString("image_url")
                 );
                 events.add(event);
             }
@@ -122,4 +133,73 @@ public class EventDAO {
         }
         return events;
     }
+
+    /**
+     * Mencari semua acara yang ada di database.
+     * Dibutuhkan oleh KategoriUser untuk menampilkan daftar event secara dinamis.
+     */
+    public List<Event> getAllEvents() {
+        List<Event> events = new ArrayList<>();
+        String sql = "SELECT * FROM events"; // Ambil semua tanpa syarat (WHERE)
+        
+        try (Connection conn = DbConnect.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                Event event = new Event(
+                    rs.getInt("id"),
+                    rs.getInt("organizer_id"),
+                    rs.getString("title"),
+                    rs.getString("detail_description"),
+                    rs.getString("category"),
+                    rs.getString("ticket_type"),
+                    rs.getString("status"),
+                    rs.getInt("kuota"),
+                    rs.getDouble("price"),
+                    rs.getTimestamp("event_date"), 
+                    rs.getString("location"),
+                    rs.getString("image_url")
+                );
+                events.add(event);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error get all events: " + e.getMessage());
+        }
+        return events;
+    }
+
+    public List<Event> getEventsByOrganizer(int organizerId) {
+    List<Event> events = new ArrayList<>();
+    // Sesuaikan nama tabel dan kolom dengan skema database Anda
+    String sql = "SELECT * FROM events WHERE organizer_id = ?";
+    
+    try (Connection conn = DbConnect.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        pstmt.setInt(1, organizerId);
+        ResultSet rs = pstmt.executeQuery();
+        
+        while (rs.next()) {
+            // Sesuaikan constructor dengan model Event Anda
+            events.add(new Event(
+                 rs.getInt("id"),
+                rs.getInt("organizer_id"),
+                rs.getString("title"),
+                rs.getString("detail_description"),
+                rs.getString("category"),
+                rs.getString("ticket_type"),
+                rs.getString("status"),
+                rs.getInt("kuota"),
+                rs.getDouble("price"),
+                rs.getTimestamp("event_date"), 
+                rs.getString("location"),
+                rs.getString("image_url")
+            ));
+        }
+    } catch (SQLException e) {
+        System.err.println("Error getEventsByOrganizer: " + e.getMessage());
+    }
+    return events;
+}
 }

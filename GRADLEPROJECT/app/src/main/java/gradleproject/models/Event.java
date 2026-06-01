@@ -10,11 +10,17 @@ public class Event extends BaseEntity {
     private String ticketType; // Free, Paid
     private String status; // Draft, Active, Past, Pending
     private int quota;
+    private Double price;
     private Timestamp eventDate;
+    private String location;
+    private String imagePath;
+    private String Name;
+
 
     public Event() {}
 
-    public Event(int id, int organizerId, String title, String description, String category, String ticketType, String status, int quota, Timestamp eventDate) {
+    public Event(int id, int organizerId, String title, String description, String category, String ticketType, 
+                 String status, int quota, Double price, Timestamp eventDate, String location, String imagePath) {
         super(id);
         this.organizerId = organizerId;
         this.title = title;
@@ -24,6 +30,9 @@ public class Event extends BaseEntity {
         this.status = status;
         this.quota = quota;
         this.eventDate = eventDate;
+        this.price = price;
+        this.location = location;
+        this.imagePath = imagePath;
     }
 
     // Getters and Setters
@@ -48,6 +57,17 @@ public class Event extends BaseEntity {
     public int getQuota() { return quota; }
     public void setQuota(int quota) { this.quota = quota; }
 
+    public Double getPrice() { return price; }
+    public void setPrice(Double price) { this.price = price; }
+
     public Timestamp getEventDate() { return eventDate; }
     public void setEventDate(Timestamp eventDate) { this.eventDate = eventDate; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
+
+    public String getName() { return Name; }
 }

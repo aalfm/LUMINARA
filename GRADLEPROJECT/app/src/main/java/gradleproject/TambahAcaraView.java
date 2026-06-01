@@ -41,11 +41,15 @@ public class TambahAcaraView extends VBox {
     private TextField txtKategori;
     private TextField txtHarga;
 
+    private final int organizerId;
+
     // --- PREVIEW FIELD STEP 3 (Submit / Ringkasan) ---
     private TextField viewNama, viewTanggal, viewWaktu, viewLokasi, viewKuota, viewKategori, viewHarga;
     private ImageView viewPamfletPreview; // ImageView khusus untuk menampung aset icon/gambar unggahan
+    private String imagePath = "";
 
-    public TambahAcaraView() {
+    public TambahAcaraView(int organizerId) {
+        this.organizerId = organizerId;
         this.setSpacing(20);
         this.setPadding(new Insets(20, 40, 20, 40));
         this.getStyleClass().add("tambah-acara-root");
@@ -413,21 +417,25 @@ public class TambahAcaraView extends VBox {
 
     // Fungsi pembantu terpusat untuk memanggil FileChooser sistem operasi
     private void pemicuPilihGambar() {
-        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
-        fileChooser.setTitle("Pilih Pamflet Acara");
-        fileChooser.getExtensionFilters().addAll(
-            new javafx.stage.FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
-        );
+    javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+    fileChooser.setTitle("Pilih Pamflet Acara");
+    fileChooser.getExtensionFilters().addAll(
+        new javafx.stage.FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
+    );
+    
+    java.io.File selectedFile = (this.getScene() != null && this.getScene().getWindow() != null) ? 
+        fileChooser.showOpenDialog(this.getScene().getWindow()) : null;
+    
+    if (selectedFile != null) {
+        // 🎯 FIX: Simpan path lengkapnya ke variabel imagePath
+        this.imagePath = selectedFile.getAbsolutePath(); 
         
-        java.io.File selectedFile = (this.getScene() != null && this.getScene().getWindow() != null) ? 
-            fileChooser.showOpenDialog(this.getScene().getWindow()) : null;
+        Image imageBaru = new Image(selectedFile.toURI().toString());
+        viewPamfletPreview.setFitWidth(260);
+        viewPamfletPreview.setFitHeight(300);
+        viewPamfletPreview.setImage(imageBaru);
         
-        if (selectedFile != null) {
-            Image imageBaru = new Image(selectedFile.toURI().toString());
-            // Sesuaikan ukuran ImageView agar memenuhi bingkai secara proporsional saat gambar masuk
-            viewPamfletPreview.setFitWidth(260);
-            viewPamfletPreview.setFitHeight(300);
-            viewPamfletPreview.setImage(imageBaru);
+        System.out.println("DEBUG: Gambar terpilih: " + this.imagePath);
         }
     }
 
@@ -439,14 +447,61 @@ public class TambahAcaraView extends VBox {
         viewLokasi.setText(txtTempatLokasi.getText());
         viewKuota.setText(txtKuota.getText());
         viewKategori.setText(txtKategori.getText());
-        viewHarga.setText(isTiketGratis ? "Gratis (Rp 0)" : "Rp " + txtHarga.getText());
+        viewHarga.setText(isTiketGratis ? "Gratis (Rp 0)" : txtHarga.getText());
     }
 
     private void prosesSelesaiSimpan() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Sukses");
-        alert.setHeaderText(null);
-        alert.setContentText("Selamat! Acara '" + txtNamaAcara.getText() + "' Berhasil Dipublikasikan.");
+        try {
+            // 1. Bersihkan Data Harga
+            String rawHarga = txtHarga.getText().replaceAll("[^0-9]", ""); 
+            double harga = rawHarga.isEmpty() ? 0 : Double.parseDouble(rawHarga);
+
+            // 2. Format tanggal/waktu (Menambahkan :00.0 agar Timestamp Java tidak error)
+            String dateTimeStr = txtTanggal.getText() + " " + txtWaktu.getText() + ":00.0";
+            java.sql.Timestamp eventTimestamp = java.sql.Timestamp.valueOf(dateTimeStr);
+
+            // 3. Buat objek Event
+            gradleproject.models.Event newEvent = new gradleproject.models.Event(
+                0,
+                this.organizerId,
+                txtNamaAcara.getText(),
+                txtDeskripsiDetail.getText(),
+                txtKategori.getText(),
+                isTiketGratis ? "Free" : "Paid",
+                "Draft", // 🎯 UBAH INI DARI "Active" MENJADI "Draft"
+                Integer.parseInt(txtKuota.getText()), 
+                harga,
+                eventTimestamp,
+                txtTempatLokasi.getText(), 
+                this.imagePath // Pastikan imagePath sudah menyimpan path lengkap dari file yang dipilih di step 2
+            );
+
+            // 4. Simpan ke Database
+            gradleproject.services.OrganizerManagementService service = new gradleproject.services.OrganizerManagementService();
+            service.createEventDraft(newEvent);
+
+            // Jika sampai ke baris ini berarti BERHASIL (tidak ada error dari DB)
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Sukses");
+            alert.setContentText("Acara berhasil dipublikasikan.");
+            alert.showAndWait();
+            
+        } catch (java.sql.SQLException sqlError) {
+            // 🎯 INI KUNCI UTAMANYA: Menampilkan error langsung dari SQLite ke layar
+            showError("Ditolak oleh Database:\n" + sqlError.getMessage());
+        } catch (NumberFormatException e) {
+            showError("Data angka tidak valid (Kuota/Harga). Pastikan hanya berisi angka.");
+        } catch (IllegalArgumentException e) {
+            showError("Format Tanggal salah. Gunakan: YYYY-MM-DD dan Waktu: HH:MM\nContoh: 2026-09-10 dan 08:00");
+        } catch (Exception e) {
+            showError("Terjadi kesalahan sistem:\n" + e.getMessage());
+        }
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Gagal");
+        alert.setContentText(message);
         alert.showAndWait();
     }
 }

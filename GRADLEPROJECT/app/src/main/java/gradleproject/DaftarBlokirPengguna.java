@@ -1,14 +1,18 @@
 package gradleproject;
 
+import gradleproject.config.DbConnect;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane; // <--- Import ScrollPane
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.*;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DaftarBlokirPengguna {
 
@@ -23,11 +27,11 @@ public class DaftarBlokirPengguna {
         VBox header = new VBox(-5);
         Label lblHi = new Label("Hai, admin.");
         lblHi.getStyleClass().add("greeting-title");
-        Label lblSub = new Label("Pantau pengguna ya . . ."); // Subtitle diubah sesuai desain
+        Label lblSub = new Label("Daftar pengguna yang diblokir"); 
         lblSub.getStyleClass().add("greeting-subtitle");
         header.getChildren().addAll(lblHi, lblSub);
 
-        // 2. JUDUL DENGAN IKON BLOKIR
+        // 2. JUDUL HALAMAN
         HBox titleBox = new HBox(10);
         titleBox.setAlignment(Pos.CENTER_LEFT);
         
@@ -41,55 +45,77 @@ public class DaftarBlokirPengguna {
         listContainer.setMaxWidth(770);
         listContainer.setStyle("-fx-background-color: transparent;");
 
-        // Memasukkan data dummy (Diulang 4 kali agar daftar panjang dan bisa di-scroll)
-        for (int i = 0; i < 4; i++) {
-            listContainer.getChildren().addAll(
-                createBlokirRow("Alifah Mahalini", "Diblokir hari ini pukul 12.23 WITA"),
-                createBlokirRow("Ra-fly", "Diblokir hari ini pukul 07.17 WITA"),
-                createBlokirRow("Alifah Mahalini", "Diblokir Senin pukul 17.47 WITA")
-            );
+        // =====================================================================
+        // 👉 AMBIL DATA PENGGUNA (ROLE USER) YANG DIBLOKIR DARI DATABASE
+        // =====================================================================
+        // Perubahan di sini: Role diubah menjadi 'USER'
+        String query = "SELECT username, created_at FROM users WHERE UPPER(role) = 'USER' AND UPPER(account_status) = 'BANNED' ORDER BY id DESC";
+        
+        try (Connection conn = DbConnect.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+             
+            SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat displayFormat = new SimpleDateFormat("'Diblokir pada' dd MMMM yyyy 'pukul' HH.mm 'WITA'");
+            
+            boolean adaData = false;
+            
+            while (rs.next()) {
+                adaData = true;
+                String nama = rs.getString("username");
+                String tglMentah = rs.getString("created_at");
+                String tglTampil = "Baru saja diblokir"; 
+                
+                try {
+                    if (tglMentah != null) {
+                        Date date = dbFormat.parse(tglMentah);
+                        tglTampil = displayFormat.format(date);
+                    }
+                } catch(Exception ignored) {}
+                
+                listContainer.getChildren().add(createBlokirRow(nama, tglTampil));
+            }
+            
+            if (!adaData) {
+                Label lblKosong = new Label("Tidak ada pengguna yang diblokir saat ini.");
+                lblKosong.setStyle("-fx-font-family: 'Poppins'; -fx-text-fill: #7F8C8D; -fx-font-style: italic;");
+                listContainer.getChildren().add(lblKosong);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("⚠️ Gagal memuat daftar blokir pengguna: " + e.getMessage());
         }
 
-        // =====================================================================
-        // 4. SCROLL PANE (Menggantikan Paginasi)
-        // =====================================================================
+        // 4. SCROLL PANE
         ScrollPane scrollTable = new ScrollPane(listContainer);
-        scrollTable.setFitToWidth(true); // Memaksa lebar menyesuaikan layar
-        scrollTable.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED); // Scroll vertikal otomatis
-        scrollTable.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Scroll horizontal mati
+        scrollTable.setFitToWidth(true); 
+        scrollTable.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED); 
+        scrollTable.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); 
         scrollTable.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;");
         
-        // Memaksa scroll area mengisi sisa layar ke bawah
         VBox.setVgrow(scrollTable, Priority.ALWAYS);
-        // =====================================================================
 
-        // Masukkan Header, Judul, dan ScrollTable (Paginasi dihapus)
         view.getChildren().addAll(header, titleBox, scrollTable);
     }
 
-    // FUNGSI UNTUK MENCETAK BARIS (Tanpa Tombol Detail)
     private HBox createBlokirRow(String name, String blockTime) {
         HBox row = new HBox(15);
         row.setAlignment(Pos.CENTER_LEFT);
-        row.getStyleClass().add("user-row-box"); // Pakai style kartu oranye yang sudah ada
-        row.setPadding(new Insets(10, 15, 10, 15)); // Tambahan padding agar lebih rapi
+        row.getStyleClass().add("user-row-box"); 
+        row.setPadding(new Insets(10, 15, 10, 15)); 
 
-        // Ikon User Outline
         Label icon = new Label("👤");
         icon.setStyle("-fx-font-size: 16px; -fx-text-fill: #0A3B5C;");
 
-        // Nama Pengguna
         Label lblName = new Label(name);
         lblName.getStyleClass().add("user-name-text");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Keterangan Waktu Blokir
         Label lblTime = new Label(blockTime);
         lblTime.getStyleClass().add("join-time-text");
 
-        // Perhatikan di sini tidak ada tambahan Button Detail
         row.getChildren().addAll(icon, lblName, spacer, lblTime);
         return row;
     }

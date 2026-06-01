@@ -1,5 +1,7 @@
 package gradleproject;
 
+import gradleproject.dao.ReviewDAO;
+import gradleproject.models.Review;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -16,7 +18,7 @@ import javafx.scene.layout.VBox;
 
 public class UlasanUser {
 
-    private StackPane view; // Menggunakan StackPane agar bisa menumpuk dialog notifikasi kustom
+    private StackPane view; 
     private TextField txtNamaKegiatan;
     private TextArea txtAreaUlasan;
     private Button btnKirim;
@@ -25,8 +27,12 @@ public class UlasanUser {
     private Label lblNotifTitle;
     private Label lblNotifMessage;
 
-    // Konstruktor menerima nama kegiatan secara dinamis dari riwayat yang diklik
-    public UlasanUser(String namaKegiatan) {
+    private int eventId;
+
+    // 🎯 FIX: Tangkap eventId dari halaman Riwayat
+    public UlasanUser(int eventId, String namaKegiatan) {
+        this.eventId = eventId; 
+        
         view = new StackPane();
         view.setStyle("-fx-background-color: #F8F9FA;");
 
@@ -129,6 +135,7 @@ public class UlasanUser {
         createCustomNotificationOverlay();
 
         // Logika Klik Validasi Tombol Kirim Ulasan
+        // Ubah logika btnKirim.setOnAction menjadi ini:
         btnKirim.setOnAction(event -> {
             String ulasanTeks = txtAreaUlasan.getText().trim();
             if (ulasanTeks.isEmpty()) {
@@ -136,8 +143,25 @@ public class UlasanUser {
                 lblNotifMessage.setText("Kotak teks ulasan tidak boleh kosong! Silakan berikan kesan pengalamanmu.");
                 overlayNotif.setVisible(true);
             } else {
-                lblNotifTitle.setText("Sukses");
-                lblNotifMessage.setText("Terima kasih! Ulasan kamu untuk kegiatan '" + namaKegiatan + "' berhasil dikirim.");
+                int userId = UserSession.getInstance().getUserId();
+                
+                // 🎯 FIX: Memanfaatkan ReviewDAO bawaan Anda
+                ReviewDAO reviewDAO = new ReviewDAO();
+                
+                // CATATAN: Pastikan Anda memiliki 'eventId' dari halaman sebelumnya. 
+                // Jika UI Anda belum punya rating bintang, kita set default 5 dulu.
+                // Format model Review: (id, event_id, user_id, rating, comment)
+                Review ulasanBaru = new Review(0, eventId, userId, 5, ulasanTeks);
+                
+                boolean sukses = reviewDAO.insertReview(ulasanBaru);
+
+                if (sukses) {
+                    lblNotifTitle.setText("Sukses");
+                    lblNotifMessage.setText("Terima kasih! Ulasan kamu berhasil dikirim.");
+                } else {
+                    lblNotifTitle.setText("Gagal");
+                    lblNotifMessage.setText("Maaf, terjadi kesalahan saat menyimpan ulasan.");
+                }
                 overlayNotif.setVisible(true);
             }
         });
@@ -224,6 +248,10 @@ public class UlasanUser {
 
         card.getChildren().addAll(lblField, inputNode);
         return card;
+    }
+
+    public int geteventId() {
+        return eventId;
     }
 
     public Parent getView() {

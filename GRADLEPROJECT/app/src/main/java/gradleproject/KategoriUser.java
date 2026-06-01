@@ -1,5 +1,8 @@
 package gradleproject;
 
+import gradleproject.dao.EventDAO;
+import gradleproject.models.Event;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -16,23 +19,22 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
+import java.io.File;
+import java.util.List;
+
 public class KategoriUser {
 
-    // 👉 PERBAIKAN 1: Root utama diganti dari ScrollPane ke VBox agar header tidak ikut ter-scroll
     private VBox view; 
     private HBox tabBudaya, tabFestival, tabLokakarya, tabMusik;
     private GridPane cardsGrid;
 
     public KategoriUser() {
-        // Kontainer vertikal utama
         view = new VBox(25);
         view.setPadding(new Insets(30, 40, 30, 60)); 
         view.setAlignment(Pos.TOP_LEFT);
-        view.setStyle("-fx-background-color: #F8F9FA;"); // Latar belakang krem terang mockup
+        view.setStyle("-fx-background-color: #F8F9FA;"); 
 
-        // =====================================================================
-        // 1. HEADER WELCOME (Tetap Diam di Atas)
-        // =====================================================================
+        // 1. HEADER WELCOME
         VBox welcomeHeader = new VBox(2);
         Label lblTitle = new Label("Halo, Sobat Luminara");
         lblTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 28px; -fx-text-fill: #0A3B5C;");
@@ -40,16 +42,14 @@ public class KategoriUser {
         lblSubtitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 14px; -fx-text-fill: #5A7184;");
         welcomeHeader.getChildren().addAll(lblTitle, lblSubtitle);
 
-        // =====================================================================
-        // 2. KAPSUL NAVIGASI HORIZONTAL KATEGORI (Tetap Diam di Atas)
-        // =====================================================================
+        // 2. KAPSUL NAVIGASI HORIZONTAL KATEGORI
         HBox categoryBar = new HBox(0); 
         categoryBar.setAlignment(Pos.CENTER_LEFT);
         categoryBar.setMaxWidth(800);
         categoryBar.setPrefHeight(45);
         categoryBar.setStyle("-fx-background-color: #0A3B5C; -fx-background-radius: 20; -fx-padding: 4 10 4 10;");
 
-        tabBudaya = createCategoryTab("Budaya", true); // Default Aktif
+        tabBudaya = createCategoryTab("Budaya", true); 
         tabFestival = createCategoryTab("Festival", false);
         tabLokakarya = createCategoryTab("Lokakarya", false);
         tabMusik = createCategoryTab("Musik", false);
@@ -61,52 +61,74 @@ public class KategoriUser {
 
         categoryBar.getChildren().addAll(tabBudaya, tabFestival, tabLokakarya, tabMusik);
 
-        tabBudaya.setOnMouseClicked(e -> selectTab(tabBudaya));
-        tabFestival.setOnMouseClicked(e -> selectTab(tabFestival));
-        tabLokakarya.setOnMouseClicked(e -> selectTab(tabLokakarya));
-        tabMusik.setOnMouseClicked(e -> selectTab(tabMusik));
+        // Aksi Klik Tab: Ubah warna & Tarik data sesuai kategori
+        tabBudaya.setOnMouseClicked(e -> selectTab(tabBudaya, "Budaya"));
+        tabFestival.setOnMouseClicked(e -> selectTab(tabFestival, "Festival"));
+        tabLokakarya.setOnMouseClicked(e -> selectTab(tabLokakarya, "Lokakarya"));
+        tabMusik.setOnMouseClicked(e -> selectTab(tabMusik, "Musik"));
 
-        // =====================================================================
-        // 3. WADAH UTAMA BIRU GELAP (Diberi Vgrow agar Fleksibel Mengisi Layar)
-        // =====================================================================
+        // 3. WADAH UTAMA BIRU GELAP
         VBox boxBlueContainer = new VBox(0);
         boxBlueContainer.setStyle("-fx-background-color: #0A3B5C; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);"); 
         boxBlueContainer.setPadding(new Insets(20));
         boxBlueContainer.setMaxWidth(800);
-        
-        // Paksa wadah biru memanjang ke bawah menghabiskan sisa tinggi jendela screen
         VBox.setVgrow(boxBlueContainer, Priority.ALWAYS); 
 
-        // Pembuatan Grid Ubin Kartu
         cardsGrid = new GridPane();
         cardsGrid.setHgap(20);
         cardsGrid.setVgap(20);
         cardsGrid.setStyle("-fx-background-color: transparent;");
 
-        String descDummy = "Pementasan busana adat Makassar dan Sulawesi Selatan yang menampilkan Baju Bodo, passapu, kain sutra, dan aksesoris tradisional dalam parade budaya modern.";
-        
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event1.png", "Makassar Traditional\nCostume Showcase", descDummy, "Gratis", "Budaya"), 0, 0);
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event2.png", "Makassar Traditional\nCostume Showcase", descDummy, "Berbayar", "Budaya"), 1, 0);
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event3.png", "Makassar Traditional\nCostume Showcase", descDummy, "Paid", "Budaya"), 0, 1);
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event4.png", "Makassar Traditional\nCostume Showcase", descDummy, "Free", "Budaya"), 1, 1);
-
-        // 👉 PERBAIKAN 2: ScrollPane diletakkan di SINI (Bagian Dalam Wadah Biru)
         ScrollPane scrollInner = new ScrollPane(cardsGrid);
         scrollInner.setFitToWidth(true);
-        scrollInner.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Sembunyikan scrollbar yang kasar
+        scrollInner.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); 
         scrollInner.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        // Set transparan penuh agar warna dasar biru dari boxBlueContainer terlihat menembus rapi
         scrollInner.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;");
         VBox.setVgrow(scrollInner, Priority.ALWAYS);
 
-        // Masukkan ScrollPane dalam ke kotak biru
         boxBlueContainer.getChildren().add(scrollInner);
-
-        // Masukkan semua komponen berjejer ke atas ke dalam VBox view utama
         view.getChildren().addAll(welcomeHeader, categoryBar, boxBlueContainer);
+
+        // Muat data awal secara otomatis (Kategori: Budaya)
+        selectTab(tabBudaya, "Budaya");
     }
 
-    // --- METHOD HELPER 1: Kapsul Tab Kategori ---
+    // --- METHOD HELPER: Menarik Data dari Database ---
+    private void loadEventsByCategory(String kategoriDipilih) {
+        cardsGrid.getChildren().clear(); // Bersihkan kartu lama
+        
+        EventDAO eventDAO = new EventDAO();
+        List<Event> semuaAcara = eventDAO.getAllEvents(); // Pastikan method ini ada di EventDAO Anda
+        
+        int kolom = 0;
+        int baris = 0;
+        boolean adaData = false;
+
+        for (Event acara : semuaAcara) {
+            // Filter berdasarkan kategori (Abaikan besar/kecil huruf)
+            if (acara.getCategory() != null && acara.getCategory().equalsIgnoreCase(kategoriDipilih)) {
+                adaData = true;
+                
+                // Buat kartu event berdasarkan data asli dari database
+                VBox kartuEvent = createEventCard(acara);
+                cardsGrid.add(kartuEvent, kolom, baris);
+                
+                kolom++;
+                if (kolom == 2) { // Maksimal 2 kolom per baris
+                    kolom = 0;
+                    baris++;
+                }
+            }
+        }
+
+        // Jika kosong, tampilkan pesan
+        if (!adaData) {
+            Label lblKosong = new Label("Belum ada event untuk kategori " + kategoriDipilih + " saat ini.");
+            lblKosong.setStyle("-fx-text-fill: #A0A9B5; -fx-font-family: 'Poppins'; -fx-font-size: 14px; -fx-font-style: italic;");
+            cardsGrid.add(lblKosong, 0, 0);
+        }
+    }
+
     private HBox createCategoryTab(String text, boolean isActive) {
         HBox tab = new HBox();
         tab.setAlignment(Pos.CENTER);
@@ -126,8 +148,7 @@ public class KategoriUser {
         return tab;
     }
 
-    // --- METHOD HELPER 2: Logika Warna Kapsul Aktif Klik ---
-    private void selectTab(HBox selectedTab) {
+    private void selectTab(HBox selectedTab, String categoryName) {
         HBox[] tabs = {tabBudaya, tabFestival, tabLokakarya, tabMusik};
         for (HBox tab : tabs) {
             Label lbl = (Label) tab.getChildren().get(0);
@@ -139,10 +160,12 @@ public class KategoriUser {
                 lbl.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 14px; -fx-text-fill: #FFFFFF;");
             }
         }
+        // Panggil penarik data setelah warna tab berubah
+        loadEventsByCategory(categoryName);
     }
 
-    // --- METHOD HELPER 3: Cetakan Kartu Putih Event ---
-    private VBox createEventCard(String imagePath, String title, String description, String priceTag, String categoryTag) {
+    // 👉 PERBAIKAN: Parameter sekarang menerima objek Event asli
+    private VBox createEventCard(Event acara) {
         VBox card = new VBox(10);
         card.setPrefWidth(360);
         card.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 15; -fx-padding: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);");
@@ -153,7 +176,14 @@ public class KategoriUser {
 
         ImageView iv = new ImageView();
         try {
-            Image img = new Image(getClass().getResourceAsStream(imagePath));
+            Image img;
+            String imgPath = acara.getImagePath();
+            // Cek apakah gambar berasal dari file lokal (Upload PC) atau resource dalam (Mockup)
+            if (imgPath != null && (imgPath.contains(":\\") || imgPath.contains(":/"))) {
+                img = new Image(new File(imgPath).toURI().toString());
+            } else {
+                img = new Image(getClass().getResourceAsStream(imgPath != null ? imgPath : "/aset/gambarLuminara/event1.png"));
+            }
             iv.setImage(img);
             iv.setFitWidth(330);
             iv.setFitHeight(130);
@@ -161,18 +191,18 @@ public class KategoriUser {
             clip.setArcWidth(20);
             clip.setArcHeight(20);
             iv.setClip(clip);
+            imagePane.getChildren().add(0, iv);
         } catch (Exception e) {
-            Label lblPlaceholder = new Label("🖼️ Gambar Event");
+            Label lblPlaceholder = new Label("🖼️ Pamflet Acara");
             lblPlaceholder.setStyle("-fx-text-fill: #A0A9B5; -fx-font-family: 'Poppins';");
             imagePane.getChildren().add(lblPlaceholder);
         }
-        imagePane.getChildren().add(0, iv);
 
-        Label lblTitle = new Label(title);
+        Label lblTitle = new Label(acara.getTitle());
         lblTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #0A3B5C;");
         lblTitle.setWrapText(true);
 
-        Label lblDesc = new Label(description);
+        Label lblDesc = new Label(acara.getDescription());
         lblDesc.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 10px; -fx-text-fill: #5A7184; -fx-line-spacing: 1.5;");
         lblDesc.setWrapText(true);
         lblDesc.setMaxHeight(45);
@@ -181,10 +211,13 @@ public class KategoriUser {
         bottomRow.setAlignment(Pos.CENTER_LEFT);
 
         VBox labelBox = new VBox(0);
-        Label lblPrice = new Label(priceTag);
-        lblPrice.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 11px; -fx-text-fill: " + 
-            (priceTag.equalsIgnoreCase("Free") || priceTag.equalsIgnoreCase("Gratis") ? "#FF9800;" : "#E53935;"));
-        Label lblCat = new Label(categoryTag);
+        boolean isFree = (acara.getPrice() == 0);
+        String labelHargaText = isFree ? "Gratis" : "Berbayar";
+        
+        Label lblPrice = new Label(labelHargaText);
+        lblPrice.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 11px; -fx-text-fill: " + (isFree ? "#FF9800;" : "#E53935;"));
+        
+        Label lblCat = new Label(acara.getCategory());
         lblCat.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 11px; -fx-text-fill: #A0A9B5;");
         labelBox.getChildren().addAll(lblPrice, lblCat);
 
@@ -193,8 +226,17 @@ public class KategoriUser {
 
         Button btnBeli = new Button("Beli Tiket");
         btnBeli.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-size: 9px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 4 12;");
+        
+        double hargaAsli = acara.getPrice() != null ? acara.getPrice() : 0;
+        // 👉 WAJIB: Kirim data Event ke halaman Pemesanan Tiket
         btnBeli.setOnAction(event -> {
-            if (DashboardUser.getInstance() != null) DashboardUser.getInstance().pindahKePesanTiket();
+            if (DashboardUser.getInstance() != null) {
+                // Casting ke int akan otomatis membuang desimal (misal 25000.0 menjadi 25000)
+                // Lalu diubah ke String agar bisa dikirim ke halaman selanjutnya
+                String hargaTiketUntukSistem = String.valueOf((Double) hargaAsli);
+                
+                DashboardUser.getInstance().pindahKePesanTiket(acara, hargaTiketUntukSistem);
+            }
         });
 
         Button btnDetail = new Button("Lihat Detail");
@@ -203,15 +245,7 @@ public class KategoriUser {
 
         btnDetail.setOnAction(event -> {
             if (DashboardUser.getInstance() != null) {
-                // Mengirimkan data string kategori "Budaya" secara aman ke layar detail
-                DashboardUser.getInstance().pindahKeDetailKategori("Budaya"); 
-            }
-        });
-        
-        btnDetail.setOnAction(event -> {
-            if (DashboardUser.getInstance() != null) {
-                // Memanggil rute khusus kategori dengan membawa parameter teks "Budaya"
-                DashboardUser.getInstance().pindahKeDetailKategori("Budaya"); 
+                DashboardUser.getInstance().pindahKeDetailKategori(acara.getCategory()); 
             }
         });
 
@@ -220,7 +254,6 @@ public class KategoriUser {
         return card;
     }
 
-    // 👉 PERBAIKAN REVISI: Mengembalikan VBox Parent secara langsung
     public Parent getView() {
         return view;
     }

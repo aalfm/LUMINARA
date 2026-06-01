@@ -56,13 +56,34 @@ public class RekomendasiKegiatan {
         cardsGrid.setVgap(20); // Jarak vertikal antar kartu
         cardsGrid.setStyle("-fx-background-color: transparent;");
 
-        // Mengisi Ubin Kartu Sesuai Mockup Gambar
-        String descDummy = "Pementasan busana adat Makassar dan Sulawesi Selatan yang menampilkan Baju Bodo, passapu, kain sutra, dan aksesoris tradisional dalam parade budaya modern.";
-        
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event1.png", "Makassar Traditional\nCostume Showcase", descDummy, "Gratis", "Budaya"), 0, 0);
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event2.png", "Makassar Traditional\nCostume Showcase", descDummy, "Berbayar", "Budaya"), 1, 0);
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event3.png", "Makassar Traditional\nCostume Showcase", descDummy, "Gratis", "Budaya"), 0, 1);
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event4.png", "Makassar Traditional\nCostume Showcase", descDummy, "Berbayar", "Budaya"), 1, 1);
+        // Looping untuk setiap acara yang ditemukan di database
+        // Perbaiki cara pemanggilan DAO dan method-nya
+        gradleproject.dao.EventDAO eventDAO = new gradleproject.dao.EventDAO();
+        java.util.List<gradleproject.models.Event> daftarAcara = eventDAO.findByStatus("Active"); // Tanpa 'status:'
+
+        int kolom = 0;
+        int baris = 0;
+
+        for (gradleproject.models.Event acara : daftarAcara) {
+
+            VBox eventCard = createEventCard(acara);
+
+            cardsGrid.add(eventCard, kolom, baris);
+
+            kolom++;
+
+            if (kolom == 2) {
+                kolom = 0;
+                baris++;
+            }
+        }
+
+        // Opsional: Jika database masih kosong, tampilkan pesan kosong yang elegan
+        if (daftarAcara.isEmpty()) {
+            Label lblKosong = new Label("Belum ada kegiatan yang tersedia saat ini.");
+            lblKosong.setStyle("-fx-font-family: 'Poppins'; -fx-text-fill: #A0A9B5; -fx-font-style: italic;");
+            cardsGrid.add(lblKosong, 0, 0);
+        }
 
         // 👉 KUNCI SCROLL: Dibungkus ScrollPane transparan bagian dalam agar sticky header atas tetap diam
         ScrollPane scrollInner = new ScrollPane(cardsGrid);
@@ -79,7 +100,7 @@ public class RekomendasiKegiatan {
     }
 
     // --- METHOD HELPER: Membuat Cetakan Desain Kartu Putih Per Kegiatan Eksklusif ---
-    private VBox createEventCard(String imagePath, String title, String description, String typeTag, String categoryTag) {
+    private VBox createEventCard(gradleproject.models.Event acara) {
         VBox card = new VBox(10);
         card.setPrefWidth(360); // Lebar proporsional setengah frame dari total 800px
         card.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 15; -fx-padding: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);");
@@ -89,10 +110,25 @@ public class RekomendasiKegiatan {
         imagePane.setPrefSize(330, 130);
         imagePane.setStyle("-fx-background-color: #E2E8F0; -fx-background-radius: 12;");
 
+        String imagePath = acara.getImagePath();
+        String title = acara.getTitle();
+        String description = acara.getDescription();
+
+        String typeTag = acara.getTicketType().equalsIgnoreCase("Free")
+                ? "Gratis"
+                : "Berbayar";
+
+        String categoryTag = acara.getCategory();
+
         ImageView iv = new ImageView();
         try {
-            Image img = new Image(getClass().getResourceAsStream(imagePath));
-            iv.setImage(img);
+            // Jika path adalah file lokal di komputer (bukan di folder resource)
+            if (imagePath.startsWith("C:") || imagePath.startsWith("/")) {
+                iv.setImage(new Image(new java.io.File(imagePath).toURI().toString()));
+            } else {
+                // Jika path adalah file di dalam folder resource
+                iv.setImage(new Image(getClass().getResourceAsStream(imagePath)));
+            }
             iv.setFitWidth(330);
             iv.setFitHeight(130);
             
@@ -134,13 +170,20 @@ public class RekomendasiKegiatan {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        double hargaAsli = acara.getPrice() != null ? acara.getPrice() : 0;
+
         // Dua Tombol Oranye Kanan
         Button btnBeli = new Button("Beli Tiket");
         btnBeli.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-size: 9px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 4 12;");
         btnBeli.setOnAction(event -> {
-            if (DashboardUser.getInstance() != null) DashboardUser.getInstance().pindahKePesanTiket();
+            if (DashboardUser.getInstance() != null) {
+                // Casting ke int akan otomatis membuang desimal (misal 25000.0 menjadi 25000)
+                // Lalu diubah ke String agar bisa dikirim ke halaman selanjutnya
+                String hargaTiketUntukSistem = String.valueOf((Double) hargaAsli);
+                
+                DashboardUser.getInstance().pindahKePesanTiket(acara, hargaTiketUntukSistem);
+            }
         });
-        // Cari baris deklarasi btnDetail di bagian bawah RekomendasiKegiatan.java kamu
         
         Button btnDetail = new Button("Lihat Detail");
         btnDetail.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-size: 9px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 4 12;");
@@ -148,10 +191,9 @@ public class RekomendasiKegiatan {
         // 👉 TAMBAHKAN BLOK BARIS AKSI INI:
         btnDetail.setOnAction(event -> {
             if (DashboardUser.getInstance() != null) {
-                DashboardUser.getInstance().pindahKeDetailRekomendasi();
+                DashboardUser.getInstance().pindahKeDetailRekomendasi(acara);
             }
         });
-
         bottomRow.getChildren().addAll(labelBox, spacer, btnBeli, btnDetail);
         card.getChildren().addAll(imagePane, lblTitle, lblDesc, bottomRow);
         return card;

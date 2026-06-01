@@ -66,8 +66,12 @@ public class MulaiEksplorasiPage {
         Button btnSelanjutnya = new Button("Selanjutnya");
         btnSelanjutnya.getStyleClass().add("eksplorasi-btn-selanjutnya");
         btnSelanjutnya.setCursor(javafx.scene.Cursor.HAND);
+        
+        // PERBAIKAN: Menghubungkan tombol Selanjutnya ke SignUpPage
         btnSelanjutnya.setOnAction(e -> {
-            System.out.println("Navigasi ke form pembuatan akun / pendaftaran tamu...");
+            System.out.println("🔗 Controller: Mengalihkan pengunjung ke Formulir Pendaftaran (SignUpPage)...");
+            SignUpPage signUpPage = new SignUpPage("User");
+            signUpPage.start(primaryStage);
         });
 
         buttonRow.getChildren().addAll(btnKembali, btnSelanjutnya);
@@ -76,7 +80,7 @@ public class MulaiEksplorasiPage {
         mainLayout.getChildren().addAll(sidebar, centerContent);
         root.getChildren().add(mainLayout);
 
-        Scene scene = new Scene(root, 1024, 720);
+        Scene scene = new Scene(root, 1280, 720);
         scene.getStylesheets().add(getClass().getResource("/style/guest/intro.css").toExternalForm());
 
         primaryStage.setTitle("Luminara - Mulai Eksplorasi");

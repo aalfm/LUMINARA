@@ -3,10 +3,22 @@ package gradleproject;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import java.util.Optional;
+
+// 👉 IMPORT DATABASE
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import gradleproject.config.DbConnect;
 
 public class DetailPenyelenggara {
 
@@ -30,6 +42,7 @@ public class DetailPenyelenggara {
 
         VBox tableWrapper = new VBox(15); 
         tableWrapper.setMaxWidth(770);
+        VBox.setVgrow(tableWrapper, Priority.ALWAYS); // Biarkan meluas
 
         HBox tableHeader = new HBox();
         tableHeader.getStyleClass().add("detail-header-container");
@@ -59,32 +72,55 @@ public class DetailPenyelenggara {
         tableBody.getStyleClass().add("detail-body-container");
         tableBody.setPadding(new Insets(25, 25, 25, 25));
 
-        // Data dummy untuk baris tabel penyelenggara
-        tableBody.getChildren().addAll(
-            createDetailRow("Alifah\nMahrani", "alfm@gmail.com", "081234567890"),
-            createDetailRow("Zahwa", "zahwa@gmail.com", "081234567890"),
-            createDetailRow("Syarief\nRahmat", "syarief@gmail.com", "081234567890"),
-            createDetailRow("Fa'iqh\nMusharraf", "faiq@gmail.com", "081234567890")
-        );
-
-        tableWrapper.getChildren().addAll(tableHeader, tableBody);
-
-        HBox pagination = new HBox(10);
-        pagination.setAlignment(Pos.CENTER_RIGHT);
-        pagination.setMaxWidth(770); 
+        // =====================================================================
+        // 👉 AMBIL DATA PENYELENGGARA AKTIF DARI DATABASE
+        // =====================================================================
+        String query = "SELECT id, username, email, phone_number FROM users WHERE (UPPER(role) = 'ORGANIZER' OR UPPER(role) = 'PENYELENGGARA') AND UPPER(account_status) != 'BANNED' ORDER BY id DESC";
         
-        Button btnPrev = new Button("<");
-        btnPrev.getStyleClass().add("btn-page-inactive");
-        
-        Button btnNext = new Button(">");
-        btnNext.getStyleClass().add("btn-page-active");
-        
-        pagination.getChildren().addAll(btnPrev, btnNext);
+        try (Connection conn = DbConnect.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+             
+            boolean adaData = false;
+            while (rs.next()) {
+                adaData = true;
+                int id = rs.getInt("id");
+                String nama = rs.getString("username");
+                String email = rs.getString("email") != null ? rs.getString("email") : "-";
+                String telepon = rs.getString("phone_number") != null ? rs.getString("phone_number") : "-";
+                
+                // Masukkan ke dalam tabel (mengirim ID untuk keperluan blokir)
+                tableBody.getChildren().add(createDetailRow(id, nama, email, telepon));
+            }
 
-        view.getChildren().addAll(headerBox, lblDetailTitle, tableWrapper, pagination);
+            if (!adaData) {
+                Label lblKosong = new Label("Tidak ada penyelenggara aktif saat ini.");
+                lblKosong.setStyle("-fx-font-family: 'Poppins'; -fx-text-fill: #FFFFFF; -fx-font-style: italic;");
+                tableBody.getChildren().add(lblKosong);
+            }
+
+        } catch (Exception e) {
+            System.out.println("⚠️ Gagal memuat detail penyelenggara: " + e.getMessage());
+        }
+
+        // =====================================================================
+        // 👉 SCROLL PANE (Pengganti Paginasi)
+        // =====================================================================
+        ScrollPane scrollTable = new ScrollPane(tableBody);
+        scrollTable.setFitToWidth(true);
+        scrollTable.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollTable.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollTable.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;");
+        VBox.setVgrow(scrollTable, Priority.ALWAYS);
+
+        tableWrapper.getChildren().addAll(tableHeader, scrollTable);
+
+        // Gabungkan ke view utama (Paginasi dihapus)
+        view.getChildren().addAll(headerBox, lblDetailTitle, tableWrapper);
     }
 
-    private HBox createDetailRow(String name, String email, String phone) {
+    // Method pembentuk baris yang menerima ID
+    private HBox createDetailRow(int id, String name, String email, String phone) {
         HBox row = new HBox();
         row.getStyleClass().add("detail-row-card");
         row.setAlignment(Pos.CENTER_LEFT);
@@ -108,10 +144,57 @@ public class DetailPenyelenggara {
         
         Button btnBlokir = new Button("Blokir");
         btnBlokir.getStyleClass().add("btn-blokir");
-        actionBox.getChildren().add(btnBlokir);
+        btnBlokir.setCursor(javafx.scene.Cursor.HAND);
+        
+        // =====================================================================
+        // 👉 LOGIKA TOMBOL BLOKIR
+        // =====================================================================
+        btnBlokir.setOnAction(e -> {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Konfirmasi Blokir");
+            confirm.setHeaderText("Blokir Penyelenggara");
+            confirm.setContentText("Apakah Anda yakin ingin memblokir akun penyelenggara '" + name + "'?\nMereka tidak akan bisa login lagi.");
+            
+            Optional<ButtonType> result = confirm.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                prosesBlokirAkun(id);
+            }
+        });
 
+        actionBox.getChildren().add(btnBlokir);
         row.getChildren().addAll(lblName, lblEmail, lblPhone, actionBox);
         return row;
+    }
+
+    // Fungsi utama eksekusi blokir ke database
+    private void prosesBlokirAkun(int userId) {
+        String sql = "UPDATE users SET account_status = 'Banned' WHERE id = ?";
+        
+        try (Connection conn = DbConnect.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
+            pstmt.setInt(1, userId);
+            int rowsUpdated = pstmt.executeUpdate();
+            
+            if (rowsUpdated > 0) {
+                Alert success = new Alert(Alert.AlertType.INFORMATION);
+                success.setTitle("Berhasil");
+                success.setHeaderText(null);
+                success.setContentText("Penyelenggara berhasil diblokir!");
+                success.showAndWait();
+                
+                // Me-refresh halaman secara otomatis agar akun langsung hilang dari daftar
+                if (DashboardAdmin.getInstance() != null) {
+                    DashboardAdmin.getInstance().pindahKeDetailPenyelenggara();
+                }
+            }
+            
+        } catch (Exception e) {
+            Alert error = new Alert(Alert.AlertType.ERROR);
+            error.setTitle("Gagal");
+            error.setContentText("Terjadi kesalahan database: " + e.getMessage());
+            error.showAndWait();
+        }
     }
 
     public Parent getView() {

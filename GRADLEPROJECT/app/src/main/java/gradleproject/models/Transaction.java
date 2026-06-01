@@ -1,28 +1,25 @@
 package gradleproject.models;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
-public class Transaction extends BaseEntity {
-    private double amount;
-    private Timestamp transactionDate;
-    private String status; // Success, Failed, Refunded
+public class Transaction {
+    private int id;
+    private String eventName;
+    private String participantName;
+    private double totalAmount;
+    private Date transactionDate;
 
-    public Transaction() {}
-
-    public Transaction(int id, double amount, Timestamp transactionDate, String status) {
-        super(id);
-        this.amount = amount;
+    public Transaction (int id, String eventName, String participantName, double totalAmount, Date transactionDate) {
+        this.id = id;
+        this.eventName = eventName;
+        this.participantName = participantName;
+        this.totalAmount = totalAmount;
         this.transactionDate = transactionDate;
-        this.status = status;
     }
 
-    // Getters and Setters
-    public double getAmount() { return amount; }
-    public void setAmount(double amount) { this.amount = amount; }
-
-    public Timestamp getTransactionDate() { return transactionDate; }
-    public void setTransactionDate(Timestamp transactionDate) { this.transactionDate = transactionDate; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public int getId() { return id; }
+    public String getEventName() { return eventName; }
+    public String getParticipantName() { return participantName; }
+    public double getTotalAmount() { return totalAmount; }
+    public Date getTransactionDate() { return transactionDate; }
 }

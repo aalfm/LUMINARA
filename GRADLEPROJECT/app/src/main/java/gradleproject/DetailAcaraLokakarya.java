@@ -1,5 +1,8 @@
 package gradleproject;
 
+import java.io.File;
+import java.io.InputStream;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -8,14 +11,16 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+
 
 public class DetailAcaraLokakarya {
 
     private VBox view;
 
-    public DetailAcaraLokakarya() {
+    public DetailAcaraLokakarya(gradleproject.models.Event acara) {
         view = new VBox(20);
         view.setPadding(new Insets(20, 20, 20, 80)); 
         view.setAlignment(Pos.TOP_LEFT);
@@ -46,18 +51,59 @@ public class DetailAcaraLokakarya {
         // Kartu Putih di dalam Bingkai Abu-abu
         VBox whiteCard = new VBox(15);
         whiteCard.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);");
-
+        
         // --- BAGIAN GAMBAR ---
+        StackPane imagePane = new StackPane();
+        imagePane.setPrefSize(720, 200);
+        imagePane.setMaxSize(720, 200);
+        imagePane.setStyle("-fx-background-color: #E2E8F0; -fx-background-radius: 15 15 0 0;");
         ImageView imgEvent = new ImageView();
+        Image img = null;
+        String imgPath = acara.getImagePath(); // Mengambil string "C:\Users\..." dari DB
+
         try {
-            // Sesuaikan rute ini dengan file gambar aslimu nanti
-            Image img = new Image(getClass().getResourceAsStream("/aset/gambarLuminara/img-loka-detail.png"));
-            imgEvent.setImage(img);
+            if (imgPath != null && !imgPath.trim().isEmpty()) {
+                File fileGambar = new File(imgPath);
+                
+                // Cek apakah file benar-benar ada di komputer
+                if (fileGambar.exists()) {
+                    // 🎯 KUNCI: Konversi ke URI agar JavaFX bisa membaca file lokal
+                    img = new Image(fileGambar.toURI().toString(), false);
+                } else {
+                    // Jika file tidak ditemukan di komputer, coba cari di aset internal
+                    InputStream is = getClass().getResourceAsStream(imgPath);
+                    if (is != null) {
+                        img = new Image(is);
+                    }
+                }
+            }
         } catch (Exception e) {
-            System.out.println("⚠️ Gambar acara tidak ditemukan.");
+            System.out.println("⚠️ Error saat memuat gambar: " + e.getMessage());
         }
-        imgEvent.setFitWidth(720);
-        imgEvent.setFitHeight(200); 
+
+        // Fallback: Jika gambar tetap null (gagal semua), pakai gambar default
+        if (img == null || img.isError()) {
+            try {
+                img = new Image(getClass().getResourceAsStream("/aset/gambarLuminara/event1.png"));
+            } catch (Exception e) {
+                System.out.println("⚠️ Gambar default pun tidak ditemukan!");
+            }
+        }
+
+        // Terapkan ke ImageView
+        if (img != null) {
+            imgEvent.setImage(img);
+            imgEvent.setFitWidth(720);
+            imgEvent.setFitHeight(200); 
+            imgEvent.setPreserveRatio(false);
+
+            Rectangle clip = new Rectangle(720, 200);
+            clip.setArcWidth(30);
+            clip.setArcHeight(30);
+            imgEvent.setClip(clip);
+
+            imagePane.getChildren().add(imgEvent);
+        }
         
         // Memotong sudut atas gambar agar melengkung rapi
         Rectangle clip = new Rectangle(720, 200);

@@ -1,5 +1,7 @@
 package gradleproject;
 
+import gradleproject.dao.SorotanDAO;
+import gradleproject.models.Sorotan;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -15,11 +17,16 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
+import java.util.List;
+
 public class SorotanBudaya {
 
     private VBox view;
+    private SorotanDAO sorotanDAO;
 
     public SorotanBudaya() {
+        sorotanDAO = new SorotanDAO(); // Inisialisasi DAO
+
         view = new VBox(25);
         view.setPadding(new Insets(30, 40, 30, 60)); 
         view.setAlignment(Pos.TOP_LEFT);
@@ -55,15 +62,26 @@ public class SorotanBudaya {
         cardsGrid.setVgap(20); 
         cardsGrid.setStyle("-fx-background-color: transparent;");
 
-        String descDummy = "Pementasan busana adat Makassar dan Sulawesi Selatan yang menampilkan Baju Bodo, passapu, kain sutra, dan aksesoris tradisional dalam parade budaya modern.";
-        
-        // Memasukkan 4 data kartu sorotan sesuai gambar mockup
-        cardsGrid.add(createSorotanCard("/aset/gambarLuminara/sorotan1.png", "Makassar Traditional\nCostume Showcase", descDummy), 0, 0);
-        cardsGrid.add(createSorotanCard("/aset/gambarLuminara/sorotan2.png", "Makassar Traditional\nCostume Showcase", descDummy), 1, 0);
-        cardsGrid.add(createSorotanCard("/aset/gambarLuminara/sorotan3.png", "Makassar Traditional\nCostume Showcase", descDummy), 0, 1);
-        cardsGrid.add(createSorotanCard("/aset/gambarLuminara/sorotan4.png", "Makassar Traditional\nCostume Showcase", descDummy), 1, 1);
+        // 🔥 MENGAMBIL DATA DARI DATABASE
+        List<Sorotan> daftarSorotan = sorotanDAO.getAllSorotan();
 
-        // Konstruksi ScrollPane bagian dalam agar judul halaman tetap terkunci diam di atas
+        if (daftarSorotan.isEmpty()) {
+            Label lblKosong = new Label("Belum ada artikel sorotan budaya saat ini.");
+            lblKosong.setStyle("-fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-style: italic;");
+            cardsGrid.add(lblKosong, 0, 0);
+        } else {
+            // Looping data ke dalam Grid 2 Kolom
+            for (int i = 0; i < daftarSorotan.size(); i++) {
+                Sorotan s = daftarSorotan.get(i);
+                
+                int kolom = i % 2; // Sisa bagi 2 (Kolom 0 atau 1)
+                int baris = i / 2; // Hasil bagi 2 (Baris akan bertambah tiap 2 item)
+
+                cardsGrid.add(createSorotanCard(s), kolom, baris);
+            }
+        }
+
+        // Konstruksi ScrollPane bagian dalam
         ScrollPane scrollInner = new ScrollPane(cardsGrid);
         scrollInner.setFitToWidth(true);
         scrollInner.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -77,8 +95,9 @@ public class SorotanBudaya {
         view.getChildren().addAll(welcomeHeader, sectionSorotan);
     }
 
-    // --- METHOD HELPER: Membuat Cetakan Kartu Sorotan Budaya (Hanya Tombol Lihat Detail) ---
-    private VBox createSorotanCard(String imagePath, String title, String description) {
+    // --- METHOD HELPER: Menerima Model 'Sorotan' secara dinamis ---
+    SorotanBudayaView sorotanDetailView; // Simpan referensi untuk akses di tombol detail
+    private VBox createSorotanCard(Sorotan sorotan) {
         VBox card = new VBox(10);
         card.setPrefWidth(360); 
         card.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 15; -fx-padding: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);");
@@ -89,35 +108,52 @@ public class SorotanBudaya {
         imagePane.setStyle("-fx-background-color: #E2E8F0; -fx-background-radius: 12;");
 
         ImageView iv = new ImageView();
+        Image img;
+        String imgPath = sorotan.getImagePath();
+
         try {
-            Image img = new Image(getClass().getResourceAsStream(imagePath));
-            iv.setImage(img);
-            iv.setFitWidth(330);
-            iv.setFitHeight(130);
-            
-            Rectangle clip = new Rectangle(330, 130);
-            clip.setArcWidth(20);
-            clip.setArcHeight(20);
-            iv.setClip(clip);
+            if (imgPath != null && imgPath.startsWith("file:")) {
+                // Gunakan background loading false agar gambar langsung terarsip di UI
+                img = new Image(imgPath, false);
+            } 
+            else if (imgPath != null && getClass().getResourceAsStream(imgPath) != null) {
+                img = new Image(getClass().getResourceAsStream(imgPath));
+            } 
+            else {
+                img = new Image(getClass().getResourceAsStream("/aset/gambarLuminara/sorotan1.png"));
+            }
         } catch (Exception e) {
-            Label lblPlaceholder = new Label("🖼️ Gambar Sorotan");
-            lblPlaceholder.setStyle("-fx-text-fill: #A0A9B5; -fx-font-family: 'Poppins';");
-            imagePane.getChildren().add(lblPlaceholder);
+            System.out.println("Error load image: " + e.getMessage());
+            img = new Image(getClass().getResourceAsStream("/aset/gambarLuminara/sorotan1.png"));
         }
-        imagePane.getChildren().add(0, iv);
+
+        iv.setImage(img);
+        iv.setFitWidth(330);
+        iv.setFitHeight(130); // 🎯 KUNCI 1: WAJIB SET TINGGI AGAR GAMBAR TIDAK MENCIL
+        iv.setPreserveRatio(false);
+
+        // Beri efek melengkung pada sudut gambar
+        Rectangle clip = new Rectangle(330, 130);
+        clip.setArcWidth(20);
+        clip.setArcHeight(20);
+        iv.setClip(clip);
+
+        // 🎯 KUNCI 2: MASUKKAN IMAGEVIEW KE DALAM STACKPANE!
+        imagePane.getChildren().add(iv); 
 
         // Judul Artikel Budaya
-        Label lblTitle = new Label(title);
+        Label lblTitle = new Label(sorotan.getJudul());
         lblTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #0A3B5C;");
         lblTitle.setWrapText(true);
 
         // Deskripsi Narasi
-        Label lblDesc = new Label(description);
+        String deskripsi = (sorotan.getDeskripsiSingkat() != null) ? sorotan.getDeskripsiSingkat() : "-";
+        Label lblDesc = new Label(deskripsi);
         lblDesc.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 10px; -fx-text-fill: #5A7184; -fx-line-spacing: 1.5;");
         lblDesc.setWrapText(true);
         lblDesc.setMaxHeight(45);
 
-        // Baris Tombol Aksi Bawah (Hanya Ada Tombol Lihat Detail pushed ke kanan)
+        // Baris Tombol Aksi Bawah
         HBox bottomRow = new HBox();
         bottomRow.setAlignment(Pos.CENTER_RIGHT);
         bottomRow.setPadding(new Insets(5, 0, 0, 0));
@@ -133,11 +169,17 @@ public class SorotanBudaya {
         });
 
         bottomRow.getChildren().add(btnDetail);
+        
+        // 🎯 KUNCI 3: Susun komponen ke dalam struktur VBox utama kartu
         card.getChildren().addAll(imagePane, lblTitle, lblDesc, bottomRow);
         return card;
     }
-
+        
+    
     public Parent getView() {
         return view;
     }
+    
 }
+
+

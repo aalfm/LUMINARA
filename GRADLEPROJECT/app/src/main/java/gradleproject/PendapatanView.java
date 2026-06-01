@@ -1,8 +1,15 @@
 package gradleproject;
 
+import gradleproject.dao.EventDAO;
+import gradleproject.dao.TicketDAO;
+import gradleproject.models.Event;
+import gradleproject.models.Ticket;
+
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.List;
+import java.util.ArrayList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -16,76 +23,154 @@ public class PendapatanView extends StackPane {
 
     public ManajemenAcaraView mainDashboard;
     
-    // Simpan kedua panel secara permanen agar tidak dibuat ulang
+    // Panel Layout Utama
     private VBox overviewContent;
     private VBox detailContent;
+    private VBox listRowsContainer; 
 
     // Node Detail Konten Pendapatan Dinamis
     private Label lblNamaAcaraHeader;
     private Label lblStatusBadge;
     private Label lblSubDetailAcara;
     private VBox tabelPembeliRowsContainer;
+    
+    // Label Dinamis untuk Kartu Ringkasan
+    private Label lblTotalTiketVal;
+    private Label lblTotalPendapatanVal;
 
     public PendapatanView(ManajemenAcaraView mainDashboard) {
         this.mainDashboard = mainDashboard;
         
-        // Inisialisasi struktur layout sekali saja di awal
         inisialisasiOverviewLayout();
         inisialisasiDetailLayout();
         
-        // Tampilan default
         tampilkanOverview();
     }
 
     public void tampilkanOverview() {
         this.getChildren().clear();
+        loadDataPendapatan(); // Tarik ulang data ter-update
         this.getChildren().add(overviewContent);
     }
 
-    public void tampilkanDetail(ManajemenAcaraView.AcaraMock data, String totalPendapatan, String tiketTerjual) {
+    // 🎯 FIX: Sekarang Menerima Objek Event Langsung (Bukan Data Tiruan)
+    public void tampilkanDetail(Event acara) {
         this.getChildren().clear();
         this.getChildren().add(detailContent);
         
-        // UPDATE KONTEN TEKS DINAMIS SECARA AMAN
-        lblNamaAcaraHeader.setText(data.nama);
-        lblSubDetailAcara.setText(data.tanggal + "   •   " + data.waktu + "   •   " + data.lokasi);
+        lblNamaAcaraHeader.setText(acara.getTitle());
+        String tanggal = acara.getEventDate() != null ? acara.getEventDate().toString() : "-";
+        String lokasi = acara.getLocation() != null ? acara.getLocation() : "-";
+        lblSubDetailAcara.setText(tanggal + "   •   " + lokasi);
         
-        // Kosongkan baris tabel pembeli sebelum diisi data acara yang baru
+        String statusAcara = acara.getStatus() != null ? acara.getStatus() : "Draft";
+        lblStatusBadge.setText(statusAcara);
+        
         tabelPembeliRowsContainer.getChildren().clear();
         
-        // Ekstraksi Angka Tiket Terjual yang Aman
-        int jumlahPembeli = 0;
-        try {
-            String angkaMentah = tiketTerjual.split("/")[0].replaceAll("[^0-9]", "").trim();
-            if (!angkaMentah.isEmpty()) {
-                jumlahPembeli = Integer.parseInt(angkaMentah);
+        // 🎯 FIX: Ambil daftar pembeli asli dari database
+        TicketDAO ticketDAO = new TicketDAO();
+        List<Ticket> daftarPeserta = ticketDAO.getTicketsByEventId(acara.getId());
+        
+        if (daftarPeserta == null) daftarPeserta = new ArrayList<>();
+
+        for (Ticket t : daftarPeserta) {
+            String nama = t.getUserName() != null ? t.getUserName() : "Tanpa Nama";
+            
+            // Buat inisial otomatis dari nama asli
+            String inisial = "??";
+            String[] kata = nama.trim().split("\\s+");
+            if (kata.length >= 2) {
+                inisial = (kata[0].substring(0, 1) + kata[1].substring(0, 1)).toUpperCase();
+            } else if (kata[0].length() > 0) {
+                inisial = (kata[0].length() > 1) ? kata[0].substring(0, 2).toUpperCase() : kata[0].toUpperCase();
             }
-        } catch (Exception e) {
-            jumlahPembeli = 0; 
-        }
-        
-        if (jumlahPembeli <= 0) {
-            jumlahPembeli = 3; 
-        }
-        
-        String[] daftarNamaTiruan = {"Alifah Mahrani", "Zahwa", "Syarief Rahmat", "Fa'iq Musharraf"};
-        String[] daftarInisial = {"A", "Z", "SR", "FM"};
 
-        for (int i = 0; i < jumlahPembeli; i++) {
-            String nama = daftarNamaTiruan[i % daftarNamaTiruan.length] + (i >= daftarNamaTiruan.length ? " " + (i/4 + 1) : "");
-            String inisial = daftarInisial[i % daftarInisial.length];
-            
-            String statusBayar = (i % 3 == 2) ? "Belum Lunas" : "Lunas";
-            String warnaStatus = (i % 3 == 2) ? "#FF9412" : "#60E514";
-            
-            String telp = "081234567" + String.format("%03d", i);
-            String email = nama.toLowerCase().replace(" ", "").replace(".", "") + "@gmail.com";
+            // 🎯 FIX: Cek status pembayaran dari database
+            String statusDB = t.getPaymentStatus();
+            String statusBayar = "Paid".equalsIgnoreCase(statusDB) ? "Lunas" : "Belum Lunas";
+            String warnaStatus = "Paid".equalsIgnoreCase(statusDB) ? "#60E514" : "#FF9412"; // Hijau/Orange
 
-            // PERBAIKAN: Parameter totalPendapatan tidak dikirimkan lagi ke baris tabel rincian
+            String telp = t.getUserPhone() != null ? t.getUserPhone() : "-";
+            String email = t.getUserEmail() != null ? t.getUserEmail() : "-";
+
             tabelPembeliRowsContainer.getChildren().add(
                 buatBarisPembeli(inisial, nama, telp, email, statusBayar, warnaStatus)
             );
         }
+    }
+
+    // =========================================================
+    // 🎯 LOGIKA PENGAMBILAN DATA (FILTER EVENT PAID & HITUNG UANG)
+    // =========================================================
+    private void loadDataPendapatan() {
+        listRowsContainer.getChildren().clear();
+        EventDAO eventDAO = new EventDAO();
+        TicketDAO ticketDAO = new TicketDAO();
+        
+        int organizerId = 0;
+        if (mainDashboard != null && mainDashboard.getCurrentOrganizer() != null) {
+            organizerId = mainDashboard.getCurrentOrganizer().getId();
+        }
+
+        List<Event> allEvents = eventDAO.findByOrganizerId(organizerId);
+
+        int grandTotalTiket = 0;
+        double grandTotalPendapatan = 0;
+
+        if (allEvents != null) {
+            for (Event e : allEvents) {
+                // 1. FILTER: HANYA TAMPILKAN EVENT BERBAYAR SAJA
+                if ("Paid".equalsIgnoreCase(e.getTicketType())) {
+                    
+                    // 2. HITUNG PENDAPATAN DARI TIKET YANG LUNAS
+                    List<Ticket> tiketEventIni = ticketDAO.getTicketsByEventId(e.getId());
+                    int tiketTerjualLunas = 0;
+                    
+                    if(tiketEventIni != null) {
+                        for(Ticket t : tiketEventIni) {
+                            if("Paid".equalsIgnoreCase(t.getPaymentStatus())) {
+                                tiketTerjualLunas++; // Hanya hitung yang sudah bayar
+                            }
+                        }
+                    }
+
+                    double hargaRata2 = e.getPrice();
+                    double totalKotor = hargaRata2 * tiketTerjualLunas;
+                    double pajak = totalKotor * 0.10; // Potongan pajak 10% untuk Admin
+                    double totalBersih = totalKotor - pajak; // Sisa uang untuk Penyelenggara
+
+                    grandTotalTiket += tiketTerjualLunas;
+                    grandTotalPendapatan += totalBersih;
+
+                    // 3. PEMETAAN STATUS WARNA UI
+                    String statusDB = e.getStatus();
+                    String warnaStatus = "#E67E22"; // Kuning untuk Draft/Pending
+                    if ("Active".equalsIgnoreCase(statusDB) || "Approved".equalsIgnoreCase(statusDB)) warnaStatus = "#2B8A3E"; // Hijau
+                    else if ("Past".equalsIgnoreCase(statusDB) || "Rejected".equalsIgnoreCase(statusDB) || "Selesai".equalsIgnoreCase(statusDB)) warnaStatus = "#7F8C8D"; // Abu-abu
+
+                    // 4. MASUKKAN KE DALAM TABEL
+                    listRowsContainer.getChildren().add(buatBarisOverviewKeuangan(
+                        e,
+                        String.valueOf(tiketTerjualLunas),
+                        formatRupiah(hargaRata2),
+                        formatRupiah(pajak),
+                        formatRupiah(totalBersih),
+                        statusDB != null ? statusDB : "Draft",
+                        warnaStatus
+                    ));
+                }
+            }
+        }
+        
+        // 5. UPDATE KARTU RINGKASAN DI ATAS TABEL
+        lblTotalTiketVal.setText(String.valueOf(grandTotalTiket));
+        lblTotalPendapatanVal.setText(formatRupiah(grandTotalPendapatan));
+    }
+
+    private String formatRupiah(double nominal) {
+        NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(new Locale ("id", "ID"));
+        return formatRupiah.format(nominal);
     }
 
     // =========================================================
@@ -95,8 +180,6 @@ public class PendapatanView extends StackPane {
         overviewContent = new VBox(25);
         overviewContent.setPadding(new Insets(40, 40, 20, 40));
 
-        
-        // 1. Header Greetings
         VBox greetingBox = new VBox(5);
         Label greeting = new Label("Hai, tim.");
         greeting.getStyleClass().add("heading");
@@ -104,9 +187,12 @@ public class PendapatanView extends StackPane {
         subGreeting.getStyleClass().add("subheading");
         greetingBox.getChildren().addAll(greeting, subGreeting);
 
+        lblTotalTiketVal = new Label("0");
+        lblTotalPendapatanVal = new Label("Rp 0");
+
         HBox kartuContainer = new HBox(20);
-        HBox kartuTiket = buatKartuRingkasan("TIKET TERJUAL", "1.250", "Total tiket terjual");
-        HBox kartuUang = buatKartuRingkasan("TOTAL PENDAPATAN", "37jt", "Total pendapatan kotor");
+        HBox kartuTiket = buatKartuRingkasan("TIKET TERJUAL", lblTotalTiketVal, "Total tiket terjual (Lunas)");
+        HBox kartuUang = buatKartuRingkasan("TOTAL PENDAPATAN", lblTotalPendapatanVal, "Total pendapatan bersih (-10% Admin)");
         HBox.setHgrow(kartuTiket, Priority.ALWAYS);
         HBox.setHgrow(kartuUang, Priority.ALWAYS);
         kartuContainer.getChildren().addAll(kartuTiket, kartuUang);
@@ -118,7 +204,7 @@ public class PendapatanView extends StackPane {
 
         Label h1 = new Label("Nama Acara");
         Label h2 = new Label("Tiket Terjual");
-        Label h3 = new Label("Harga Rata-rata (Rp)");
+        Label h3 = new Label("Harga Rata-rata");
         Label h4 = new Label("Pajak (10%)");
         Label h5 = new Label("Total Pendapatan");
         Label h6 = new Label("Status");
@@ -130,7 +216,7 @@ public class PendapatanView extends StackPane {
         tableHeader.add(h1, 0, 0); tableHeader.add(h2, 1, 0); tableHeader.add(h3, 2, 0);
         tableHeader.add(h4, 3, 0); tableHeader.add(h5, 4, 0); tableHeader.add(h6, 5, 0);
 
-        VBox listRowsContainer = new VBox(12);
+        listRowsContainer = new VBox(12);
         listRowsContainer.setPadding(new Insets(10, 0, 10, 0));
 
         ScrollPane scrollPane = new ScrollPane(listRowsContainer);
@@ -138,35 +224,24 @@ public class PendapatanView extends StackPane {
         scrollPane.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
-        // Data Mock Utama
-        List<ManajemenAcaraView.AcaraMock> daftarAcara = new ArrayList<>();
-        daftarAcara.add(new ManajemenAcaraView.AcaraMock("Kecapi & Sulawesi Traditional Ensemble", "2026, Mei 20-22", "19:00:00 - 22:00:00", "Trans Studio Mall Makassar", "11", "100"));
-        daftarAcara.add(new ManajemenAcaraView.AcaraMock("Makassar Islamic & Tradisi Festival", "2026, Mei 19-21", "10:00:00 - 14:00:00", "Trans Studio Mall Makassar", "50", "50"));
-        daftarAcara.add(new ManajemenAcaraView.AcaraMock("Gandrangan Bulo Rhythm Performance", "2026, Mei 20-21", "16:00:00 - 20:00:00", "Kawasan Center Point of Indonesia (CPI)", "43", "50"));
-        daftarAcara.add(new ManajemenAcaraView.AcaraMock("Pelatihan Berbicara Bahasa Makassar", "2026, Mei 20", "09:00:00 - 11:00:00", "Benteng Rotterdam", "15", "20"));
-
-        listRowsContainer.getChildren().add(buatBarisOverviewKeuangan(daftarAcara.get(0), "11", "20.000", "200.000", "1.800.000", "Selesai", "#2B8A3E"));
-        listRowsContainer.getChildren().add(buatBarisOverviewKeuangan(daftarAcara.get(1), "50", "25.000", "125.000", "1.125.000", "Selesai", "#2B8A3E"));
-        listRowsContainer.getChildren().add(buatBarisOverviewKeuangan(daftarAcara.get(2), "43", "50.000", "500.000", "4.500.000", "Pending", "#E67E22"));
-        listRowsContainer.getChildren().add(buatBarisOverviewKeuangan(daftarAcara.get(3), "15", "30.000", "45.000", "445.000", "Selesai", "#2B8A3E"));
-
         overviewContent.getChildren().addAll(greetingBox, kartuContainer, tableHeader, scrollPane);
     }
 
-    private GridPane buatBarisOverviewKeuangan(ManajemenAcaraView.AcaraMock data, String terjual, String rata2, String pajak, String total, String status, String warnaStatus) {
+    private GridPane buatBarisOverviewKeuangan(Event acara, String terjual, String rata2, String pajak, String total, String status, String warnaStatus) {
         GridPane row = new GridPane();
         row.setPadding(new Insets(15, 20, 15, 20));
         row.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 12; -fx-border-color: #DDE5EC; -fx-border-radius: 12; -fx-border-width: 1;");
         setupTableConstraints(row);
 
         VBox namaBox = new VBox(8);
-        Label lblNama = new Label(data.nama);
+        Label lblNama = new Label(acara.getTitle() != null ? acara.getTitle() : "Tanpa Judul");
         lblNama.setWrapText(true);
         lblNama.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #002B5B; -fx-font-family: 'Poppins';");
         
         Button btnRincian = new Button("Rincian");
         btnRincian.setStyle("-fx-background-color: #FF922B; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 6; -fx-padding: 4 12 4 12; -fx-cursor: hand; -fx-font-family: 'Poppins';");
-        btnRincian.setOnAction(e -> tampilkanDetail(data, total, terjual));
+        // 🎯 FIX: Mem-passing objek 'acara' langsung ke halaman detail
+        btnRincian.setOnAction(e -> tampilkanDetail(acara));
         
         namaBox.getChildren().addAll(lblNama, btnRincian);
 
@@ -219,7 +294,7 @@ public class PendapatanView extends StackPane {
         lblNamaAcaraHeader = new Label();
         lblNamaAcaraHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #002B5B; -fx-font-family: 'Poppins';");
         
-        lblStatusBadge = new Label("Selesai");
+        lblStatusBadge = new Label("Status");
         lblStatusBadge.setStyle("-fx-background-color: #E2F0D9; -fx-text-fill: #385723; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 3 10 3 10; -fx-background-radius: 8; -fx-font-family: 'Poppins';");
         topRowBanner.getChildren().addAll(lblNamaAcaraHeader, lblStatusBadge);
 
@@ -244,7 +319,6 @@ public class PendapatanView extends StackPane {
         Label dh1 = new Label("Nama"); dh1.setStyle(styleDH);
         Label dh2 = new Label("Kontak"); dh2.setStyle(styleDH);
         Label dh3 = new Label("Email"); dh3.setStyle(styleDH);
-        // PERBAIKAN: Menghapus total pendapatan dari header, langsung melompat ke Status Pembayaran
         Label dh4 = new Label("Status Pembayaran"); dh4.setStyle(styleDH);
 
         detailTableHeader.add(dh1, 0, 0); 
@@ -253,9 +327,7 @@ public class PendapatanView extends StackPane {
         detailTableHeader.add(dh4, 3, 0);
         detailContent.getChildren().add(detailTableHeader);
 
-        // Sediakan penampung baris pembeli kosong di sini
         tabelPembeliRowsContainer = new VBox(10);
-
         ScrollPane scrollTabel = new ScrollPane(tabelPembeliRowsContainer);
         scrollTabel.setFitToWidth(true);
         scrollTabel.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
@@ -264,7 +336,6 @@ public class PendapatanView extends StackPane {
         detailContent.getChildren().add(scrollTabel);
     }
 
-    // PERBAIKAN: Parameter 'total' dihapus sepenuhnya dari penulisan baris
     private GridPane buatBarisPembeli(String inisial, String nama, String telp, String email, String status, String warnaStatus) {
         GridPane row = new GridPane();
         row.setPadding(new Insets(12, 20, 12, 20));
@@ -314,12 +385,12 @@ public class PendapatanView extends StackPane {
         row.add(profilBox, 0, 0); 
         row.add(telpBox, 1, 0); 
         row.add(emailBox, 2, 0);
-        row.add(statusBox, 3, 0); // Menempati kolom indeks ke-3 langsung setelah Email
+        row.add(statusBox, 3, 0); 
 
         return row;
     }
 
-    private HBox buatKartuRingkasan(String title, String value, String desc) {
+    private HBox buatKartuRingkasan(String title, Label lblValue, String desc) {
         HBox kartu = new HBox(15);
         kartu.setPadding(new Insets(15, 20, 15, 20));
         kartu.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 12; -fx-border-color: #E6ECF0; -fx-border-width: 1;");
@@ -328,8 +399,9 @@ public class PendapatanView extends StackPane {
         VBox infoBox = new VBox(2);
         Label lblTitle = new Label(title);
         lblTitle.setStyle("-fx-font-size: 11px; -fx-text-fill: #70889F; -fx-font-weight: bold; -fx-font-family: 'Poppins';");
-        Label lblValue = new Label(value);
+        
         lblValue.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #002B5B; -fx-font-family: 'Poppins';");
+        
         Label lblDesc = new Label(desc);
         lblDesc.setStyle("-fx-font-size: 11px; -fx-text-fill: #9CB1C6; -fx-font-family: 'Poppins';");
         
@@ -339,8 +411,7 @@ public class PendapatanView extends StackPane {
     }
 
     private ImageView dapatkanIconView(String path, double ukuran) {
-        try {
-            InputStream stream = getClass().getResourceAsStream(path);
+        try (InputStream stream = getClass().getResourceAsStream(path)) {
             if (stream != null) {
                 ImageView iv = new ImageView(new Image(stream));
                 iv.setFitWidth(ukuran); iv.setFitHeight(ukuran);
@@ -363,12 +434,11 @@ public class PendapatanView extends StackPane {
         grid.getColumnConstraints().setAll(c1, c2, c3, c4, c5, c6);
     }
 
-    // PERBAIKAN: Pembagian 4 kolom dengan proporsi lebar baru agar data pembeli terentang rapi dan seimbang
     private void setupDetailTableConstraints(GridPane grid) {
-        ColumnConstraints c1 = new ColumnConstraints(); c1.setPercentWidth(32); // Nama Pembeli
-        ColumnConstraints c2 = new ColumnConstraints(); c2.setPercentWidth(18); // Kontak / No. Telp
-        ColumnConstraints c3 = new ColumnConstraints(); c3.setPercentWidth(30); // Email
-        ColumnConstraints c4 = new ColumnConstraints(); c4.setPercentWidth(20); // Status Pembayaran
+        ColumnConstraints c1 = new ColumnConstraints(); c1.setPercentWidth(32); 
+        ColumnConstraints c2 = new ColumnConstraints(); c2.setPercentWidth(18); 
+        ColumnConstraints c3 = new ColumnConstraints(); c3.setPercentWidth(30); 
+        ColumnConstraints c4 = new ColumnConstraints(); c4.setPercentWidth(20); 
         grid.getColumnConstraints().setAll(c1, c2, c3, c4);
     }
 }

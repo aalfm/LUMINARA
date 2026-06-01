@@ -1,38 +1,24 @@
 package gradleproject.models;
 
-import java.sql.Timestamp;
+public class RefundRequest {
+    private int id;
+    private String eventName;
+    private String userName;
+    private double total;
+    private String status;
 
-public class RefundRequest extends BaseEntity {
-    private int ticketId;
-    private String reason;
-    private String status; // 'Pending', 'Approved', 'Rejected'
-    private Timestamp requestedAt;
-    private Timestamp resolvedAt;
-
+    // Tambahkan konstruktor kosong
     public RefundRequest() {}
 
-    public RefundRequest(int id, int ticketId, String reason, String status, Timestamp requestedAt, Timestamp resolvedAt) {
-        super(id);
-        this.ticketId = ticketId;
-        this.reason = reason;
-        this.status = status;
-        this.requestedAt = requestedAt;
-        this.resolvedAt = resolvedAt;
-    }
-
-    // Getters and Setters
-    public int getTicketId() { return ticketId; }
-    public void setTicketId(int ticketId) { this.ticketId = ticketId; }
-
-    public String getReason() { return reason; }
-    public void setReason(String reason) { this.reason = reason; }
-
+    // Tambahkan semua Getter & Setter
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public String getEventName() { return eventName; }
+    public void setEventName(String eventName) { this.eventName = eventName; }
+    public String getUserName() { return userName; }
+    public void setUserName(String userName) { this.userName = userName; }
+    public double getTotal() { return total; }
+    public void setTotal(double total) { this.total = total; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-
-    public Timestamp getRequestedAt() { return requestedAt; }
-    public void setRequestedAt(Timestamp requestedAt) { this.requestedAt = requestedAt; }
-
-    public Timestamp getResolvedAt() { return resolvedAt; }
-    public void setResolvedAt(Timestamp resolvedAt) { this.resolvedAt = resolvedAt; }
 }

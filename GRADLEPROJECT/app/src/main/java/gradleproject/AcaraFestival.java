@@ -62,14 +62,31 @@ public class AcaraFestival {
 
         tableHeader.getChildren().addAll(colNama, colDetail, colStatus);
 
-        // ISI TABEL
+        // ISI TABEL (Dinamis dari Database - Festival)
         VBox tableBody = new VBox(15);
         tableBody.setPadding(new Insets(20, 25, 20, 25));
         tableBody.setStyle("-fx-background-color: transparent;");
 
-        // Data Dummy (Diulang 4 kali agar tabel bisa di-scroll)
-        for (int i = 0; i < 4; i++) {
-            tableBody.getChildren().add(createRow("Makassar Traditional Costume Showcase", "Trans Studio Mall Makassar"));
+        // 🎯 KODE DINAMIS: Tarik data Festival yang statusnya "Draft"
+        gradleproject.dao.EventDAO eventDAO = new gradleproject.dao.EventDAO();
+        java.util.List<gradleproject.models.Event> daftarFestival = eventDAO.findByCategory("Festival");
+
+        boolean adaDataDraft = false;
+
+        for (gradleproject.models.Event acara : daftarFestival) {
+            // Hanya tampilkan acara yang statusnya masih Draft (menunggu disetujui admin)
+            if (acara.getStatus().equalsIgnoreCase("Draft")) {
+                // Panggil method createRow dengan mengirim objek acara yang utuh
+                tableBody.getChildren().add(createRow(acara));
+                adaDataDraft = true;
+            }
+        }
+
+        // Tampilkan pesan teks jika tidak ada acara yang perlu di-approve
+        if (!adaDataDraft) {
+            Label lblKosong = new Label("Tidak ada acara baru yang menunggu persetujuan.");
+            lblKosong.setStyle("-fx-font-family: 'Poppins'; -fx-text-fill: #A0A9B5; -fx-font-style: italic;");
+            tableBody.getChildren().add(lblKosong);
         }
 
         // =====================================================================
@@ -89,7 +106,8 @@ public class AcaraFestival {
     }
 
     // Method Helper untuk membuat baris tabel dengan interaksi ubah status
-    private HBox createRow(String title, String location) {
+    // 🎯 Parameter diubah agar menerima objek Event langsung
+    private HBox createRow(gradleproject.models.Event acara) {
         HBox row = new HBox();
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(10, 0, 10, 0));
@@ -98,10 +116,10 @@ public class AcaraFestival {
         VBox nameBox = new VBox(3);
         nameBox.setPrefWidth(400); 
         
-        Label lblTitle = new Label(title);
+        Label lblTitle = new Label(acara.getTitle());
         lblTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-text-fill: #1A3C5A; -fx-font-size: 13px;");
         
-        Label lblLocation = new Label(location);
+        Label lblLocation = new Label(acara.getCategory()); // Asumsi metode getLocation() sudah ditambahkan di Model
         lblLocation.setStyle("-fx-font-family: 'Poppins'; -fx-text-fill: #5A7184; -fx-font-size: 11px;");
         
         nameBox.getChildren().addAll(lblTitle, lblLocation);
@@ -112,27 +130,18 @@ public class AcaraFestival {
         detailBox.setAlignment(Pos.CENTER);
 
         Button btnLihat = new Button("Lihat");
-        btnLihat.setStyle(
-            "-fx-background-color: #FF9800; " +
-            "-fx-text-fill: white; " +
-            "-fx-background-radius: 20; " +
-            "-fx-padding: 5 15; " +
-            "-fx-font-family: 'Poppins'; " +
-            "-fx-font-size: 12px; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(255,152,0,0.6), 8, 0, 0, 3);"
-        );
+        btnLihat.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 5 15; -fx-font-family: 'Poppins'; -fx-font-size: 12px; -fx-effect: dropshadow(three-pass-box, rgba(255,152,0,0.6), 8, 0, 0, 3);");
         btnLihat.setCursor(javafx.scene.Cursor.HAND);
 
         btnLihat.setOnAction(event -> {
-            if (Dashboard.getInstance() != null) {
-                Dashboard.getInstance().pindahKeDetailAcaraFestival();
+            if (DashboardAdmin.getInstance() != null) {
+                DashboardAdmin.getInstance().pindahKeDetailAcaraFestival(acara); 
             }
         });
-        
         detailBox.getChildren().add(btnLihat);
 
         // =======================================================================
-        // KOLOM 3: LOGIKA PERUBAHAN STATUS (StackPane)
+        // KOLOM 3: LOGIKA PERUBAHAN STATUS (StackPane + Database Update)
         // =======================================================================
         StackPane statusContainer = new StackPane();
         statusContainer.setPrefWidth(150);
@@ -142,34 +151,18 @@ public class AcaraFestival {
         actionButtonsBox.setAlignment(Pos.CENTER);
         
         Button btnTerima = new Button("Terima");
-        btnTerima.setStyle(
-            "-fx-background-color: #FF9800; " +
-            "-fx-text-fill: white; " +
-            "-fx-background-radius: 20; " +
-            "-fx-padding: 5 15; " +
-            "-fx-font-family: 'Poppins'; " +
-            "-fx-font-size: 12px; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(255,152,0,0.6), 8, 0, 0, 3);"
-        );
+        btnTerima.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 5 15; -fx-font-family: 'Poppins'; -fx-font-size: 12px; -fx-effect: dropshadow(three-pass-box, rgba(255,152,0,0.6), 8, 0, 0, 3);");
         btnTerima.setCursor(javafx.scene.Cursor.HAND);
         btnTerima.setPrefWidth(85); 
         
         Button btnTolak = new Button("Tolak");
-        btnTolak.setStyle(
-            "-fx-background-color: #FFFFFF; " +
-            "-fx-text-fill: #1A3C5A; " + 
-            "-fx-background-radius: 20; " +
-            "-fx-padding: 5 15; " +
-            "-fx-font-family: 'Poppins'; " +
-            "-fx-font-size: 12px; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 8, 0, 0, 3);"
-        );
+        btnTolak.setStyle("-fx-background-color: #FFFFFF; -fx-text-fill: #1A3C5A; -fx-background-radius: 20; -fx-padding: 5 15; -fx-font-family: 'Poppins'; -fx-font-size: 12px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 8, 0, 0, 3);");
         btnTolak.setCursor(javafx.scene.Cursor.HAND);
         btnTolak.setPrefWidth(85); 
 
         actionButtonsBox.getChildren().addAll(btnTerima, btnTolak);
 
-        // WADAH B: Berisi Hasil Status (Titik warna + Teks) -> Awalnya disembunyikan
+        // WADAH B: Berisi Hasil Status
         HBox resultStatusBox = new HBox(8);
         resultStatusBox.setAlignment(Pos.CENTER);
         
@@ -178,45 +171,51 @@ public class AcaraFestival {
         lblStatusText.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 12px; -fx-text-fill: #1A3C5A;");
         
         resultStatusBox.getChildren().addAll(dotIndicator, lblStatusText);
-        resultStatusBox.setVisible(false);  // Sembunyikan visualnya
-        resultStatusBox.setManaged(false); // Jangan ambil ruang tata letak saat disembunyikan
+        resultStatusBox.setVisible(false);  
+        resultStatusBox.setManaged(false); 
 
-        // LOGIKA KLIK TOMBOL TERIMA
+        // 🎯 LOGIKA KLIK TOMBOL TERIMA (Database Update)
         btnTerima.setOnAction(e -> {
-            // Hilangkan tombol
-            actionButtonsBox.setVisible(false);
-            actionButtonsBox.setManaged(false);
+            gradleproject.dao.EventDAO eventDAO = new gradleproject.dao.EventDAO();
             
-            // Ubah gaya kotak status (Titik hijau, teks Diterima)
-            dotIndicator.setStyle("-fx-fill: #4CAF50;"); 
-            lblStatusText.setText("Diterima");
+            // Perbarui status database menjadi Active!
+            boolean suksesUpdate = eventDAO.updateStatus(acara.getId(), "Active");
             
-            // Tampilkan kotak status
-            resultStatusBox.setVisible(true);
-            resultStatusBox.setManaged(true);
+            if (suksesUpdate) {
+                actionButtonsBox.setVisible(false);
+                actionButtonsBox.setManaged(false);
+                
+                dotIndicator.setStyle("-fx-fill: #4CAF50;"); 
+                lblStatusText.setText("Diterima");
+                
+                resultStatusBox.setVisible(true);
+                resultStatusBox.setManaged(true);
+            }
         });
 
-        // LOGIKA KLIK TOMBOL TOLAK
+        // 🎯 LOGIKA KLIK TOMBOL TOLAK (Database Update)
         btnTolak.setOnAction(e -> {
-            // Hilangkan tombol
-            actionButtonsBox.setVisible(false);
-            actionButtonsBox.setManaged(false);
+            gradleproject.dao.EventDAO eventDAO = new gradleproject.dao.EventDAO();
             
-            // Ubah gaya kotak status (Titik oranye, teks Ditolak)
-            dotIndicator.setStyle("-fx-fill: #FF9800;"); 
-            lblStatusText.setText("Ditolak");
+            // Perbarui status database menjadi Past atau Rejected (Sesuaikan aturan basis data)
+            boolean suksesUpdate = eventDAO.updateStatus(acara.getId(), "Rejected"); 
             
-            // Tampilkan kotak status
-            resultStatusBox.setVisible(true);
-            resultStatusBox.setManaged(true);
+            if (suksesUpdate) {
+                actionButtonsBox.setVisible(false);
+                actionButtonsBox.setManaged(false);
+                
+                dotIndicator.setStyle("-fx-fill: #FF9800;"); 
+                lblStatusText.setText("Ditolak");
+                
+                resultStatusBox.setVisible(true);
+                resultStatusBox.setManaged(true);
+            }
         });
 
-        // Masukkan Wadah A dan Wadah B ke dalam StackPane
         statusContainer.getChildren().addAll(actionButtonsBox, resultStatusBox);
         // =======================================================================
 
-        row.getChildren().addAll(nameBox,
-            detailBox, statusContainer);
+        row.getChildren().addAll(nameBox, detailBox, statusContainer);
         return row;
     }
 

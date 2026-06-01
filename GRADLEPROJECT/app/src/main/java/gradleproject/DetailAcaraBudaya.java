@@ -10,12 +10,14 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import java.text.SimpleDateFormat; // Untuk format tanggal
 
 public class DetailAcaraBudaya {
 
     private VBox view;
 
-    public DetailAcaraBudaya() {
+    // 🎯 PERUBAHAN: Konstruktor sekarang meminta objek Event (acara)
+    public DetailAcaraBudaya(gradleproject.models.Event acara) {
         view = new VBox(20);
         view.setPadding(new Insets(20, 20, 20, 80)); 
         view.setAlignment(Pos.TOP_LEFT);
@@ -33,8 +35,8 @@ public class DetailAcaraBudaya {
         contentContainer.setMaxWidth(770);
         contentContainer.setPadding(new Insets(10, 0, 0, 0));
 
-        // Tab Oranye di atas
-        Label lblTab = new Label("Budaya");
+        // Tab Oranye di atas (Ambil dari Kategori Event)
+        Label lblTab = new Label(acara.getCategory());
         lblTab.setStyle("-fx-background-color: #FFC074; -fx-text-fill: #1A3C5A; -fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 8 40; -fx-background-radius: 15 15 0 0;");
 
         // Bingkai Abu-abu tebal
@@ -50,16 +52,43 @@ public class DetailAcaraBudaya {
         // --- BAGIAN GAMBAR ---
         ImageView imgEvent = new ImageView();
         try {
-            // Sesuaikan rute ini dengan file gambar aslimu nanti
-            Image img = new Image(getClass().getResourceAsStream("/aset/gambarLuminara/img-budaya-detail.png"));
-            imgEvent.setImage(img);
+            String pathGambar = acara.getImagePath(); 
+            Image img = null;
+            
+            // 1. Cek apakah ada teks lokasi gambar yang tersimpan
+            if (pathGambar != null && !pathGambar.trim().isEmpty()) {
+                // 🎯 PERBAIKAN: Gunakan java.io.File agar rute Windows terbaca dengan aman
+                java.io.File fileGambar = new java.io.File(pathGambar);
+                
+                // Pastikan file gambarnya memang masih ada di laptop/komputer
+                if (fileGambar.exists()) {
+                    img = new Image(fileGambar.toURI().toString());
+                } else {
+                    System.out.println("⚠️ File gambar tidak ditemukan di komputer: " + pathGambar);
+                }
+            }
+            
+            // 2. Jika gambar gagal dimuat (atau organizer tidak upload)
+            if (img == null) {
+                // Kita gunakan icon yang sudah PASTI ADA di folder Anda (berdasarkan kode TambahAcaraView sebelumnya)
+                java.io.InputStream defaultImgStream = getClass().getResourceAsStream("/aset/iconLuminara/icon-gambar.png");
+                if (defaultImgStream != null) {
+                    img = new Image(defaultImgStream);
+                }
+            }
+            
+            // 3. Pasang gambar ke layar
+            if (img != null) {
+                imgEvent.setImage(img);
+            }
+            
         } catch (Exception e) {
-            System.out.println("⚠️ Gambar acara budaya tidak ditemukan.");
+            System.out.println("⚠️ Error sistem saat memuat gambar: " + e.getMessage());
         }
+        
         imgEvent.setFitWidth(720);
         imgEvent.setFitHeight(200); 
         
-        // Memotong sudut atas gambar agar melengkung rapi
         Rectangle clip = new Rectangle(720, 200);
         clip.setArcWidth(15);
         clip.setArcHeight(15);
@@ -69,10 +98,11 @@ public class DetailAcaraBudaya {
         VBox textInfoBox = new VBox(15);
         textInfoBox.setPadding(new Insets(10, 25, 25, 25)); 
 
-        Label lblTitle = new Label("Legenda Makassar Storytelling Corner");
+        // 🎯 KODE DINAMIS: Ambil Judul dan Deskripsi
+        Label lblTitle = new Label(acara.getTitle());
         lblTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #1A3C5A;");
 
-        Label lblDesc = new Label("Ruang pementasan cerita rakyat dan sejarah Makassar melalui seni tutur lisan yang interaktif. Menggabungkan sinrilik, musik tradisional, dan storytelling modern, kegiatan ini menghadirkan kisah-kisah legenda secara dekat, hangat, dan edukatif bagi generasi muda.");
+        Label lblDesc = new Label(acara.getDescription());
         lblDesc.setWrapText(true); 
         lblDesc.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 12px; -fx-text-fill: #1A3C5A; -fx-line-spacing: 0.5em;");
 
@@ -81,17 +111,22 @@ public class DetailAcaraBudaya {
         gridInfo.setHgap(150); 
         gridInfo.setVgap(15);  
 
-        // Kolom 1
-        gridInfo.add(createGridItem("Lokasi:", "Trans Studio Mall Makassar"), 0, 0);
-        gridInfo.add(createGridItem("Harga:", "Rp25.000"), 0, 1);
+        // Format Harga
+        String hargaTeks = acara.getTicketType().equalsIgnoreCase("Free") ? "Gratis" : String.format("Rp %,.0f", acara.getPrice());
         
-        // Kolom 2
-        gridInfo.add(createGridItem("Tanggal:", "20-22 Mei 2026"), 1, 0);
-        gridInfo.add(createGridItem("Kuota:", "100 orang"), 1, 1);
+        // Format Tanggal (Membuang detiknya agar lebih rapi)
+        String tanggalTeks = new SimpleDateFormat("dd MMMM yyyy, HH:mm").format(acara.getEventDate());
+
+        // 🎯 KODE DINAMIS: Ambil Data Spesifikasi
+        gridInfo.add(createGridItem("Lokasi:", acara.getCategory()), 0, 0);
+        gridInfo.add(createGridItem("Harga:", hargaTeks), 0, 1);
+        gridInfo.add(createGridItem("Tanggal & Waktu:", tanggalTeks), 1, 0);
+        
+        // Pastikan Anda punya getKuota() di model Event. Jika tidak ada, ganti dengan "100 orang" sementara.
+        gridInfo.add(createGridItem("Kuota:", acara.getQuota() + " orang"), 1, 1); 
 
         textInfoBox.getChildren().addAll(lblTitle, lblDesc, gridInfo);
         
-        // Gabungkan elemen ke dalam kartu dan bingkai
         whiteCard.getChildren().addAll(imgEvent, textInfoBox);
         grayFrame.getChildren().add(whiteCard);
         contentContainer.getChildren().addAll(lblTab, grayFrame);

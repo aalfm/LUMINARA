@@ -1,5 +1,10 @@
 package gradleproject;
 
+import gradleproject.dao.EventDAO;
+import gradleproject.dao.TicketDAO;
+import gradleproject.models.Event;
+import gradleproject.models.Ticket;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -11,9 +16,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import java.text.SimpleDateFormat;
+import java.util.List;
+
 public class TiketSaya {
 
-    private VBox view; // Root utama
+    private VBox view; 
+    private VBox listContainer; 
 
     public TiketSaya() {
         view = new VBox(25);
@@ -46,18 +55,13 @@ public class TiketSaya {
         VBox.setVgrow(boxTiketContainer, Priority.ALWAYS);
 
         // Kontainer Penampung List Kartu Tiket Putih
-        VBox listContainer = new VBox(15);
+        listContainer = new VBox(15);
         listContainer.setStyle("-fx-background-color: transparent;");
         listContainer.setPadding(new Insets(5, 5, 5, 5));
 
-        // Memasukkan data tiket dummy
-        listContainer.getChildren().addAll(
-            createDetailedTicketCard("101", "Makassar Traditional\nCostume Showcase", "20-22 Mei 2026 / 19:00 - 22:00", "Trans Studio Mall Makassar"),
-            createDetailedTicketCard("201", "Makassar Traditional\nCostume Showcase", "20-22 Mei 2026 / 19:00 - 22:00", "Trans Studio Mall Makassar"),
-            createDetailedTicketCard("301", "Makassar Traditional\nCostume Showcase", "20-22 Mei 2026 / 19:00 - 22:00", "Trans Studio Mall Makassar")
-        );
+        System.out.println("TiketSaya mencari tiket user = " + UserSession.getInstance().getUserId());
+        muatDataTiketDariDatabase(UserSession.getInstance().getUserId());
 
-        // ScrollPane Transparan khusus bagian dalam
         ScrollPane scrollInnerTiket = new ScrollPane(listContainer);
         scrollInnerTiket.setFitToWidth(true); 
         scrollInnerTiket.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); 
@@ -69,6 +73,55 @@ public class TiketSaya {
         sectionTiket.getChildren().addAll(tabTiket, boxTiketContainer);
 
         view.getChildren().addAll(welcomeHeader, sectionTiket);
+    }
+
+    private void muatDataTiketDariDatabase(int userId) {
+        listContainer.getChildren().clear();
+
+        TicketDAO ticketDAO = new TicketDAO();
+        EventDAO eventDAO = new EventDAO();
+
+        List<Ticket> daftarTiket = ticketDAO.findByUserId(userId);
+        
+        int tiketAktifDitampilkan = 0; // 🎯 Penghitung tiket yang benar-benar tampil
+
+        SimpleDateFormat formatTanggal = new SimpleDateFormat("dd MMM yyyy / HH:mm");
+
+        for (Ticket tiket : daftarTiket) {
+            
+            // 🎯 LOGIKA MENGHILANG: Jika tiket sudah dihadiri (1) atau dibatalkan (2), JANGAN TAMPILKAN!
+            int statusKehadiran = 0;
+            try {
+                statusKehadiran = tiket.getIsAttended();
+            } catch (Exception e) {}
+
+            if (statusKehadiran != 0) {
+                continue; // Lewati tiket ini dan lanjut ke tiket berikutnya
+            }
+
+            Event acara = eventDAO.findById(tiket.getEventId());
+            String idTiketString = String.valueOf(tiket.getId());
+            
+            String namaAcara = (acara != null && acara.getTitle() != null) ? acara.getTitle() : "Acara Tidak Tersedia";
+            String lokasiAcara = (acara != null && acara.getLocation() != null) ? acara.getLocation() : "Lokasi Tidak Diketahui";
+            
+            String tanggalWaktu = "TBA";
+            if (acara != null && acara.getEventDate() != null) {
+                tanggalWaktu = formatTanggal.format(acara.getEventDate());
+            }
+
+            VBox kartuTiket = createDetailedTicketCard(idTiketString, namaAcara, tanggalWaktu, lokasiAcara);
+            listContainer.getChildren().add(kartuTiket);
+            
+            tiketAktifDitampilkan++; // Hitung tiket yang berhasil ditampilkan
+        }
+
+        // 🎯 CEK KOSONG: Jika semua tiket sudah dihadiri, tampilkan pesan kosong
+        if (tiketAktifDitampilkan == 0) {
+            Label lblKosong = new Label("Kamu belum memiliki tiket aktif saat ini.");
+            lblKosong.setStyle("-fx-text-fill: #FFFFFF; -fx-font-family: 'Poppins'; -fx-font-size: 13px; -fx-font-style: italic;");
+            listContainer.getChildren().add(lblKosong);
+        }
     }
 
     private VBox createDetailedTicketCard(String id, String nama, String tanggalWaktu, String lokasi) {
@@ -99,6 +152,7 @@ public class TiketSaya {
         lblNama.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 11px; -fx-text-fill: #5A7184; -fx-font-weight: bold;");
         Label valNama = new Label(nama);
         valNama.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 13px; -fx-text-fill: #0A3B5C; -fx-font-weight: bold;");
+        valNama.setWrapText(true); 
         blockNama.getChildren().addAll(lblNama, valNama);
 
         VBox blockLokasi = new VBox(2);
@@ -106,6 +160,7 @@ public class TiketSaya {
         lblLokasi.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 11px; -fx-text-fill: #5A7184; -fx-font-weight: bold;");
         Label valLokasi = new Label(lokasi);
         valLokasi.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 12px; -fx-text-fill: #0A3B5C;");
+        valLokasi.setWrapText(true);
         blockLokasi.getChildren().addAll(lblLokasi, valLokasi);
 
         grid.add(blockId, 0, 0);
@@ -116,29 +171,23 @@ public class TiketSaya {
         GridPane.setHgrow(blockId, Priority.ALWAYS);
         GridPane.setHgrow(blockWaktu, Priority.ALWAYS);
 
-        // ==============================================================
-        // TOMBOL BATAL (DESAIN & INTERAKSI UI SAJA)
-        // ==============================================================
         HBox actionBox = new HBox();
         actionBox.setAlignment(Pos.CENTER_RIGHT); 
         
         Button btnBatal = new Button("Batal");
         btnBatal.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 5px; -fx-padding: 5 20; -fx-cursor: hand;");
 
-        // Efek hover
         btnBatal.setOnMouseEntered(e -> btnBatal.setStyle("-fx-background-color: #F57C00; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 5px; -fx-padding: 5 20; -fx-cursor: hand;"));
         btnBatal.setOnMouseExited(e -> btnBatal.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 5px; -fx-padding: 5 20; -fx-cursor: hand;"));
 
-        // Aksi klik murni UI (Menyembunyikan kartu seolah-olah sudah dihapus)
         btnBatal.setOnAction(e -> {
             card.setVisible(false);
             card.setManaged(false);
         });
 
         actionBox.getChildren().add(btnBatal);
-        // ==============================================================
-
         card.getChildren().addAll(grid, actionBox);
+        
         return card;
     }
 

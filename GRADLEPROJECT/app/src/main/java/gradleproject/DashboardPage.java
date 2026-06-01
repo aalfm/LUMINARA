@@ -1,11 +1,12 @@
 package gradleproject;
 
+// IMPORT UTAMA UNTUK FIX ERROR GARIS MERAH
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;       // Pastikan ini ada
+import javafx.scene.image.ImageView;   // Pastikan ini ada
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -19,7 +20,7 @@ public class DashboardPage {
         StackPane root = new StackPane();
         root.getStyleClass().add("dashboard-root");
 
-        // Latar Belakang Gambar Utama Aplikasi (Pemandangan Perahu Tradisional)
+        // Latar Belakang Gambar Utama Aplikasi
         try {
             String bgPath = getClass().getResource("/aset/gambarLuminara/gambar-bg.png").toExternalForm();
             root.setStyle("-fx-background-image: url('" + bgPath + "'); " +
@@ -33,16 +34,16 @@ public class DashboardPage {
         HBox mainLayout = new HBox();
         mainLayout.setAlignment(Pos.CENTER_LEFT);
 
-        // 1. SIDEBAR KIRI (Menggunakan Helper Tunggal)
+        // 1. SIDEBAR KIRI
         VBox sidebar = SidebarHelper.createSidebar("Tentang Kami", primaryStage);
 
-        // 2. AREA UTAMA KANAN (KONTEN TRANSPARAN DENGAN JUDUL SELAMAT DATANG)
+        // 2. AREA UTAMA KANAN
         VBox rightArea = new VBox(20);
         rightArea.setPadding(new Insets(40, 50, 40, 50));
         HBox.setHgrow(rightArea, Priority.ALWAYS);
         rightArea.setAlignment(Pos.TOP_LEFT);
 
-        // Judul Besar "Selamat datang," di luar kotak putih
+        // Judul Besar "Selamat datang,"
         VBox welcomeHeader = new VBox(5);
         Label lblWelcome = new Label("Selamat datang,");
         lblWelcome.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;");
@@ -50,7 +51,7 @@ public class DashboardPage {
         lblSubWelcome.setStyle("-fx-font-size: 14px; -fx-text-fill: #E2E8F0;");
         welcomeHeader.getChildren().addAll(lblWelcome, lblSubWelcome);
 
-        // ==================== 3. KARTU PUTIH UTAMA (CENTRAL CARD) ====================
+        // ==================== 3. KARTU PUTIH UTAMA ====================
         VBox whiteCard = new VBox(20);
         whiteCard.setPadding(new Insets(30, 35, 30, 35));
         whiteCard.setStyle("-fx-background-color: white; -fx-background-radius: 20px;");
@@ -65,14 +66,14 @@ public class DashboardPage {
         lblDesc.setWrapText(true);
         lblDesc.setStyle("-fx-font-size: 14px; -fx-text-fill: #002B49; -fx-line-spacing: 4px;");
 
-        // Baris Baris Statistik dengan Ikon Ilustrasi Asli
+        // Baris Statistik
         HBox statsRow = new HBox(40);
         statsRow.setAlignment(Pos.CENTER);
         statsRow.setPadding(new Insets(15, 0, 15, 0));
 
-        VBox stat1 = createStatBox("20+ Kegiatan", "dashboard.png"); 
-        VBox stat2 = createStatBox("10+ Komunitas Lokal", "lokakarya.png");
-        VBox stat3 = createStatBox("200+ Peserta", "budaya.png");
+        VBox stat1 = createStatBox("20+ Kegiatan", "/aset/iconLuminara/icon-guest2.png"); 
+        VBox stat2 = createStatBox("10+ Komunitas Lokal", "/aset/iconLuminara/icon-guest.png");
+        VBox stat3 = createStatBox("200+ Peserta", "/aset/iconLuminara/icon-guest1.png");
         statsRow.getChildren().addAll(stat1, stat2, stat3);
 
         // Judul Bagian Kategori
@@ -80,36 +81,49 @@ public class DashboardPage {
         lblKategoriTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #002B49;");
 
         // =====================================================================
-        // 👉 PERBAIKAN UTAMA: MERAKIT 4 KATEGORI MENJADI SATU KAPSUL UTUH
+        // 👉 FIX KATEGORI: MEMASANG 1 ASSET GAMBAR GABUNGAN PADA INDUK HBOX
         // =====================================================================
-        HBox categoriesRow = new HBox(0); // Set spacing menjadi 0 agar menempel rapat tanpa celah
+        HBox categoriesRow = new HBox(0); // Spacing 0 agar menempel sempurna
         categoriesRow.setAlignment(Pos.CENTER);
+        categoriesRow.setPrefSize(740, 110); 
+        categoriesRow.setMinSize(740, 110);
+        categoriesRow.setMaxSize(740, 110);
 
-        // Lebar tiap komponen disesuaikan (185px) agar total panjang pas menutup area tengah (185 * 4 = 740px)
-        StackPane catBudaya = createCategoryCard("Budaya", "/aset/gambarLuminara/Kategori.png", primaryStage);
-        StackPane catFestival = createCategoryCard("Festival", "/aset/gambarLuminara/fest-story.png", primaryStage);
-        StackPane catLokakarya = createCategoryCard("Lokakarya", "/aset/gambarLuminara/fest-costume2.png", primaryStage);
-        StackPane catMusik = createCategoryCard("Musik", "/aset/gambarLuminara/fest-costume3.png", primaryStage);
+        // Pasang gambar background HBox induk
+        try {
+            String stripPath = getClass().getResource("/aset/gambarLuminara/Kategori.png").toExternalForm();
+            categoriesRow.setStyle("-fx-background-image: url('" + stripPath + "'); " +
+                                  "-fx-background-repeat: no-repeat; " +
+                                  "-fx-background-size: cover; " +
+                                  "-fx-background-position: center center;");
+        } catch (Exception e) {
+            // Fallback jika path salah atau asset belum terbaca gradle
+            categoriesRow.setStyle("-fx-background-color: #002B49;");
+            System.out.println("Gagal memuat background gabungan Kategori.png");
+        }
+
+        // Potong ujung luar kiri-kanan HBox agar membentuk satu kapsul melengkung utuh
+        Rectangle rowClip = new Rectangle(740, 110); 
+        rowClip.setArcWidth(25); 
+        rowClip.setArcHeight(25);
+        categoriesRow.setClip(rowClip);
+
+        // Bagi lebar 740px menjadi 4 bagian kartu transparan (740 / 4 = 185px)
+        StackPane catBudaya = createTransparentCategoryCard("Budaya", primaryStage);
+        StackPane catFestival = createTransparentCategoryCard("Festival", primaryStage);
+        StackPane catLokakarya = createTransparentCategoryCard("Lokakarya", primaryStage);
+        StackPane catMusik = createTransparentCategoryCard("Musik", primaryStage);
         
         categoriesRow.getChildren().addAll(catBudaya, catFestival, catLokakarya, catMusik);
 
-        // 🎯 KUNCI UTAMA: Potong ujung luar kontainer induk HBox agar berbentuk satu kapsul melengkung utuh
-        Rectangle rowClip = new Rectangle(740, 100); // Ukuran total baris (lebar 740, tinggi 100)
-        rowClip.setArcWidth(20);                     // Kelengkungan sudut luar kiri-kanan
-        rowClip.setArcHeight(20);
-        categoriesRow.setClip(rowClip);
-
-        // Masukkan komponen ke dalam kartu putih
+        // Masukkan semua komponen ke dalam boks putih utama
         whiteCard.getChildren().addAll(lblTentang, lblDesc, statsRow, lblKategoriTitle, categoriesRow);
 
-        // Satukan Judul Selamat Datang dan Kartu Putih ke Area Kanan
         rightArea.getChildren().addAll(welcomeHeader, whiteCard);
-
-        // Gabungkan Sidebar Kiri dengan Area Konten Kanan
         mainLayout.getChildren().addAll(sidebar, rightArea);
         root.getChildren().add(mainLayout);
 
-        Scene scene = new Scene(root, 1024, 720);
+        Scene scene = new Scene(root, 1280, 650);
         try {
             scene.getStylesheets().add(getClass().getResource("/style/guest/intro.css").toExternalForm());
         } catch (Exception e) {}
@@ -119,24 +133,32 @@ public class DashboardPage {
         primaryStage.show();
     }
 
-    // Fungsi Pembantu Pembuat Item Statistik Beserta Ikon Gambar
-    private VBox createStatBox(String text, String iconFile) {
+   // Fungsi Statistik yang sudah diperbaiki path-nya agar fleksibel
+    private VBox createStatBox(String text, String iconPath) {
         VBox box = new VBox(8);
         box.setAlignment(Pos.CENTER);
         box.setPrefWidth(160);
 
         try {
-            Image img = new Image(getClass().getResourceAsStream("/aset/ikon/" + iconFile));
-            ImageView iconView = new ImageView(img);
-            iconView.setFitWidth(40);
-            iconView.setFitHeight(40);
-            iconView.setPreserveRatio(true);
-            box.getChildren().add(iconView);
+            // LANGSUNG GUNAKAN iconPath tanpa ditambah-tambah teks "/aset/ikon/" lagi
+            java.io.InputStream is = getClass().getResourceAsStream(iconPath);
+            if (is != null) {
+                Image img = new Image(is);
+                ImageView iconView = new ImageView(img);
+                iconView.setFitWidth(40);
+                iconView.setFitHeight(40);
+                iconView.setPreserveRatio(true);
+                box.getChildren().add(iconView);
+            } else {
+                throw new Exception("File tidak ditemukan di path: " + iconPath);
+            }
         } catch (Exception e) {
+            // Jika gagal, kotak biru placeholder ini yang akan muncul
             StackPane placeholder = new StackPane();
             placeholder.setPrefSize(40, 40);
             placeholder.setStyle("-fx-background-color: #002B49; -fx-background-radius: 5px;");
             box.getChildren().add(placeholder);
+            System.out.println("⚠️ " + e.getMessage());
         }
 
         Label lblText = new Label(text);
@@ -146,38 +168,29 @@ public class DashboardPage {
         return box;
     }
 
-    // 👉 PERBAIKAN KEDUA: Rombak fungsi cetak kartu agar menyatu rapi tanpa sekat melengkung di dalam
-    private StackPane createCategoryCard(String title, String imagePath, Stage stage) {
+    // Pembuat kartu transparan agar gambar panjang dari boks induk terlihat langsung
+    private StackPane createTransparentCategoryCard(String title, Stage stage) {
         StackPane card = new StackPane();
-        card.setPrefSize(185, 100); // Tinggi dinaikkan ke 100px agar tulisan lebih lega di tengah
+        card.setPrefSize(185, 110); 
+        card.setMinSize(185, 110);
+        card.setMaxSize(185, 110);
         card.setCursor(javafx.scene.Cursor.HAND);
 
-        // 1. Komponen Gambar Latar Belakang
-        try {
-            Image img = new Image(getClass().getResourceAsStream(imagePath));
-            ImageView imgView = new ImageView(img);
-            imgView.setFitWidth(185);
-            imgView.setFitHeight(100);
-            imgView.setPreserveRatio(false); // Di-false agar gambar memenuhi boks secara penuh dan rapat
-            
-            // ❌ Potongan clip individu dihapus agar antar gambar bisa tersambung rata tanpa sekat melengkung internal
-            
-            card.getChildren().add(imgView);
-        } catch (Exception e) {
-            card.setStyle("-fx-background-color: #002B49;");
-        }
-
-        // 2. Lapisan Biru Transparan (Overlay) Supaya Teks Putih Mudah Dibaca
+        // Lapisan transparan gelap (overlay) agar teks putih gampang dibaca di atas gambar
         StackPane overlay = new StackPane();
-        overlay.setStyle("-fx-background-color: rgba(0, 43, 73, 0.5);");
+        overlay.setStyle("-fx-background-color: rgba(0, 43, 73, 0.45);"); 
         card.getChildren().add(overlay);
 
-        // 3. Komponen Teks Judul Kategori (Ditampilkan di atas lapisan overlay)
-        Label lblTitle = new Label(title);
-        lblTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: white;");
-        card.getChildren().add(lblTitle); // 🎯 FIX BUG: Sekarang teks sudah dimasukkan ke dalam layout card
+        // Efek Hover: Menyorot boks kategori yang sedang didekati kursor
+        card.setOnMouseEntered(e -> overlay.setStyle("-fx-background-color: rgba(0, 43, 73, 0.2);"));
+        card.setOnMouseExited(e -> overlay.setStyle("-fx-background-color: rgba(0, 43, 73, 0.45);"));
 
-        // Aksi Navigasi Klik Halaman Kategori
+        // Judul Kategori
+        Label lblTitle = new Label(title);
+        lblTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;");
+        card.getChildren().add(lblTitle);
+
+        // Navigasi halaman saat diklik
         card.setOnMouseClicked(e -> {
             if (title.equals("Budaya")) new BudayaPage().start(stage);
             else if (title.equals("Festival")) new FestivalPage().start(stage);

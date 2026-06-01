@@ -18,7 +18,12 @@ import javafx.scene.layout.Region;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-public class Dashboard {
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import gradleproject.config.DbConnect;
+
+public class DashboardAdmin {
 
     private BorderPane root;
     private VBox homeContent; 
@@ -27,7 +32,6 @@ public class Dashboard {
     private HBox mnuPengguna;
     private HBox mnuPenyelenggara;
     private HBox mnuAcara;
-    private HBox mnuTransaksi;
     private HBox mnuProfil;
     private HBox mnuKeluar;
 
@@ -42,20 +46,22 @@ public class Dashboard {
     private VBox submenuAcaraBox;
     private HBox mnuFestival, mnuLokakarya, mnuMusik, mnuBudaya;
 
-    private static Dashboard instance;
+    private VBox submenuProfilBox;
+    private HBox mnuSorotanBudaya;
 
-    public Dashboard() {
-        instance = this; 
-        root = new BorderPane();
+    private static DashboardAdmin instance;
+
+    public DashboardAdmin() {
+        instance = this; // 🎯 KUNCI UTAMA: Baris ini wajib ada di urutan pertama!
+        root = new BorderPane(); 
+        
+        createNavbar();
         createContent(); 
-        createNavbar(); 
     }
-
-    public static Dashboard getInstance() {
+    public static DashboardAdmin getInstance() {
         return instance;
     }
 
-    // Jembatan 1: Membuka Daftar Pengguna dari Kartu "Total Pengguna"
     public void pindahKeDaftarPengguna() {
         DaftarPengguna halDaftar = new DaftarPengguna(false); 
         root.setCenter(halDaftar.getView());
@@ -67,25 +73,21 @@ public class Dashboard {
         setMenuSelection(mnuDaftarPengguna);
     }
 
-    // Jembatan 2: Membuka Profil 1 Orang dari Beranda
-    public void pindahKeProfilPengguna() {
-        ProfilPengguna halProfil = new ProfilPengguna();
-        root.setCenter(halProfil.getView());
+    public void pindahKeProfilPengguna(int id) {
+        ProfilPengguna view = new ProfilPengguna(id);
+        root.setCenter(view.getView());
     }
 
-    // Jembatan 3: Membuka Detail Banyak Orang dari Manajemen Pengguna
-    public void pindahKeDetailPengguna() {
+    public void pindahKeDetailPengguna(int userId) {
         DetailPengguna halDetail = new DetailPengguna();
         root.setCenter(halDetail.getView());
     }
 
-    // Jembatan 4: Membuka Profil Penyelenggara
     public void pindahKeProfilPenyelenggara() {
         ProfilPenyelenggara halProfilPenyelenggara = new ProfilPenyelenggara();
         root.setCenter(halProfilPenyelenggara.getView());
     }
 
-    // Jembatan untuk membuka Daftar Penyelenggara
     public void pindahKeDaftarPenyelenggara() {
         DaftarPenyelenggara halDaftar = new DaftarPenyelenggara(false); 
         root.setCenter(halDaftar.getView());
@@ -102,7 +104,6 @@ public class Dashboard {
         root.setCenter(halTabelPenyelenggara.getView());
     }
 
-    // Jembatan untuk Membuka Daftar Blokir Pengguna
     public void pindahKeDaftarBlokirPengguna() {
         DaftarBlokirPengguna halBlokirUser = new DaftarBlokirPengguna(); 
         root.setCenter(halBlokirUser.getView());
@@ -114,7 +115,6 @@ public class Dashboard {
         setMenuSelection(mnuDaftarBlokir); 
     }
 
-    // Jembatan untuk Membuka Daftar Blokir Penyelenggara
     public void pindahKeDaftarBlokirPenyelenggara() {
         DaftarBlokirPenyelenggara halBlokirVendor = new DaftarBlokirPenyelenggara();
         root.setCenter(halBlokirVendor.getView());
@@ -126,19 +126,11 @@ public class Dashboard {
         setMenuSelection(mnuDaftarBlokirPenyelenggara); 
     }
 
-    // Jembatan untuk membuka tabel detail kategori Festival
     public void pindahKeAcaraFestival() {
-        AcaraFestival halFestival = new AcaraFestival();
-        root.setCenter(halFestival.getView());
-        
-        if (submenuAcaraBox != null) {
-            submenuAcaraBox.setVisible(true);
-            submenuAcaraBox.setManaged(true);
-        }
-        setMenuSelection(mnuFestival);
+        gradleproject.AcaraFestival halamanFestival = new gradleproject.AcaraFestival();
+        root.setCenter(halamanFestival.getView()); 
     }
 
-    // Jembatan untuk membuka tabel detail kategori Lokakarya
     public void pindahKeAcaraLokakarya() {
         AcaraLokakarya halLokakarya = new AcaraLokakarya();
         root.setCenter(halLokakarya.getView());
@@ -162,9 +154,14 @@ public class Dashboard {
     }
 
     public void pindahKeAcaraBudaya() {
-        AcaraBudaya halBudaya = new AcaraBudaya();
-        root.setCenter(halBudaya.getView());
-        
+        gradleproject.AcaraBudaya halamanBudaya = new gradleproject.AcaraBudaya();
+        root.setCenter(halamanBudaya.getView()); 
+    }
+
+    public void pindahKeDetailAcaraBudaya(gradleproject.models.Event acara) {
+        DetailAcaraBudaya halamanDetail = new DetailAcaraBudaya(acara);
+        root.setCenter(halamanDetail.getView());
+
         if (submenuAcaraBox != null) {
             submenuAcaraBox.setVisible(true);
             submenuAcaraBox.setManaged(true);
@@ -172,10 +169,10 @@ public class Dashboard {
         setMenuSelection(mnuBudaya);
     }
 
-    public void pindahKeDetailAcaraFestival() {
-        DetailAcaraFestival halamanDetail = new DetailAcaraFestival();
+    public void pindahKeDetailAcaraFestival(gradleproject.models.Event acara) {
+        DetailAcaraFestival halamanDetail = new DetailAcaraFestival(acara);
         root.setCenter(halamanDetail.getView());
-        
+
         if (submenuAcaraBox != null) {
             submenuAcaraBox.setVisible(true);
             submenuAcaraBox.setManaged(true);
@@ -183,10 +180,10 @@ public class Dashboard {
         setMenuSelection(mnuFestival);
     }
 
-    public void pindahKeDetailAcaraLokakarya() {
-        DetailAcaraLokakarya halamanDetail = new DetailAcaraLokakarya();
+    public void pindahKeDetailAcaraLokakarya(gradleproject.models.Event acara) {
+        DetailAcaraLokakarya halamanDetail = new DetailAcaraLokakarya(acara);
         root.setCenter(halamanDetail.getView());
-        
+
         if (submenuAcaraBox != null) {
             submenuAcaraBox.setVisible(true);
             submenuAcaraBox.setManaged(true);
@@ -194,10 +191,10 @@ public class Dashboard {
         setMenuSelection(mnuLokakarya);
     }
 
-    public void pindahKeDetailAcaraMusik() {
-        DetailAcaraMusik halamanDetail = new DetailAcaraMusik();
+    public void pindahKeDetailAcaraMusik(gradleproject.models.Event acara) {
+        DetailAcaraMusik halamanDetail = new DetailAcaraMusik(acara);
         root.setCenter(halamanDetail.getView());
-        
+
         if (submenuAcaraBox != null) {
             submenuAcaraBox.setVisible(true);
             submenuAcaraBox.setManaged(true);
@@ -205,68 +202,31 @@ public class Dashboard {
         setMenuSelection(mnuMusik);
     }
 
-    public void pindahKeDetailAcaraBudaya() {
-        DetailAcaraBudaya halamanDetail = new DetailAcaraBudaya();
-        root.setCenter(halamanDetail.getView());
-        
-        if (submenuAcaraBox != null) {
-            submenuAcaraBox.setVisible(true);
-            submenuAcaraBox.setManaged(true);
-        }
-        setMenuSelection(mnuBudaya);
-    }
-
-    // Fungsi untuk membuka halaman Transaksi
-    public void pindahKeTransaksi() {
-        Transaksi halTransaksi = new Transaksi();
-        root.setCenter(halTransaksi.getView());
-        setMenuSelection(mnuTransaksi); 
-    }
-
-    // Fungsi untuk membuka halaman Daftar Tabel Transaksi Penuh
-    public void pindahKeDaftarTransaksiPenuh() {
-        DaftarTransaksi halDaftarTransaksi = new DaftarTransaksi();
-        root.setCenter(halDaftarTransaksi.getView());
-        
-        // Tetap sorot mnuTransaksi di sidebar
-        setMenuSelection(mnuTransaksi);
-    }
-
-    // Fungsi untuk membuka halaman Persetujuan Pengembalian Dana
-    public void pindahKePengembalianDana() {
-        PengembalianDana halRefund = new PengembalianDana();
-        root.setCenter(halRefund.getView());
-        
-        // Tetap tandai Transaksi sebagai menu aktif di sidebar
-        setMenuSelection(mnuTransaksi);
-    }
-
-    // Fungsi untuk membuka halaman Detail Laporan Pendapatan 12 Bulan penuh
-    public void pindahKeLaporanPendapatan() {
-        LaporanPendapatan halLaporan = new LaporanPendapatan();
-        root.setCenter(halLaporan.getView());
-        
-        // Tetap nyalakan seleksi menu Transaksi di sidebar
-        setMenuSelection(mnuTransaksi);
-    }
-
-    // Letakkan baris ini di dalam Class Dashboard bersama fungsi pindah halaman lainnya
     public void pindahKeProfilAdmin() {
         ProfilAdmin halProfil = new ProfilAdmin();
         root.setCenter(halProfil.getView());
         
-        // Ganti mnuProfil dengan nama variabel tombol menu profil di sidebar-mu
+        if (submenuProfilBox != null) {
+            submenuProfilBox.setVisible(true);
+            submenuProfilBox.setManaged(true);
+        }
         setMenuSelection(mnuProfil); 
     }
 
-    // Jalur pusat untuk melompat dari beranda admin ke detail pendapatan bulanan
+    public void pindahKeSorotanBudaya() {
+        SorotanBudayaView halSorotan = new SorotanBudayaView();
+        root.setCenter(halSorotan); 
+        
+        if (submenuProfilBox != null) {
+            submenuProfilBox.setVisible(true);
+            submenuProfilBox.setManaged(true);
+        }
+        setMenuSelection(mnuSorotanBudaya);
+    }
+
     public void pindahKeDetailPendapatan() {
         DetailPendapatanAdmin halDetail = new DetailPendapatanAdmin();
-        
-        // Ganti root center (area kanan dashboard) menjadi tampilan detail pendapatan
         this.root.setCenter(halDetail.getView()); 
-        
-        // Tetap pastikan menu "Beranda" atau "Transaksi" menyala sesuai struktur kustommu
         setMenuSelection(mnuBeranda); 
     }
 
@@ -304,7 +264,6 @@ public class Dashboard {
         mnuPengguna = createMenuItem("/aset/iconLuminara/icon-komunitas.png", "/aset/iconLuminara/icon-peserta.png", "Manajemen Pengguna", false);
         mnuPenyelenggara = createMenuItem("/aset/iconLuminara/icon-komunitas.png", "/aset/iconLuminara/icon-peserta.png", "Manajemen Penyelenggara", false);
         mnuAcara = createMenuItem("/aset/iconLuminara/acara-putih.png", "/aset/iconLuminara/icon-manajemen-acara.png", "Acara", false);
-        mnuTransaksi = createMenuItem("/aset/iconLuminara/icon-payments.png", "/aset/iconLuminara/icon-payment-biru.png", "Transaksi", false);
         mnuProfil = createMenuItem("/aset/iconLuminara/icon-user.png", "/aset/iconLuminara/profil-biru.png", "Profil", false);
         mnuKeluar = createMenuItem("/aset/iconLuminara/icon-masuk-keluar.png", "/aset/iconLuminara/icon-masuk-keluar.png", "Keluar", false);
 
@@ -317,19 +276,19 @@ public class Dashboard {
         submenuPenggunaBox.setManaged(false);
 
         mnuBeranda.setOnMouseClicked(event -> {
+            createContent(); 
             root.setCenter(homeContent); 
             setMenuSelection(mnuBeranda); 
         });
-        mnuBeranda.setCursor(javafx.scene.Cursor.HAND);
 
         mnuPengguna.setOnMouseClicked(event -> {
             boolean isExpanded = submenuPenggunaBox.isVisible();
             submenuPenggunaBox.setVisible(!isExpanded);
             submenuPenggunaBox.setManaged(!isExpanded);
             
-            // 👉 PERBAIKAN: Tutup otomatis submenu lainnya saat menu ini di-klik
             if (submenuPenyelenggaraBox != null) { submenuPenyelenggaraBox.setVisible(false); submenuPenyelenggaraBox.setManaged(false); }
             if (submenuAcaraBox != null) { submenuAcaraBox.setVisible(false); submenuAcaraBox.setManaged(false); }
+            if (submenuProfilBox != null) { submenuProfilBox.setVisible(false); submenuProfilBox.setManaged(false); }
             
             ManajemenPengguna halManajemen = new ManajemenPengguna();
             root.setCenter(halManajemen.getView());
@@ -361,9 +320,9 @@ public class Dashboard {
             submenuPenyelenggaraBox.setVisible(!isExpanded);
             submenuPenyelenggaraBox.setManaged(!isExpanded);
 
-            // 👉 PERBAIKAN: Tutup otomatis submenu lainnya saat menu ini di-klik
             if (submenuPenggunaBox != null) { submenuPenggunaBox.setVisible(false); submenuPenggunaBox.setManaged(false); }
             if (submenuAcaraBox != null) { submenuAcaraBox.setVisible(false); submenuAcaraBox.setManaged(false); }
+            if (submenuProfilBox != null) { submenuProfilBox.setVisible(false); submenuProfilBox.setManaged(false); }
             
             ManajemenPenyelenggara halManajemen = new ManajemenPenyelenggara();
             root.setCenter(halManajemen.getView());
@@ -375,6 +334,11 @@ public class Dashboard {
             DaftarPenyelenggara hal = new DaftarPenyelenggara(false);
             root.setCenter(hal.getView());
             setMenuSelection(mnuDaftarPenyelenggara);
+        });
+        
+        mnuDaftarBlokirPenyelenggara.setOnMouseClicked(event -> {
+            pindahKeDaftarBlokirPenyelenggara();
+            setMenuSelection(mnuDaftarBlokirPenyelenggara);
         });
 
         submenuAcaraBox = new VBox(3);
@@ -390,32 +354,6 @@ public class Dashboard {
         mnuBudaya = createSubmenuItem("/aset/iconLuminara/budaya-puith.png", "/aset/iconLuminara/icon-budaya-biru.png", "Budaya");
         mnuBudaya.setOnMouseClicked(event -> pindahKeAcaraBudaya());
 
-        mnuTransaksi.setOnMouseClicked(event -> {
-            pindahKeTransaksi();
-        });
-        mnuTransaksi.setCursor(javafx.scene.Cursor.HAND);
-
-        try {
-            StackPane iconContainerFest = (StackPane) mnuFestival.getChildren().get(0);
-            ImageView imgViewFest = (ImageView) iconContainerFest.getChildren().get(0);
-            imgViewFest.setFitWidth(22);  
-            imgViewFest.setFitHeight(22);
-            imgViewFest.setPreserveRatio(true);
-            iconContainerFest.setPrefWidth(35);
-            iconContainerFest.setMinWidth(35);
-
-            StackPane iconContainerBudaya = (StackPane) mnuBudaya.getChildren().get(0);
-            ImageView imgViewBudaya = (ImageView) iconContainerBudaya.getChildren().get(0);
-            imgViewBudaya.setFitWidth(22);  
-            imgViewBudaya.setFitHeight(22);
-            imgViewBudaya.setPreserveRatio(true);
-            iconContainerBudaya.setPrefWidth(35);
-            iconContainerBudaya.setMinWidth(35);
-            
-        } catch (Exception e) {
-            System.out.println("⚠️ Gagal memperbesar ikon Festival atau Budaya!");
-        }
-
         submenuAcaraBox.getChildren().addAll(mnuFestival, mnuLokakarya, mnuMusik, mnuBudaya);
         submenuAcaraBox.setVisible(false);
         submenuAcaraBox.setManaged(false);
@@ -427,27 +365,54 @@ public class Dashboard {
             
             if (submenuPenggunaBox != null) { submenuPenggunaBox.setVisible(false); submenuPenggunaBox.setManaged(false); }
             if (submenuPenyelenggaraBox != null) { submenuPenyelenggaraBox.setVisible(false); submenuPenyelenggaraBox.setManaged(false); }
+            if (submenuProfilBox != null) { submenuProfilBox.setVisible(false); submenuProfilBox.setManaged(false); }
             
             AcaraUtama halAcara = new AcaraUtama();
             root.setCenter(halAcara.getView());
             setMenuSelection(mnuAcara); 
         });
 
-        mnuDaftarBlokirPenyelenggara.setOnMouseClicked(event -> {
-            pindahKeDaftarBlokirPenyelenggara();
-            setMenuSelection(mnuDaftarBlokirPenyelenggara);
-        });
+        submenuProfilBox = new VBox(3);
+        mnuSorotanBudaya = createSubmenuItem("/aset/iconLuminara/budaya-puith.png", "/aset/iconLuminara/icon-budaya-biru.png", "Sorotan Budaya");
+        
+        submenuProfilBox.getChildren().add(mnuSorotanBudaya);
+        submenuProfilBox.setVisible(false);
+        submenuProfilBox.setManaged(false);
 
-        mnuProfil.setOnMouseClicked(event -> {pindahKeProfilAdmin();});
+        mnuProfil.setOnMouseClicked(event -> {
+            boolean isExpanded = submenuProfilBox.isVisible();
+            submenuProfilBox.setVisible(!isExpanded);
+            submenuProfilBox.setManaged(!isExpanded);
+            
+            if (submenuPenggunaBox != null) { submenuPenggunaBox.setVisible(false); submenuPenggunaBox.setManaged(false); }
+            if (submenuPenyelenggaraBox != null) { submenuPenyelenggaraBox.setVisible(false); submenuPenyelenggaraBox.setManaged(false); }
+            if (submenuAcaraBox != null) { submenuAcaraBox.setVisible(false); submenuAcaraBox.setManaged(false); }
+
+            pindahKeProfilAdmin();
+            setMenuSelection(mnuProfil);
+        });
         mnuProfil.setCursor(javafx.scene.Cursor.HAND);
 
-        mnuKeluar.setOnMouseClicked(event -> javafx.application.Platform.exit());
-        mnuKeluar.setCursor(javafx.scene.Cursor.HAND);
+        mnuSorotanBudaya.setOnMouseClicked(event -> {
+            pindahKeSorotanBudaya();
+        });
+
+        mnuKeluar.setOnMouseClicked(event -> {
+            javafx.stage.Stage primaryStage = (javafx.stage.Stage) mnuKeluar.getScene().getWindow();
+            IntroPage3 intro3 = new IntroPage3();
+            try {
+                intro3.start(primaryStage);
+            } catch (Exception ex) {
+                System.out.println("Gagal memuat halaman keluar: " + ex.getMessage());
+            }
+        });
 
         menuBox.getChildren().addAll(
             mnuBeranda, mnuPengguna, submenuPenggunaBox,  
             mnuPenyelenggara, submenuPenyelenggaraBox,
-            mnuAcara, submenuAcaraBox, mnuTransaksi, mnuProfil, mnuKeluar
+            mnuAcara, submenuAcaraBox, 
+            mnuProfil, submenuProfilBox, 
+            mnuKeluar
         );
 
         HBox bottomLogoBox = new HBox();
@@ -493,20 +458,26 @@ public class Dashboard {
             }
         }
 
-        // 👉 PERBAIKAN PUSAT: Tutup otomatis submenu Acara jika menu lain yang di-klik
         if (selectedMenu != mnuAcara && selectedMenu != mnuFestival && selectedMenu != mnuLokakarya && selectedMenu != mnuMusik && selectedMenu != mnuBudaya) {
             if (submenuAcaraBox != null) {
                 submenuAcaraBox.setVisible(false);
                 submenuAcaraBox.setManaged(false);
             }
         }
+        
+        if (selectedMenu != mnuProfil && selectedMenu != mnuSorotanBudaya) {
+            if (submenuProfilBox != null) {
+                submenuProfilBox.setVisible(false);
+                submenuProfilBox.setManaged(false);
+            }
+        }
 
         HBox[] allMenus = {
-            mnuBeranda, mnuPengguna, mnuPenyelenggara, mnuAcara, 
-            mnuTransaksi, mnuProfil, mnuKeluar,
+            mnuBeranda, mnuPengguna, mnuPenyelenggara, mnuAcara, mnuProfil, mnuKeluar,
             mnuDaftarPengguna, mnuDaftarBlokir,
             mnuDaftarPenyelenggara, mnuDaftarBlokirPenyelenggara,
-            mnuFestival, mnuLokakarya, mnuMusik, mnuBudaya
+            mnuFestival, mnuLokakarya, mnuMusik, mnuBudaya,
+            mnuSorotanBudaya 
         };
         
         for (HBox menu : allMenus) {
@@ -640,12 +611,10 @@ public class Dashboard {
     }
 
     private HBox createSubmenuItem(String iconPutihPath, String iconBiruPath, String text) {
-        // 👉 KEMBALIKAN: Jarak asli antar wadah ikon dan teks sebesar 15px
         HBox subItem = new HBox(15); 
         subItem.setAlignment(Pos.CENTER_LEFT); 
         subItem.getStyleClass().add("submenu-item");
         
-        // 👉 KEMBALIKAN: Lekukan kiri asli sebesar 45px agar tulisan kembali sejajar
         subItem.setPadding(new Insets(8, 20, 8, 45)); 
         subItem.setCursor(javafx.scene.Cursor.HAND);
 
@@ -659,14 +628,11 @@ public class Dashboard {
         try {
             Image iconImage = new Image(getClass().getResourceAsStream(iconPutihPath));
             iconView.setImage(iconImage);
-            
-            // KUNCI: Ukuran ikon tetap besar 22px agar terlihat jelas
             iconView.setFitWidth(22); 
             iconView.setFitHeight(22);
             iconView.setPreserveRatio(true);
         } catch (Exception e) { }
 
-        // 👉 KEMBALIKAN: Lebar wadah dikunci di 35px & dipaksa CENTER agar semua ikon rata tengah
         StackPane iconContainer = new StackPane(iconView);
         iconContainer.setAlignment(Pos.CENTER); 
         iconContainer.setPrefWidth(35);         
@@ -784,31 +750,50 @@ public class Dashboard {
         VBox greetingBox = new VBox(-5); 
         Label hiLabel = new Label("Hai, admin.");
         hiLabel.getStyleClass().add("greeting-title");
-        Label todayLabel = new Label("Gimana hari ini . . .");
+        Label todayLabel = new Label("Pantau perkembangan hari ini . . .");
         todayLabel.getStyleClass().add("greeting-subtitle");
         greetingBox.getChildren().addAll(hiLabel, todayLabel);
+
+        // =======================================================
+        // 🎯 DATA DINAMIS DARI DATABASE UNTUK KARTU (CARD)
+        // =======================================================
+        int totalPengguna = getDatabaseCount("SELECT COUNT(*) FROM users WHERE UPPER(role) = 'USER' AND UPPER(account_status) != 'BANNED'");
+        int totalPenyelenggara = getDatabaseCount("SELECT COUNT(*) FROM users WHERE (UPPER(role) = 'ORGANIZER' OR UPPER(role) = 'PENYELENGGARA') AND UPPER(account_status) != 'BANNED'");
+        
+        // 🎯 PERBAIKAN: Gunakan JOIN agar event yang diselenggarakan oleh Organizer Banned tidak ikut dihitung
+        int acaraBerlangsung = getDatabaseCount(
+            "SELECT COUNT(*) FROM events e " +
+            "JOIN users u ON e.organizer_id = u.id " +
+            "WHERE e.status = 'Active' AND (u.account_status IS NULL OR UPPER(u.account_status) != 'BANNED')"
+        );
+        
+        int acaraPending = getDatabaseCount(
+            "SELECT COUNT(*) FROM events e " +
+            "JOIN users u ON e.organizer_id = u.id " +
+            "WHERE e.status = 'Draft' AND (u.account_status IS NULL OR UPPER(u.account_status) != 'BANNED')"
+        );
 
         GridPane cardsGrid = new GridPane();
         cardsGrid.setHgap(20); 
         cardsGrid.setVgap(20); 
         cardsGrid.setAlignment(Pos.TOP_LEFT);
 
-        VBox card1 = createSummaryCard("👤", "TOTAL PENGGUNA", "19", "box-gray", event -> {
+        VBox card1 = createSummaryCard("👤", "TOTAL PENGGUNA", String.valueOf(totalPengguna), "box-gray", event -> {
             DaftarPengguna halDaftar = new DaftarPengguna(true); 
             root.setCenter(halDaftar.getView()); 
         });
             
-        VBox card2 = createSummaryCard("🏢", "TOTAL PENYELENGGARA", "7", "box-gray", event -> {
+        VBox card2 = createSummaryCard("🏢", "TOTAL PENYELENGGARA", String.valueOf(totalPenyelenggara), "box-gray", event -> {
             DaftarPenyelenggara halPenyelenggara = new DaftarPenyelenggara(true); 
             root.setCenter(halPenyelenggara.getView());
         });
         
-        VBox card3 = createSummaryCard("📅", "SEDANG BERLANGSUNG", "22", "box-gray", event -> {
+        VBox card3 = createSummaryCard("📅", "SEDANG BERLANGSUNG", String.valueOf(acaraBerlangsung), "box-gray", event -> {
             AcaraBerlangsung halAcara = new AcaraBerlangsung();
             root.setCenter(halAcara.getView());
         });
 
-        VBox card4 = createSummaryCard("⏱", "PENDING", "10", "box-orange", event -> {
+        VBox card4 = createSummaryCard("⏱", "PENDING", String.valueOf(acaraPending), "box-orange", event -> {
             MenungguKonfirmasi halPending = new MenungguKonfirmasi();
             root.setCenter(halPending.getView());
         });
@@ -818,6 +803,9 @@ public class Dashboard {
         cardsGrid.add(card3, 0, 1);
         cardsGrid.add(card4, 1, 1);
 
+        // =======================================================
+        // 2. KARTU RINGKASAN PENDAPATAN
+        // =======================================================
         VBox ringkasanBox = new VBox(15); 
         ringkasanBox.getStyleClass().add("revenue-card"); 
         ringkasanBox.setPrefWidth(340);
@@ -856,6 +844,12 @@ public class Dashboard {
         btnContainer.setAlignment(Pos.CENTER_RIGHT);
         Button btnDetail = new Button("Lihat Detail");
         btnDetail.getStyleClass().add("btn-lihat"); 
+        
+        btnDetail.setOnAction(event -> {
+            if (DashboardAdmin.getInstance() != null) {
+                DashboardAdmin.getInstance().pindahKeDetailPendapatan();
+            }
+        });
 
         btnContainer.getChildren().add(btnDetail);
         ringkasanBox.getChildren().addAll(headerRingkasan, rowsBox, verticalSpacer, btnContainer);
@@ -864,6 +858,9 @@ public class Dashboard {
         middleSection.setAlignment(Pos.TOP_LEFT);
         middleSection.getChildren().addAll(cardsGrid, ringkasanBox);
 
+        // =======================================================
+        // 3. AKTIVITAS TERBARU (Dinamis dari Tabel Users)
+        // =======================================================
         VBox aktivitasSection = new VBox(12); 
         aktivitasSection.setPrefWidth(770);
         aktivitasSection.setMinWidth(770);
@@ -871,9 +868,41 @@ public class Dashboard {
 
         Label lblAktivitasTitle = new Label("Aktivitas Terbaru");
         lblAktivitasTitle.getStyleClass().add("section-title");
+        aktivitasSection.getChildren().add(lblAktivitasTitle);
 
-        HBox act1 = createActivityRow("/aset/iconLuminara/profil.png", "Pendaftar baru: Alifah Mahalini", "sebagai pengguna", "11.58 WITA");
-        HBox act2 = createActivityRow("/aset/iconLuminara/keluar.png", "User diblokir: Ra-Fly", "oleh Admin", "7.17 WITA");
+        String queryAktivitas = "SELECT username, role, account_status, strftime('%H.%M', created_at) as wkt FROM users WHERE role != 'ADMIN' ORDER BY id DESC LIMIT 2";
+        
+        try (Connection conn = DbConnect.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(queryAktivitas)) {
+             
+            while (rs.next()) {
+                String nama = rs.getString("username");
+                String role = rs.getString("role"); 
+                String status = rs.getString("account_status");
+                String wkt = rs.getString("wkt") + " WITA"; 
+
+                String roleTeks = "sebagai pengguna";
+                if (role != null && (role.equalsIgnoreCase("ORGANIZER") || role.equalsIgnoreCase("PENYELENGGARA"))) {
+                    roleTeks = "sebagai penyelenggara";
+                }
+
+                String title = "Pendaftar baru: " + nama;
+                String subtitle = roleTeks; 
+                String iconPath = "/aset/iconLuminara/profil.png";
+
+                if (status != null && status.equalsIgnoreCase("Banned")) {
+                    title = "User diblokir: " + nama;
+                    subtitle = "oleh Admin";
+                    iconPath = "/aset/iconLuminara/keluar.png";
+                }
+
+                HBox actRow = createActivityRow(iconPath, title, subtitle, wkt);
+                aktivitasSection.getChildren().add(actRow);
+            }
+        } catch (Exception e) {
+            System.out.println("⚠️ Gagal memuat aktivitas: " + e.getMessage());
+        }
 
         HBox btnSemuaContainer = new HBox();
         Region pendorongTombol = new Region();
@@ -887,17 +916,25 @@ public class Dashboard {
         });
 
         btnSemuaContainer.getChildren().addAll(pendorongTombol, btnLihatSemua);
-        aktivitasSection.getChildren().addAll(lblAktivitasTitle, act1, act2, btnSemuaContainer);
-        
-        btnDetail.setOnAction(event -> {
-                    if (Dashboard.getInstance() != null) {
-                        // Perintah melompat ke halaman detail pendapatan bulanan
-                        Dashboard.getInstance().pindahKeDetailPendapatan();
-                    }
-                });
+        aktivitasSection.getChildren().add(btnSemuaContainer);
 
         homeContent.getChildren().addAll(greetingBox, middleSection, aktivitasSection);
         root.setCenter(homeContent);
+    }
+
+    private int getDatabaseCount(String query) {
+        int count = 0;
+        try (Connection conn = DbConnect.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+             
+            if (rs.next()) { 
+                count = rs.getInt(1); 
+            }
+        } catch (Exception e) { 
+            System.out.println("⚠️ Gagal mengambil data dashboard: " + e.getMessage()); 
+        }
+        return count;
     }
 
     public Parent getView() {

@@ -1,5 +1,7 @@
 package gradleproject;
 
+import gradleproject.dao.RefundDAO;
+import gradleproject.models.RefundRequest;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -13,10 +15,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 
 public class PengembalianDana {
+    private VBox listContainer;
 
     private VBox view;
 
     public PengembalianDana() {
+
         view = new VBox(20);
         view.setPadding(new Insets(20, 20, 20, 80)); 
         view.setAlignment(Pos.TOP_LEFT);
@@ -68,14 +72,6 @@ public class PengembalianDana {
         VBox listContainer = new VBox(12);
         listContainer.setStyle("-fx-background-color: transparent;");
 
-        // Memasukkan data pengembalian dummy (Diulang agar mengaktifkan efek scroll)
-        for (int i = 0; i < 4; i++) {
-            listContainer.getChildren().addAll(
-                createRefundRow("Makassar Traditional\nCostume Showcase", "Ra-Fly Organizer", "Rp7.550.000"),
-                createRefundRow("Makassar Traditional\nCostume Showcase", "Ra-Fly Organizer", "Rp7.550.000")
-            );
-        }
-
         // C. Konstruksi ScrollPane Transparan
         ScrollPane scrollTable = new ScrollPane(listContainer);
         scrollTable.setFitToWidth(true); 
@@ -88,6 +84,16 @@ public class PengembalianDana {
         tableBox.getChildren().addAll(tableHeader, blueBox);
 
         view.getChildren().addAll(header, tableBox);
+
+    loadData();
+    } // 🎯 Tambahkan ini agar tabel muncul saat dibuk}
+
+    private void loadData() {
+        listContainer.getChildren().clear();
+        RefundDAO dao = new RefundDAO();
+        for (RefundRequest r : dao.getPendingRefunds()) {
+            listContainer.getChildren().add(createRefundRow(r.getEventName(), r.getUserName(), "Rp " + String.format("%,.0f", r.getTotal())));
+        }
     }
 
     private HBox createRefundRow(String eventName, String user, String total) {
