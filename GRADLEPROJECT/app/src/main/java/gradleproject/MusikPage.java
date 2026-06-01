@@ -76,7 +76,7 @@ public class MusikPage {
         mainLayout.getChildren().addAll(sidebar, rightArea);
         root.getChildren().add(mainLayout);
 
-        Scene scene = new Scene(root, 1024, 720);
+        Scene scene = new Scene(root, 1280, 650);
         scene.getStylesheets().add(getClass().getResource("/style/guest/intro.css").toExternalForm());
 
         primaryStage.setTitle("Luminara - Musik Preview");

@@ -12,7 +12,7 @@ public class MainUser extends Application {
         DashboardUser dashboardUser = new DashboardUser();
         
         // Mengatur resolusi dasar jendela aplikasi (1100 x 700)
-        Scene scene = new Scene(dashboardUser.getView(), 1100, 700);
+        Scene scene = new Scene(dashboardUser.getView(), 1280, 650);
         
         // Sistem Pengisian CSS Fallback Aman
         try {

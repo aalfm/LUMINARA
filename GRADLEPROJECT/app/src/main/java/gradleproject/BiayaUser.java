@@ -1,5 +1,8 @@
 package gradleproject;
 
+import gradleproject.dao.EventDAO;
+import gradleproject.models.Event;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -15,6 +18,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+
+import java.io.File;
+import java.util.List;
 
 public class BiayaUser {
 
@@ -45,8 +51,7 @@ public class BiayaUser {
         priceBar.setPrefHeight(45);
         priceBar.setStyle("-fx-background-color: #0A3B5C; -fx-background-radius: 20; -fx-padding: 4 10 4 10;");
 
-        // Membuat 2 tombol kapsul sesuai gambar mockup
-        tabBerbayar = createPriceTab("Berbayar", true); // Default aktif jingga
+        tabBerbayar = createPriceTab("Berbayar", true); 
         tabGratis = createPriceTab("Gratis", false);
 
         HBox.setHgrow(tabBerbayar, Priority.ALWAYS);
@@ -54,12 +59,12 @@ public class BiayaUser {
 
         priceBar.getChildren().addAll(tabBerbayar, tabGratis);
 
-        // Aksi interaktif klik antar kapsul biaya
-        tabBerbayar.setOnMouseClicked(e -> selectTab(tabBerbayar));
-        tabGratis.setOnMouseClicked(e -> selectTab(tabGratis));
+        // 👉 PERBAIKAN: Aksi klik tab sekarang memanggil data dari database
+        tabBerbayar.setOnMouseClicked(e -> selectTab(tabBerbayar, "Berbayar"));
+        tabGratis.setOnMouseClicked(e -> selectTab(tabGratis, "Gratis"));
 
         // =====================================================================
-        // 3. WADAH UTAMA BOX BIRU (INNER SCROLL)
+        // 3. WADAH UTAMA BOX BIRU
         // =====================================================================
         VBox boxBlueContainer = new VBox(0);
         boxBlueContainer.setStyle("-fx-background-color: #0A3B5C; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);");
@@ -72,14 +77,6 @@ public class BiayaUser {
         cardsGrid.setVgap(20);
         cardsGrid.setStyle("-fx-background-color: transparent;");
 
-        String descDummy = "Pementasan busana adat Makassar dan Sulawesi Selatan yang menampilkan Baju Bodo, passapu, kain sutra, dan aksesoris tradisional dalam parade budaya modern.";
-        
-        // Memasukkan susunan kartu dummy
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event1.png", "Makassar Traditional\nCostume Showcase", descDummy, "Berbayar", "Budaya"), 0, 0);
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event2.png", "Makassar Traditional\nCostume Showcase", descDummy, "Berbayar", "Budaya"), 1, 0);
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event3.png", "Makassar Traditional\nCostume Showcase", descDummy, "Paid", "Budaya"), 0, 1);
-        cardsGrid.add(createEventCard("/aset/gambarLuminara/event4.png", "Makassar Traditional\nCostume Showcase", descDummy, "Berbayar", "Budaya"), 1, 1);
-
         ScrollPane scrollInner = new ScrollPane(cardsGrid);
         scrollInner.setFitToWidth(true);
         scrollInner.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); 
@@ -89,6 +86,52 @@ public class BiayaUser {
 
         boxBlueContainer.getChildren().add(scrollInner);
         view.getChildren().addAll(welcomeHeader, priceBar, boxBlueContainer);
+
+        // Muat data awal secara otomatis (Tab: Berbayar)
+        selectTab(tabBerbayar, "Berbayar");
+    }
+
+    // --- METHOD HELPER: Menarik Data dari Database ---
+    private void loadEventsByBiaya(String tipeBiaya) {
+        cardsGrid.getChildren().clear(); // Bersihkan kartu lama
+        
+        EventDAO eventDAO = new EventDAO();
+        List<Event> semuaAcara = eventDAO.getAllEvents(); 
+        
+        int kolom = 0;
+        int baris = 0;
+        boolean adaData = false;
+
+        for (Event acara : semuaAcara) {
+            boolean cocok = false;
+            
+            // Logika penyaringan: Gratis (Harga = 0), Berbayar (Harga > 0)
+            if (tipeBiaya.equals("Gratis") && acara.getPrice() == 0) {
+                cocok = true;
+            } else if (tipeBiaya.equals("Berbayar") && acara.getPrice() > 0) {
+                cocok = true;
+            }
+
+            if (cocok) {
+                adaData = true;
+                
+                // Buat kartu event berdasarkan data asli dari database
+                VBox kartuEvent = createEventCard(acara);
+                cardsGrid.add(kartuEvent, kolom, baris);
+                
+                kolom++;
+                if (kolom == 2) { 
+                    kolom = 0;
+                    baris++;
+                }
+            }
+        }
+
+        if (!adaData) {
+            Label lblKosong = new Label("Belum ada event untuk kategori tiket " + tipeBiaya + " saat ini.");
+            lblKosong.setStyle("-fx-text-fill: #A0A9B5; -fx-font-family: 'Poppins'; -fx-font-size: 14px; -fx-font-style: italic;");
+            cardsGrid.add(lblKosong, 0, 0);
+        }
     }
 
     private HBox createPriceTab(String text, boolean isActive) {
@@ -110,7 +153,7 @@ public class BiayaUser {
         return tab;
     }
 
-    private void selectTab(HBox selectedTab) {
+    private void selectTab(HBox selectedTab, String tipeBiaya) {
         HBox[] tabs = {tabBerbayar, tabGratis};
         for (HBox tab : tabs) {
             Label lbl = (Label) tab.getChildren().get(0);
@@ -122,9 +165,12 @@ public class BiayaUser {
                 lbl.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 14px; -fx-text-fill: #FFFFFF;");
             }
         }
+        // Panggil penarik data setelah warna tab berubah
+        loadEventsByBiaya(tipeBiaya);
     }
 
-    private VBox createEventCard(String imagePath, String title, String description, String priceTag, String categoryTag) {
+    // 👉 PERBAIKAN: Parameter sekarang menerima objek Event asli
+    private VBox createEventCard(Event acara) {
         VBox card = new VBox(10);
         card.setPrefWidth(360);
         card.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 15; -fx-padding: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);");
@@ -135,7 +181,13 @@ public class BiayaUser {
 
         ImageView iv = new ImageView();
         try {
-            Image img = new Image(getClass().getResourceAsStream(imagePath));
+            Image img;
+            String imgPath = acara.getImagePath();
+            if (imgPath != null && (imgPath.contains(":\\") || imgPath.contains(":/"))) {
+                img = new Image(new File(imgPath).toURI().toString());
+            } else {
+                img = new Image(getClass().getResourceAsStream(imgPath != null ? imgPath : "/aset/gambarLuminara/event1.png"));
+            }
             iv.setImage(img);
             iv.setFitWidth(330);
             iv.setFitHeight(130);
@@ -143,14 +195,18 @@ public class BiayaUser {
             clip.setArcWidth(20);
             clip.setArcHeight(20);
             iv.setClip(clip);
-        } catch (Exception e) { }
-        imagePane.getChildren().add(0, iv);
+            imagePane.getChildren().add(0, iv);
+        } catch (Exception e) {
+            Label lblPlaceholder = new Label("🖼️ Pamflet Acara");
+            lblPlaceholder.setStyle("-fx-text-fill: #A0A9B5; -fx-font-family: 'Poppins';");
+            imagePane.getChildren().add(lblPlaceholder);
+        }
 
-        Label lblTitle = new Label(title);
+        Label lblTitle = new Label(acara.getTitle());
         lblTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #0A3B5C;");
         lblTitle.setWrapText(true);
 
-        Label lblDesc = new Label(description);
+        Label lblDesc = new Label(acara.getDescription());
         lblDesc.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 10px; -fx-text-fill: #5A7184; -fx-line-spacing: 1.5;");
         lblDesc.setWrapText(true);
         lblDesc.setMaxHeight(45);
@@ -158,11 +214,15 @@ public class BiayaUser {
         HBox bottomRow = new HBox(8);
         bottomRow.setAlignment(Pos.CENTER_LEFT);
 
+        boolean isGratis = (acara.getPrice() == 0);
+        String labelHargaText = isGratis ? "Gratis" : "Berbayar";
+
         VBox labelBox = new VBox(0);
-        Label lblPrice = new Label(priceTag);
+        Label lblPrice = new Label(labelHargaText);
         lblPrice.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 11px; -fx-text-fill: " + 
-            (priceTag.equalsIgnoreCase("Free") || priceTag.equalsIgnoreCase("Gratis") ? "#FF9800;" : "#E53935;"));
-        Label lblCat = new Label(categoryTag);
+            (isGratis ? "#FF9800;" : "#E53935;"));
+        
+        Label lblCat = new Label(acara.getCategory());
         lblCat.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 11px; -fx-text-fill: #A0A9B5;");
         labelBox.getChildren().addAll(lblPrice, lblCat);
 
@@ -171,18 +231,27 @@ public class BiayaUser {
 
         Button btnBeli = new Button("Beli Tiket");
         btnBeli.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-size: 9px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 4 12;");
+        btnBeli.setCursor(javafx.scene.Cursor.HAND);
+        
+        double hargaAsli = acara.getPrice() != null ? acara.getPrice() : 0;
+        // 👉 WAJIB: Kirim data Event ke halaman Pemesanan Tiket
         btnBeli.setOnAction(event -> {
-            if (DashboardUser.getInstance() != null) DashboardUser.getInstance().pindahKePesanTiket();
+            if (DashboardUser.getInstance() != null) {
+                // Casting ke int akan otomatis membuang desimal (misal 25000.0 menjadi 25000)
+                // Lalu diubah ke String agar bisa dikirim ke halaman selanjutnya
+                String hargaTiketUntukSistem = String.valueOf((Double) hargaAsli);
+                
+                DashboardUser.getInstance().pindahKePesanTiket(acara, hargaTiketUntukSistem);
+            }
         });
 
         Button btnDetail = new Button("Lihat Detail");
         btnDetail.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-size: 9px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 4 12;");
         btnDetail.setCursor(javafx.scene.Cursor.HAND);
         
-        // 👉 KUNCI NAVIGASI: Mengarah ke DetailBiaya khusus
         btnDetail.setOnAction(event -> {
             if (DashboardUser.getInstance() != null) {
-                DashboardUser.getInstance().pindahKeDetailBiaya("Berbayar");
+                DashboardUser.getInstance().pindahKeDetailBiaya(labelHargaText);
             }
         });
 

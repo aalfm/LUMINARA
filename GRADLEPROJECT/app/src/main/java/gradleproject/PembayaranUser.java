@@ -1,5 +1,15 @@
 package gradleproject;
 
+import gradleproject.models.Event;
+import gradleproject.models.Ticket;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import gradleproject.config.DbConnect;
+import gradleproject.dao.TicketDAO;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -20,12 +30,27 @@ public class PembayaranUser {
     private Button btnKirim;
     
     private VBox overlayNotif;
-    private Label lblNotifTitle;   // 👉 DIUBAH JADI VARIABEL KELAS AGAR DINAMIS
+    private Label lblNotifTitle;   
     private Label lblNotifMessage;
 
-    public PembayaranUser(String totalHarga) {
+    private String displayHarga;
+
+    // 👉 PERBAIKAN: Konstruktor sekarang menerima objek Event acara dan String totalHarga
+    public PembayaranUser(Event acara, String totalHarga) {
         view = new StackPane();
         view.setStyle("-fx-background-color: #F8F9FA;");
+
+        boolean isGratis = totalHarga == null || totalHarga.trim().equals("0") || totalHarga.trim().equals("0.0") || totalHarga.trim().equalsIgnoreCase("Gratis");
+
+        displayHarga = "0";
+
+        if (!isGratis && totalHarga != null) {
+            if (totalHarga.endsWith(".0")) {
+                displayHarga = totalHarga.substring(0, totalHarga.length() - 2);
+            } else {
+                displayHarga = totalHarga;
+            }
+        }
 
         VBox contentBox = new VBox(25);
         contentBox.setPadding(new Insets(30, 40, 30, 60)); 
@@ -65,13 +90,21 @@ public class PembayaranUser {
         VBox fieldsBox = new VBox(15);
         fieldsBox.setStyle("-fx-background-color: transparent;");
 
-        txtNominalTagihan = createStyledTextField(totalHarga);
+        // Card Nominal Tagihan
+        txtNominalTagihan = createStyledTextField(displayHarga);
         txtNominalTagihan.setEditable(false); 
         txtNominalTagihan.setStyle(txtNominalTagihan.getStyle() + " -fx-opacity: 0.85; -fx-cursor: default;");
         VBox cardNominal = createFormCard("Nominal", txtNominalTagihan);
 
-        txtInputBayar = createStyledTextField(""); 
-        txtInputBayar.setPromptText("Masukkan nominal pembayaran kamu");
+        // Card Input Bayar
+        txtInputBayar = createStyledTextField(isGratis ? "0" : ""); 
+        if (isGratis) {
+            // Jika tiket gratis, kunci kolom input agar user tidak perlu mengetik
+            txtInputBayar.setEditable(false);
+            txtInputBayar.setStyle(txtInputBayar.getStyle() + " -fx-opacity: 0.85; -fx-cursor: default;");
+        } else {
+            txtInputBayar.setPromptText("Masukkan nominal pembayaran kamu");
+        }
         VBox cardInputBayar = createFormCard("Input Nominal Pembayaran", txtInputBayar);
 
         fieldsBox.getChildren().addAll(cardNominal, cardInputBayar);
@@ -102,23 +135,85 @@ public class PembayaranUser {
         createCustomNotificationOverlay();
         
         // =====================================================================
-        // LOGIKA INTERAKTIF BARU PADA TOMBOL KIRIM
+        // LOGIKA INTERAKTIF TOMBOL KIRIM & SIMPAN DATABASE
         // =====================================================================
         btnKirim.setOnAction(event -> {
-            String inputUser = txtInputBayar.getText().trim();
-            if (inputUser.isEmpty()) {
-                // 👉 UPDATE: Kalau gagal/kosong, ubah judul jadi Peringatan
-                lblNotifTitle.setText("Peringatan"); 
-                lblNotifMessage.setText("Kolom input nominal pembayaran tidak boleh kosong!");
+        String inputUser = txtInputBayar.getText().trim();
+        
+        // Validasi Dasar
+        if (inputUser.isEmpty()) {
+            System.out.println("DEBUG: Input kosong"); // Tambahkan log
+            lblNotifTitle.setText("Peringatan"); 
+            lblNotifMessage.setText("Kolom input nominal tidak boleh kosong!");
+            overlayNotif.setVisible(true);
+            return;
+        }
+
+        try {
+            // Cek UserSession
+            if (UserSession.getInstance() == null || UserSession.getInstance().getUserId() == 0) {
+                throw new Exception("UserSession tidak aktif! Harap login ulang.");
+            }
+
+            // Siapkan Data
+            Ticket tiketBaru = new Ticket();
+            tiketBaru.setEventId(acara.getId()); 
+            tiketBaru.setUserId(UserSession.getInstance().getUserId());
+            
+            int tierId = getTierIdDynamic(acara.getId());
+            tiketBaru.setTicketTierId(tierId); 
+            tiketBaru.setPaymentStatus("Paid"); 
+
+            System.out.println("DEBUG: Mencoba simpan tiket untuk User: " + tiketBaru.getUserId());
+
+            // Simpan ke database
+            TicketDAO ticketDAO = new TicketDAO();
+            boolean berhasil = ticketDAO.bookTicket(tiketBaru);
+
+            if (berhasil) {
+                lblNotifTitle.setText("Sukses");
+                lblNotifMessage.setText("Pembayaran selesai! Tiket berhasil ditambahkan.");
                 overlayNotif.setVisible(true);
             } else {
-                // 👉 UPDATE: Kalau sukses, ubah judul jadi Sukses
-                lblNotifTitle.setText("Sukses");
-                lblNotifMessage.setText("Pembayaran nominal " + inputUser + " berhasil dikirim! Silakan cek menu Tiket Saya secara berkala.");
+                lblNotifTitle.setText("Gagal");
+                lblNotifMessage.setText("Gagal menyimpan tiket di database.");
                 overlayNotif.setVisible(true);
             }
-        });
+        } catch (Exception e) {
+            // 🎯 INI YANG PALING PENTING: Menampilkan error asli jika ada crash
+            e.printStackTrace(); 
+            
+            lblNotifTitle.setText("Error Sistem");
+            lblNotifMessage.setText("Terjadi kesalahan: " + e.getMessage());
+            overlayNotif.setVisible(true);
+        }
+    });
     }
+
+    private int getTierIdDynamic(int eventId) {
+    String sql = "SELECT id FROM ticket_tiers WHERE event_id = ?";
+
+    try (Connection conn = DbConnect.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, eventId);
+
+        java.sql.ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            int id = rs.getInt("id");
+            System.out.println("Tier ditemukan: " + id);
+            return id;
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    throw new RuntimeException(
+        "Tidak ada ticket tier untuk event ID = " + eventId
+    );
+}
 
     private void createCustomNotificationOverlay() {
         overlayNotif = new VBox(0);
@@ -138,7 +233,6 @@ public class PembayaranUser {
         headerRow.setPadding(new Insets(8, 12, 8, 15));
         headerRow.setStyle("-fx-background-color: #F1F3F5; -fx-background-radius: 7 7 0 0; -fx-border-color: transparent transparent #D3D9DE transparent; -fx-border-width: 0 0 1 0;");
 
-        // 👉 PERBAIKAN: Melepas inisialisasi lokal agar merujuk ke variabel kelas dinamis
         lblNotifTitle = new Label(""); 
         lblNotifTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 13px; -fx-text-fill: #333333; -fx-font-weight: bold;");
         
@@ -191,7 +285,6 @@ public class PembayaranUser {
 
         overlayNotif.getChildren().addAll(headerRow, bodyRow, bottomRow);
 
-        // 👉 PERBAIKAN 2: Menurunkan posisi margin bawah dari 110 ke 45 agar posisinya pas turun ke bawah
         StackPane.setAlignment(overlayNotif, Pos.BOTTOM_LEFT);
         StackPane.setMargin(overlayNotif, new Insets(0, 0, 45, 85)); 
 

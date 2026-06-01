@@ -35,11 +35,29 @@ public class AcaraUtama {
         cardsContainer.setAlignment(Pos.TOP_LEFT);
         cardsContainer.setMaxWidth(770);
 
-        // Membuat 4 Kartu Besar sesuai kategori yang diminta
-        HBox cardFestival = createEventCard("/aset/iconLuminara/icon-fest.png", "Festival", "12");
-        HBox cardLokakarya = createEventCard("/aset/iconLuminara/icon-workshop.png", "Lokakarya", "5");
-        HBox cardBudaya = createEventCard("/aset/iconLuminara/icon-budaya.png", "Budaya", "3");
-        HBox cardMusik = createEventCard("/aset/iconLuminara/icon-musik.png", "Musik", "8");
+        // 🎯 KODE DINAMIS: Panggil DAO untuk mengambil data riil
+        gradleproject.dao.EventDAO eventDAO = new gradleproject.dao.EventDAO();
+        
+        // Menghitung jumlah acara per kategori yang statusnya masih "Draft"
+        long countFestival = eventDAO.findByCategory("Festival").stream()
+                .filter(acara -> acara.getStatus().equalsIgnoreCase("Draft")).count();
+                
+        long countLokakarya = eventDAO.findByCategory("Lokakarya").stream()
+                .filter(acara -> acara.getStatus().equalsIgnoreCase("Draft")).count();
+                
+        // Catatan: Jika di database constraint-nya menggunakan kata 'Kultural', pastikan parameter ini 'Kultural'.
+        // Jika sudah diubah menjadi 'Budaya', ganti menjadi 'Budaya'.
+        long countBudaya = eventDAO.findByCategory("Budaya").stream() 
+                .filter(acara -> acara.getStatus().equalsIgnoreCase("Draft")).count();
+                
+        long countMusik = eventDAO.findByCategory("Musik").stream()
+                .filter(acara -> acara.getStatus().equalsIgnoreCase("Draft")).count();
+
+        // Membuat 4 Kartu Besar dengan memasukkan variabel angka riil hasil hitungan di atas
+        HBox cardFestival = createEventCard("/aset/iconLuminara/icon-fest.png", "Festival", String.valueOf(countFestival));
+        HBox cardLokakarya = createEventCard("/aset/iconLuminara/icon-workshop.png", "Lokakarya", String.valueOf(countLokakarya));
+        HBox cardBudaya = createEventCard("/aset/iconLuminara/icon-budaya.png", "Budaya", String.valueOf(countBudaya));
+        HBox cardMusik = createEventCard("/aset/iconLuminara/icon-musik.png", "Musik", String.valueOf(countMusik));
 
         cardsContainer.getChildren().addAll(cardFestival, cardLokakarya, cardBudaya, cardMusik);
 
@@ -122,16 +140,16 @@ public class AcaraUtama {
         btnDetail.setOnAction(event -> {
             System.out.println("➤ Menuju detail sub-kategori: " + title);
             
-            if (Dashboard.getInstance() != null) {
+            if (DashboardAdmin.getInstance() != null) {
                 // Jika judul kartunya "Festival", panggil jembatan Festival
                 if (title.equalsIgnoreCase("Festival")) {
-                    Dashboard.getInstance().pindahKeAcaraFestival();
+                    DashboardAdmin.getInstance().pindahKeAcaraFestival();
                 } else if (title.equalsIgnoreCase("Lokakarya")) { 
-                    Dashboard.getInstance().pindahKeAcaraLokakarya();
+                    DashboardAdmin.getInstance().pindahKeAcaraLokakarya();
                 } else if (title.equalsIgnoreCase("Musik")) {
-                    Dashboard.getInstance().pindahKeAcaraMusik();
+                    DashboardAdmin.getInstance().pindahKeAcaraMusik();
                 } else if (title.equalsIgnoreCase("Budaya")) { // <--- TAMBAHKAN INI
-                    Dashboard.getInstance().pindahKeAcaraBudaya();
+                    DashboardAdmin.getInstance().pindahKeAcaraBudaya();
                 }
                 // Nanti kamu bisa tambahkan else if (title.equalsIgnoreCase("Lokakarya")) dst..
             }

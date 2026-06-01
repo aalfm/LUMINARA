@@ -1,5 +1,9 @@
 package gradleproject;
 
+import gradleproject.dao.UserDAO;
+import gradleproject.models.User;
+import gradleproject.services.AuthService;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -17,171 +21,255 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+
+
 public class SignInPage {
-
+    
+    private Stage primaryStage;
+    private String roleKonteks; 
+    private TextField emailField;
+    private PasswordField passwordField;
+    private Label lblStatus; 
+    
+    public SignInPage(String roleKonteks) {
+        this.roleKonteks = roleKonteks;
+    }
+    
     public void start(Stage primaryStage) {
-        // Kontainer Utama menggunakan HBox (Kiri: Banner, Kanan: Form)
+        this.primaryStage = primaryStage;
+        
         HBox mainRoot = new HBox();
-        mainRoot.getStyleClass().add("signin-root");
-
+        mainRoot.setPadding(new Insets(0)); 
+        mainRoot.setStyle("-fx-background-color: #FDFBF7; -fx-padding: 0;"); 
+        
         // ==================== SISI KIRI: BANNER GAMBAR TENUN ====================
         StackPane leftBanner = new StackPane();
-        leftBanner.getStyleClass().add("signin-left-banner");
+        leftBanner.setPrefWidth(480); 
+        leftBanner.setMinWidth(480);
         
-        // Mengunci rasio dimensi agar konsisten dengan halaman daftar
-        leftBanner.setPrefWidth(440);
-        leftBanner.setMinWidth(440);
-
-        // Memuat Gambar Background via Java
         try {
             String bgPath = getClass().getResource("/aset/gambarLuminara/gambar-sign.png").toExternalForm();
             leftBanner.setStyle("-fx-background-image: url('" + bgPath + "'); " +
-                                "-fx-background-repeat: no-repeat; " +
-                                "-fx-background-size: cover; " +
-                                "-fx-background-position: center center; " +
-                                "-fx-background-radius: 24px;");
-        } catch (Exception e) {
-            leftBanner.setStyle("-fx-background-color: #1A365D; -fx-background-radius: 24px;");
-        }
-
-        // Overlay Gelap di dalam Banner
+            "-fx-background-repeat: no-repeat; " +
+            "-fx-background-size: cover; " +
+            "-fx-background-position: center center; " +
+            "-fx-background-radius: 0 30 30 0;"); 
+        } catch (Exception e) {}
+        
         Region bannerOverlay = new Region();
-        bannerOverlay.setStyle("-fx-background-color: rgba(10, 37, 64, 0.5); -fx-background-radius: 24px;");
+        bannerOverlay.setStyle("-fx-background-color: rgba(10, 37, 64, 0.4); -fx-background-radius: 0 30 30 0;");
 
-        // Konten teks di dalam Banner Kiri
-        VBox leftContent = new VBox(15);
+        VBox leftContent = new VBox(10);
         leftContent.setAlignment(Pos.BOTTOM_LEFT);
-        leftContent.setPadding(new Insets(40));
-        leftContent.getStyleClass().add("signin-left-content");
+        leftContent.setPadding(new Insets(50, 40, 50, 40));
 
-        Label leftTitle = new Label("Selamat Datang!");
-        leftTitle.getStyleClass().add("signin-left-title");
+        Label leftTitle = new Label("Siap Berjelajah?");
+        leftTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 34px; -fx-text-fill: white;");
 
-        Label leftSub = new Label("Ayo berjelajahi dan temukan pengalaman budaya yang paling sesuai untukmu.");
-        leftSub.getStyleClass().add("signin-left-sub");
+        Label leftSub = new Label("Bergabunglah dan temukan\npengalaman budaya yang\npaling sesuai untukmu.");
+        leftSub.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 14px; -fx-text-fill: #E2E8F0; -fx-line-spacing: 5px;");
         leftSub.setWrapText(true);
 
-        // Logo Putih Transparan Luminara di bagian bawah
         ImageView logoWhite = new ImageView();
         try {
-            logoWhite.setImage(new Image(getClass().getResourceAsStream("/aset/gambarLuminara/luminara-logoWhite.png")));
-            logoWhite.setFitWidth(180);
+            logoWhite.setImage(new Image(getClass().getResourceAsStream("/aset/gambarLuminara/luminara-textWhite.png")));
+            logoWhite.setFitWidth(160);
             logoWhite.setPreserveRatio(true);
         } catch (Exception e) {}
 
-        // Spacer pendorong vertikal
         Region leftSpacer = new Region();
         VBox.setVgrow(leftSpacer, Priority.ALWAYS);
+        
+        Region innerSpacer = new Region();
+        innerSpacer.setPrefHeight(40);
 
-        leftContent.getChildren().addAll(leftSpacer, leftTitle, leftSub, logoWhite);
+        leftContent.getChildren().addAll(leftSpacer, leftTitle, leftSub, innerSpacer, logoWhite);
         leftBanner.getChildren().addAll(bannerOverlay, leftContent);
 
-
         // ==================== SISI KANAN: FORMULIR MASUK ====================
-        VBox rightContent = new VBox(25); // Jarak antar grup elemen vertikal sedikit diperlebar karena input lebih sedikit
-        rightContent.getStyleClass().add("signin-right-content");
+        VBox rightContent = new VBox(25); 
         rightContent.setAlignment(Pos.CENTER_LEFT);
+        rightContent.setPadding(new Insets(40, 80, 40, 80)); 
         HBox.setHgrow(rightContent, Priority.ALWAYS);
 
-        // Judul Form Masuk
-        VBox headerBox = new VBox(8);
-        Label formTitle = new Label("Masuk");
-        formTitle.getStyleClass().add("signin-form-title");
-        Label formSub = new Label("Masuk untuk melanjutkan perjalanan budaya bersama Luminara.");
-        formSub.getStyleClass().add("signin-form-sub");
-        formSub.setWrapText(true);
-        headerBox.getChildren().addAll(formTitle, formSub);
-
-        // Area Kumpulan Input Box (Hanya Email & Password)
-        VBox fieldsContainer = new VBox(15);
-        fieldsContainer.setAlignment(Pos.TOP_LEFT);
-
-        VBox emailBox = createInputField("Email", "Masukkan email kamu", false);
-        VBox passwordBox = createInputField("Password", "Masukkan password kamu", true);
-
-        fieldsContainer.getChildren().addAll(emailBox, passwordBox);
-
-        // Tombol Masuk
-        Button btnSignIn = new Button("Masuk  ›");
-        btnSignIn.getStyleClass().add("btn-signin-submit");
-        btnSignIn.setCursor(javafx.scene.Cursor.HAND);
-        btnSignIn.setMaxWidth(440); // Selaras dengan kotak isian teks
-
-        // Buka SignInPage.java dan pasang kode ini di setOnAction tombol Masuk:
-        btnSignIn.setOnAction(e -> {
-        System.out.println("Login berhasil, mengalihkan ke Dashboard Utama...");
-    
-        DashboardPage dashboard = new DashboardPage();
-        dashboard.start(primaryStage);
-});
-
-        // Garis Pembatas "atau"
-        HBox dividerRow = new HBox(10);
-        dividerRow.setAlignment(Pos.CENTER);
-        dividerRow.setMaxWidth(440);
-        StackPane lineLeft = new StackPane(); lineLeft.getStyleClass().add("form-line"); HBox.setHgrow(lineLeft, Priority.ALWAYS);
-        Label labelOr = new Label("atau"); labelOr.getStyleClass().add("label-or");
-        StackPane lineRight = new StackPane(); lineRight.getStyleClass().add("form-line"); HBox.setHgrow(lineRight, Priority.ALWAYS);
-        dividerRow.getChildren().addAll(lineLeft, labelOr, lineRight);
-
-        // Teks Footer Form: Belum punya akun? Daftar Sekarang
-        HBox signUpRedirectBox = new HBox(5);
-        signUpRedirectBox.setAlignment(Pos.CENTER);
-        signUpRedirectBox.setMaxWidth(440);
-        Label lblNoAccount = new Label("Belum punya akun?");
-        lblNoAccount.getStyleClass().add("lbl-no-account");
-        Hyperlink linkSignUp = new Hyperlink("Daftar Sekarang");
-        linkSignUp.getStyleClass().add("link-signup-redirect");
+        Button btnKembali = new Button("‹ Kembali");
+        btnKembali.setStyle("-fx-background-color: transparent; -fx-text-fill: #64748B; -fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 0 0 10 0;");
         
-        // Logika pengalihan ke halaman daftar jika tautan diklik
-        linkSignUp.setOnAction(e -> {
-            SignUpPage signUpPage = new SignUpPage();
-            signUpPage.start(primaryStage);
+        btnKembali.setOnAction(e -> {
+            IntroPage3 introPage = new IntroPage3();
+            introPage.start(primaryStage);
         });
 
+        VBox headerBox = new VBox(8);
+        Label formTitle = new Label("Masuk (" + roleKonteks + ")");
+        formTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 32px; -fx-text-fill: #003A6C;");
+        
+        Label formSub = new Label("Masuk untuk melanjutkan perjalanan budaya bersama Luminara.");
+        formSub.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 14px; -fx-text-fill: #495057;");
+        formSub.setWrapText(true);
+        headerBox.getChildren().addAll(formTitle, formSub);
+        
+        emailField = new TextField();
+        passwordField = new PasswordField();
+        
+        lblStatus = new Label();
+        lblStatus.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 13px; -fx-font-weight: bold;");
+        
+        VBox fieldsContainer = new VBox(18);
+        fieldsContainer.setAlignment(Pos.TOP_LEFT);
+        
+        VBox emailBox = createInputField("Email", emailField, "Masukkan email kamu");
+        VBox passwordBox = createInputField("Password", passwordField, "Masukkan password kamu");
+        
+        fieldsContainer.getChildren().addAll(emailBox, passwordBox);
+        
+        Button btnSignIn = new Button("Masuk");
+        btnSignIn.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 8px; -fx-padding: 12px; -fx-cursor: hand;");
+        btnSignIn.setMaxWidth(Double.MAX_VALUE); 
+
+        // =================================================================================
+        // 🎯 LOGIKA LOGIN UTAMA
+        // =================================================================================
+        btnSignIn.setOnAction(e -> {
+        String email = emailField.getText().trim();
+        String password = passwordField.getText().trim();
+
+        // 1. Cek user
+        User userCheck = new UserDAO().findByEmail(email);
+
+        if (userCheck == null) {
+            lblStatus.setText("❌ Email tidak terdaftar.");
+            return;
+        }
+
+        // 2. Cek apakah diblokir
+        if ("Banned".equalsIgnoreCase(userCheck.getAccountStatus())) {
+            showErrorAlert("Akun Diblokir", "Akun Anda telah dinonaktifkan oleh Admin.");
+            return;
+        }
+
+        // 3. Login
+        AuthService auth = new AuthService();
+        User user = auth.login(email, password);
+
+        if (user != null) {
+
+            if (!user.getRole().equalsIgnoreCase(roleKonteks)) {
+                lblStatus.setText("❌ Akun bukan untuk role " + roleKonteks);
+                return;
+            }
+
+            // Simpan session user
+            UserSession.getInstance().setUser(
+                user.getUsername(),
+                user.getId(),
+                user.getRole()
+            );
+
+            pindahDashboard(user.getRole(), user.getId());
+
+        } else {
+            lblStatus.setText("❌ Password salah.");
+        }
+    });
+        
+        HBox dividerRow = new HBox(10);
+        dividerRow.setAlignment(Pos.CENTER);
+        dividerRow.setMaxWidth(Double.MAX_VALUE);
+        
+        StackPane lineLeft = new StackPane(); 
+        lineLeft.setStyle("-fx-background-color: #E2E8F0; -fx-pref-height: 1px;"); 
+        HBox.setHgrow(lineLeft, Priority.ALWAYS);
+        
+        Label labelOr = new Label("atau"); 
+        labelOr.setStyle("-fx-text-fill: #94A3B8; -fx-font-family: 'Poppins'; -fx-font-size: 12px;");
+        
+        StackPane lineRight = new StackPane(); 
+        lineRight.setStyle("-fx-background-color: #E2E8F0; -fx-pref-height: 1px;"); 
+        HBox.setHgrow(lineRight, Priority.ALWAYS);
+        
+        dividerRow.getChildren().addAll(lineLeft, labelOr, lineRight);
+
+        HBox signUpRedirectBox = new HBox(5);
+        signUpRedirectBox.setAlignment(Pos.CENTER);
+        signUpRedirectBox.setMaxWidth(Double.MAX_VALUE);
+        
+        Label lblNoAccount = new Label("Belum punya akun?");
+        lblNoAccount.setStyle("-fx-font-family: 'Poppins'; -fx-text-fill: #1A3C5A; -fx-font-weight: bold;");
+        
+        Hyperlink linkSignUp = new Hyperlink("Daftar di sini!");
+        linkSignUp.setStyle("-fx-font-family: 'Poppins'; -fx-text-fill: #003A6C; -fx-font-weight: bold; -fx-underline: true; -fx-padding: 0; -fx-border-color: transparent;");
+
+        linkSignUp.setOnAction(e -> {
+            SignUpPage signUpPage = new SignUpPage(this.roleKonteks); 
+            signUpPage.start(primaryStage);
+        });
         signUpRedirectBox.getChildren().addAll(lblNoAccount, linkSignUp);
+        
+        if (roleKonteks.equalsIgnoreCase("ADMIN")) {
+            dividerRow.setVisible(false);
+            dividerRow.setManaged(false);
+            signUpRedirectBox.setVisible(false);
+            signUpRedirectBox.setManaged(false);
+        }
 
-        // Satukan komponen kanan
-        rightContent.getChildren().addAll(headerBox, fieldsContainer, btnSignIn, dividerRow, signUpRedirectBox);
-
-        // Satukan Kiri & Kanan ke Root Kontainer
+        rightContent.getChildren().addAll(btnKembali, headerBox, fieldsContainer, lblStatus, btnSignIn, dividerRow, signUpRedirectBox);
+        
         mainRoot.getChildren().addAll(leftBanner, rightContent);
-
-        // Setup Jendela Aplikasi (Resolusi 1024 x 720)
-        Scene scene = new Scene(mainRoot, 1024, 720);
+        
+        Scene scene = new Scene(mainRoot, 1280, 650);
         try {
             scene.getStylesheets().add(getClass().getResource("/style/guest/intro.css").toExternalForm());
-        } catch (Exception e) {
-            System.out.println("⚠️ Gagal memuat intro.css di SignInPage");
-        }
+        } catch (Exception e) {}
 
         primaryStage.setTitle("Luminara - Masuk Akun");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+    
+    private void showErrorAlert(String title, String content) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null); 
+        alert.setContentText(content);
+        alert.showAndWait(); 
+    }
 
-    // Fungsi pembantu pembuatan baris komponen input teks
-    private VBox createInputField(String labelText, String placeholderText, boolean isPassword) {
-        VBox fieldBox = new VBox(6);
+    // 🎯 FIX: Method ini sekarang butuh "userId" untuk dikirim ke halaman selanjutnya
+    private void pindahDashboard(String role, int userId) {
+        if (role.equalsIgnoreCase("ADMIN")) {
+            // 🎯 Hapus tanda // agar halamannya berpindah!
+            // Pastikan kamu memang punya class bernama MainAdmin.
+            MainAdmin adminPage = new MainAdmin(); 
+            adminPage.start(primaryStage);
+            
+        } else if (role.equalsIgnoreCase("ORGANIZER") || role.equalsIgnoreCase("PENYELENGGARA")) {
+            ManajemenAcaraView dashboard = new ManajemenAcaraView(userId);
+            Scene dashboardScene = new Scene(dashboard, 1280, 650); 
+            primaryStage.setScene(dashboardScene);
+            
+        } else {
+            // Lakukan hal yang sama untuk User biasa jika sudah ada halamannya
+            MainUser userPage = new MainUser();
+            userPage.start(primaryStage);
+        }
+    }
+    
+
+    private VBox createInputField(String labelText, javafx.scene.control.TextInputControl inputField, String placeholderText) {
+        VBox fieldBox = new VBox(8);
         fieldBox.setAlignment(Pos.TOP_LEFT);
 
         Label inputLabel = new Label(labelText);
-        inputLabel.getStyleClass().add("form-field-label");
+        inputLabel.setStyle("-fx-font-family: 'Poppins'; -fx-font-size: 13px; -fx-text-fill: #003A6C; -fx-font-weight: bold;");
 
-        if (isPassword) {
-            PasswordField passwordField = new PasswordField();
-            passwordField.setPromptText(placeholderText);
-            passwordField.getStyleClass().add("form-text-input");
-            passwordField.setMaxWidth(440);
-            fieldBox.getChildren().addAll(inputLabel, passwordField);
-        } else {
-            TextField textField = new TextField();
-            textField.setPromptText(placeholderText);
-            textField.getStyleClass().add("form-text-input");
-            textField.setMaxWidth(440);
-            fieldBox.getChildren().addAll(inputLabel, textField);
-        }
+        inputField.setPromptText(placeholderText);
+        inputField.setMaxWidth(Double.MAX_VALUE);
+        inputField.setStyle("-fx-background-color: #F8F9FA; -fx-border-color: #CBD5E1; -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-padding: 12px 15px; -fx-font-family: 'Poppins'; -fx-font-size: 13px;");
 
+        fieldBox.getChildren().addAll(inputLabel, inputField);
         return fieldBox;
     }
 }

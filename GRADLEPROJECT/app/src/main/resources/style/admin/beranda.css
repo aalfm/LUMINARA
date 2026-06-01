@@ -1134,3 +1134,140 @@
     -fx-background-radius: 5;
     -fx-padding: 3 10;
 }
+
+/* =========================================
+   STYLE UNTUK HALAMAN SOROTAN BUDAYA
+   ========================================= */
+
+/* Tipografi Header */
+.sorotan-title {
+    font-family: "Poppins";
+    font-size: 32px;
+    font-weight: bold;
+
+    -fx-font-family: 'Poppins';
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #003A6C;
+}
+
+.sorotan-subtitle {
+    font-family: 'Poppins';
+    font-size: 14px;
+
+    -fx-font-family: 'Poppins';
+    -fx-font-size: 14px;
+    -fx-text-fill: #6C757D;
+}
+
+/* Kartu Putih Utama */
+.sorotan-card {
+    background-color: #F8F7F4;
+
+    -fx-background-color: #F8F7F4;
+    -fx-background-radius: 20px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5);
+}
+
+.sorotan-section-title {
+    font-family: 'Poppins';
+    font-size: 16px;
+    font-weight: bold;
+
+    -fx-font-family: 'Poppins';
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #003A6C;
+}
+
+/* Label & Input Form */
+.form-label {
+    font-family: 'Poppins';
+    font-size: 12px;
+
+    -fx-font-family: 'Poppins';
+    -fx-font-size: 12px;
+    -fx-text-fill: #003A6C;
+}
+
+.form-input {
+    background-color: #F8F9FA;
+    border-color: #CBD5E1;
+    border-radius: 8px;
+    font-family: 'Poppins';
+    font-size: 13px;
+    padding: 8px 12px;
+    
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: #CBD5E1;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-font-family: 'Poppins';
+    -fx-font-size: 13px;
+    -fx-padding: 8px 12px;
+    -fx-text-fill: #1E293B;
+}
+
+/* Efek saat input diklik/difokuskan */
+.form-input:focused {
+    border-color: #FF9800;
+    background-color: #FFFFFF;
+
+    -fx-border-color: #FF9800;
+    -fx-background-color: #FFFFFF;
+}
+
+/* Area Dropzone Gambar */
+.image-dropzone {
+    background-color: #F8F9FA;
+    border-color: #CBD5E1;
+    border-radius: 12px;
+    border-width: 1.5px;
+
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: #CBD5E1;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-border-width: 1.5px;
+}
+
+/* Tombol Aksi */
+.btn-outline-primary {
+    background-color: #F8F7F4;
+    border-color: #003A6C;
+    border-radius: 8px;
+    font-family: 'Poppins';
+    font-weight: bold;
+    font-size: 12px;
+    padding: 8px 20px;
+    cursor: hand;
+
+    -fx-background-color: #F8F7F4;
+    -fx-border-color: #003A6C;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #003A6C;
+    -fx-font-family: 'Poppins';
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+}
+
+.btn-primary {
+    background-color: #FF9800;
+    font-family: 'Poppins';
+    font-weight: bold;
+    font-size: 13px;
+    padding: 10px 24px;
+    cursor: hand;
+
+    -fx-background-color: #FF9800;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-family: 'Poppins';
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 24px;
+    -fx-cursor: hand;
+}

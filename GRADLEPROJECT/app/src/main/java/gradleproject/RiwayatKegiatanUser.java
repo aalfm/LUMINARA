@@ -1,5 +1,7 @@
 package gradleproject;
 
+import java.util.List;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -56,15 +58,38 @@ public class RiwayatKegiatanUser {
         VBox.setVgrow(boxBlueContainer, Priority.ALWAYS);
 
         // Kontainer Penampung Baris Kartu Putih
+        // Di dalam konstruktor RiwayatKegiatanUser(), ganti bagian listCardsBox ini:
+
         VBox listCardsBox = new VBox(15);
         listCardsBox.setStyle("-fx-background-color: transparent;");
 
-        // Memasukkan data list riwayat sesuai urutan gambar mockup [Selesai, Berikan Ulasan, Tidak Hadir]
-        listCardsBox.getChildren().addAll(
-            createHistoryCard("Nama Kegiatan", "Selesai"),
-            createHistoryCard("Nama Kegiatan", "Berikan Ulasan"),
-            createHistoryCard("Nama Kegiatan", "Tidak Hadir")
-        );
+        // 🎯 FIX: Ambil dari database, bukan hardcoded!
+        // 🎯 LOGIKA TARIK DATA DAN CEK STATUS ULASAN
+        if (UserSession.getInstance() != null) {
+            int userId = UserSession.getInstance().getUserId();
+            gradleproject.dao.TicketDAO ticketDAO = new gradleproject.dao.TicketDAO();
+            gradleproject.dao.ReviewDAO reviewDAO = new gradleproject.dao.ReviewDAO();
+            
+            List<gradleproject.models.Ticket> daftarRiwayat = ticketDAO.getRiwayatKegiatanUser(userId);
+            
+            if (daftarRiwayat.isEmpty()) {
+                Label lblKosong = new Label("Belum ada riwayat kegiatan.");
+                lblKosong.setStyle("-fx-text-fill: #A0A9B5; -fx-font-family: 'Poppins';");
+                listCardsBox.getChildren().add(lblKosong);
+            } else {
+                for (gradleproject.models.Ticket tiket : daftarRiwayat) {
+                    String judulEvent = tiket.getUserName(); // Meminjam kolom username untuk judul event
+                    int ticketId = tiket.getId();
+                    boolean sudahMengulas = reviewDAO.hasUserReviewedTicket(userId, ticketId);
+                    
+                    // Jika sudah, tulis Selesai. Jika belum, tulis Berikan Ulasan
+                    String statusText = sudahMengulas ? "Selesai" : "Berikan Ulasan"; 
+                    
+                    // Masukkan eventId agar halaman Ulasan tahu ID acaranya
+                    listCardsBox.getChildren().add(createHistoryCard(ticketId, judulEvent, statusText));
+                }
+            }
+        }
 
         // KUNCI SCROLL: Hanya menggulung daftar kartu putih bagian dalam box biru saja
         ScrollPane scrollInner = new ScrollPane(listCardsBox);
@@ -80,38 +105,38 @@ public class RiwayatKegiatanUser {
         view.getChildren().addAll(welcomeHeader, sectionRiwayat);
     }
 
-    // --- METHOD HELPER: Membuat Baris Kapsul Putih Riwayat Kegiatan ---
-    private HBox createHistoryCard(String namaKegiatan, String statusText) {
+
+    // 🎯 FIX: Tambahkan parameter int eventId
+    private HBox createHistoryCard(int eventId, String namaKegiatan, String statusText) {
         HBox card = new HBox();
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(15, 25, 15, 25));
         card.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.02), 5, 0, 0, 1);");
 
-        // Sisi Kiri: Nama Kegiatan
         Label lblNama = new Label(namaKegiatan);
         lblNama.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #0A3B5C;");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Sisi Kanan: Status/Aksi Dinamis
         Label lblStatus = new Label(statusText);
         lblStatus.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 13px;");
         
-        // Logika pewarnaan teks status sesuai peruntukan fungsinya
+        // Logika pewarnaan teks status
         if (statusText.equalsIgnoreCase("Berikan Ulasan")) {
-            lblStatus.setStyle(lblStatus.getStyle() + " -fx-text-fill: #FF9800;"); // Oranye interaktif
+            lblStatus.setStyle(lblStatus.getStyle() + " -fx-text-fill: #FF9800;"); 
             card.setCursor(javafx.scene.Cursor.HAND);
             card.setOnMouseClicked(e -> {
                 if (DashboardUser.getInstance() != null) {
-                    // Berhasil pindah dengan membawa nama kegiatan riil (misal: "Makassar Traditional Costume Showcase")
-                    DashboardUser.getInstance().pindahKeUlasan(namaKegiatan); 
+                    // 🎯 FIX: Bawa eventId saat pindah ke halaman ulasan
+                    DashboardUser.getInstance().pindahKeUlasan(eventId, namaKegiatan); 
                 }
             });
         } else if (statusText.equalsIgnoreCase("Selesai")) {
-            lblStatus.setStyle(lblStatus.getStyle() + " -fx-text-fill: #0A3B5C;"); // Biru gelap bawaan selesai
+            lblStatus.setStyle(lblStatus.getStyle() + " -fx-text-fill: #0A3B5C;"); // Biru gelap
+            // Tidak ada setOnMouseClicked, jadi tidak bisa diklik lagi
         } else {
-            lblStatus.setStyle(lblStatus.getStyle() + " -fx-text-fill: #A0A9B5;"); // Abu-abu pudar untuk tidak hadir
+            lblStatus.setStyle(lblStatus.getStyle() + " -fx-text-fill: #A0A9B5;"); 
         }
 
         card.getChildren().addAll(lblNama, spacer, lblStatus);

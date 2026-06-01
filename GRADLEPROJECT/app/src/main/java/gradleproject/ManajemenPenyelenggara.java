@@ -5,13 +5,21 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane; // <--- Import ScrollPane
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+
+// 👉 1. TAMBAHKAN IMPORT SQL & WAKTU DI SINI
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import gradleproject.config.DbConnect;
 
 public class ManajemenPenyelenggara {
 
@@ -30,22 +38,34 @@ public class ManajemenPenyelenggara {
         lblSub.getStyleClass().add("greeting-subtitle");
         header.getChildren().addAll(lblHi, lblSub);
 
+        // =====================================================================
+        // 👉 2. AMBIL DATA JUMLAH (COUNT) DARI DATABASE (Sinkron dgn Dashboard)
+        // =====================================================================
+        int totalPenyelenggara = getDatabaseCount("SELECT COUNT(*) \r\n" + //
+                        "FROM users \r\n" + //
+                        "WHERE (UPPER(role) = 'ORGANIZER' OR UPPER(role) = 'PENYELENGGARA')\r\n" + //
+                        "AND (account_status IS NULL OR UPPER(account_status) != 'BANNED')");
+
+        int akunDiblokir = getDatabaseCount("SELECT COUNT(*) \r\n" + //
+                        "FROM users \r\n" + //
+                        "WHERE (UPPER(role) = 'ORGANIZER' OR UPPER(role) = 'PENYELENGGARA')\r\n" + //
+                        "AND UPPER(account_status) = 'BANNED'");
+
         // 2. MINI SUMMARY CARDS SECTION
         HBox cardsRow = new HBox(20);
         cardsRow.setAlignment(Pos.TOP_LEFT);
 
-        // Kartu Total Penyelenggara
-        VBox cardTotal = createMiniCard("🏢", "TOTAL PENYELENGGARA", "7", "box-gray", event -> {
-            if (Dashboard.getInstance() != null) {
-                // Pastikan kamu sudah membuat fungsi jembatan ini di Dashboard
-                Dashboard.getInstance().pindahKeDaftarPenyelenggara(); 
+        // Kartu Total Penyelenggara (Angka Dinamis)
+        VBox cardTotal = createMiniCard("🏢", "TOTAL PENYELENGGARA", String.valueOf(totalPenyelenggara), "box-gray", event -> {
+            if (DashboardAdmin.getInstance() != null) {
+                DashboardAdmin.getInstance().pindahKeDaftarPenyelenggara(); 
             }
         });
         
-        // Kartu Penyelenggara Diblokir
-        VBox cardBlokir = createMiniCard("🚫", "AKUN DIBLOKIR", "2", "box-orange", event -> {
-            if (Dashboard.getInstance() != null) {
-                Dashboard.getInstance().pindahKeDaftarBlokirPenyelenggara(); 
+        // Kartu Penyelenggara Diblokir (Angka Dinamis)
+        VBox cardBlokir = createMiniCard("🚫", "AKUN DIBLOKIR", String.valueOf(akunDiblokir), "box-orange", event -> {
+            if (DashboardAdmin.getInstance() != null) {
+                DashboardAdmin.getInstance().pindahKeDaftarBlokirPenyelenggara(); 
             }
         });
         
@@ -55,15 +75,13 @@ public class ManajemenPenyelenggara {
         VBox tableBox = new VBox(0);
         tableBox.getStyleClass().add("management-table-container");
         tableBox.setMaxWidth(770);
-        // 👉 PERBAIKAN 1: Tambahkan background putih dan border radius utuh pada wadah
         tableBox.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 8; -fx-border-color: #D3D9DE; -fx-border-radius: 8;");
-        VBox.setVgrow(tableBox, Priority.ALWAYS); // Memaksa wadah tabel meluas ke bawah
+        VBox.setVgrow(tableBox, Priority.ALWAYS); 
 
         HBox tableHeader = new HBox();
         tableHeader.getStyleClass().add("management-table-header");
         tableHeader.setAlignment(Pos.CENTER_LEFT);
         tableHeader.setPadding(new Insets(12, 25, 12, 25)); 
-        // 👉 PERBAIKAN 2: Radius melengkung HANYA di sudut atas (8 8 0 0)
         tableHeader.setStyle("-fx-background-color: #D3D9DE; -fx-background-radius: 8 8 0 0;");
 
         Label colNama = new Label("Nama Organisasi");
@@ -85,38 +103,70 @@ public class ManajemenPenyelenggara {
         tableBody.setPadding(new Insets(20, 25, 20, 25));
         tableBody.setStyle("-fx-background-color: transparent;");
 
-        // Memasukkan data penyelenggara acara (Diulang 4 kali agar tabel bisa di-scroll)
-        for (int i = 0; i < 4; i++) {
-            tableBody.getChildren().addAll(
-                createTableRow("Komunitas Ilmiah Remaja", "kir.mks@gmail.com", "2026, Januari 15", "Diterima", "#4CAF50"),
-                createTableRow("Vendor Abal-Abal", "scam.event@gmail.com", "2026, Februari 10", "Diblokir", "#FF9800"),
-                createTableRow("HIMA Sistem Informasi", "himasi@unhas.ac.id", "2026, Maret 22", "Diterima", "#4CAF50"),
-                createTableRow("Dinas Lingkungan Hidup", "dlh.makassar@gov.id", "2026, Mei 02", "Diterima", "#4CAF50")
-            );
+        // =====================================================================
+        // 👉 3. AMBIL DATA BARIS TABEL DARI DATABASE
+        // =====================================================================
+        String queryTabel = "SELECT username, email, account_status, created_at FROM users WHERE UPPER(role) = 'ORGANIZER' OR UPPER(role) = 'PENYELENGGARA' ORDER BY id DESC";
+        
+        try (Connection conn = DbConnect.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(queryTabel)) {
+             
+            while (rs.next()) {
+                String nama = rs.getString("username");
+                String email = rs.getString("email") != null ? rs.getString("email") : "-";
+                String statusAsli = rs.getString("account_status");
+                String tglMentah = rs.getString("created_at");
+                
+                // Format tanggal menjadi lebih rapi (cth: 2026, Mei 02)
+                String tglRapi = tglMentah; 
+                try {
+                    Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(tglMentah);
+                    tglRapi = new SimpleDateFormat("yyyy, MMMM dd").format(date);
+                } catch(Exception ignored) {}
+
+                // Menentukan Teks Status & Warna Titik (Dot)
+                String statusTeks = "Diterima"; // Default hijau (Active)
+                String warnaDot = "#4CAF50"; 
+                
+                if (statusAsli != null && statusAsli.equalsIgnoreCase("Banned")) {
+                    statusTeks = "Diblokir";
+                    warnaDot = "#FF9800"; // Orange
+                } else if (statusAsli != null && statusAsli.equalsIgnoreCase("Pending")) {
+                    statusTeks = "Menunggu";
+                    warnaDot = "#FFC107"; // Kuning
+                }
+
+                // Tambahkan baris baru ke tabel secara dinamis
+                tableBody.getChildren().add(createTableRow(nama, email, tglRapi, statusTeks, warnaDot));
+            }
+        } catch (Exception e) {
+            System.out.println("⚠️ Gagal memuat tabel penyelenggara: " + e.getMessage());
         }
 
         // =====================================================================
-        // 4. SCROLL PANE (Pengganti Tombol Footer "Lihat Detail")
+        // 4. SCROLL PANE
         // =====================================================================
         ScrollPane scrollTable = new ScrollPane(tableBody);
-        scrollTable.setFitToWidth(true); // Memaksa isi tabel menyesuaikan lebar layar
-        
-        // 👉 PERBAIKAN 3: Sembunyikan scrollbar vertikal dengan NEVER
+        scrollTable.setFitToWidth(true); 
         scrollTable.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); 
-        scrollTable.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Scroll horizontal dimatikan
-        
-        // 👉 PERBAIKAN 4: Radius melengkung HANYA di sudut bawah area scroll (0 0 8 8)
+        scrollTable.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); 
         scrollTable.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent; -fx-background-radius: 0 0 8 8;");
-        
-        // Memaksa area scroll mengisi sisa ruang kosong di layar bawah
         VBox.setVgrow(scrollTable, Priority.ALWAYS);
-        // =====================================================================
 
-        // Masukkan Header dan ScrollTable ke Wadah Utama
         tableBox.getChildren().addAll(tableHeader, scrollTable);
-
-        // Gabungkan semua ke view
         view.getChildren().addAll(header, cardsRow, tableBox);
+    }
+
+    // 👉 FUNGSI BANTUAN UNTUK MENGAMBIL JUMLAH (COUNT)
+    private int getDatabaseCount(String query) {
+        int count = 0;
+        try (Connection conn = DbConnect.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            if (rs.next()) { count = rs.getInt(1); }
+        } catch (Exception e) { System.out.println("⚠️ Error hitung DB: " + e.getMessage()); }
+        return count;
     }
 
     // Method pembuat kartu mini

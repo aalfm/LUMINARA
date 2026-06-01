@@ -5,11 +5,19 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane; // <--- Import ScrollPane
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+
+// 👉 1. IMPORT DATABASE & FORMAT WAKTU DI SINI
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import gradleproject.config.DbConnect;
 
 public class DaftarPenyelenggara {
 
@@ -42,19 +50,42 @@ public class DaftarPenyelenggara {
         listContainer.setMaxWidth(770);
         listContainer.setStyle("-fx-background-color: transparent;");
 
-        // Data Dummy Penyelenggara (Diulang 3 kali agar bisa di-scroll)
-        for (int i = 0; i < 3; i++) {
-            listContainer.getChildren().addAll(
-                createOrganizerRow("Alifah Mahalini", "Bergabung hari ini pukul 23.00 WITA"),
-                createOrganizerRow("Alifah Mahalini", "Bergabung hari ini pukul 20.00 WITA"),
-                createOrganizerRow("Alifah Mahalini", "Bergabung hari ini pukul 13.08 WITA"),
-                createOrganizerRow("Alifah Mahalini", "Bergabung kemarin pukul 23.00 WITA"),
-                createOrganizerRow("Alifah Mahalini", "Bergabung kemarin pukul 11.00 WITA")
-            );
+        // =====================================================================
+        // 👉 3. AMBIL DATA DARI DATABASE (Menggantikan Data Dummy)
+        // =====================================================================
+        String query = "SELECT username, created_at FROM users WHERE UPPER(role) = 'ORGANIZER' OR UPPER(role) = 'PENYELENGGARA' ORDER BY id DESC";
+        
+        try (Connection conn = DbConnect.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+             
+            // Menyiapkan alat untuk merapikan format tanggal (YYYY-MM-DD ke teks yang mudah dibaca)
+            SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat displayFormat = new SimpleDateFormat("'Bergabung pada' dd MMMM yyyy 'pukul' HH.mm 'WITA'");
+            
+            while (rs.next()) {
+                String nama = rs.getString("username");
+                String tglMentah = rs.getString("created_at");
+                String tglTampil = "Baru saja bergabung"; // Nilai default jika gagal di-parse
+                
+                try {
+                    if (tglMentah != null) {
+                        Date date = dbFormat.parse(tglMentah);
+                        tglTampil = displayFormat.format(date);
+                    }
+                } catch(Exception e) {
+                    // Biarkan menggunakan nilai mentah atau default jika terjadi error konversi format
+                }
+                
+                // Tambahkan baris baru ke layar secara dinamis
+                listContainer.getChildren().add(createOrganizerRow(nama, tglTampil));
+            }
+        } catch (Exception e) {
+            System.out.println("⚠️ Gagal memuat daftar penyelenggara: " + e.getMessage());
         }
 
         // =====================================================================
-        // 4. SCROLL PANE (Menggantikan Tombol Paginasi)
+        // 4. SCROLL PANE
         // =====================================================================
         ScrollPane scrollTable = new ScrollPane(listContainer);
         scrollTable.setFitToWidth(true); // Memaksa isi tabel menyesuaikan lebar layar
@@ -66,7 +97,7 @@ public class DaftarPenyelenggara {
         VBox.setVgrow(scrollTable, Priority.ALWAYS);
         // =====================================================================
 
-        // Masukkan semua elemen ke dalam view (Paginasi sudah dihapus)
+        // Masukkan semua elemen ke dalam view
         view.getChildren().addAll(header, lblPageTitle, scrollTable);
     }
 
@@ -74,7 +105,7 @@ public class DaftarPenyelenggara {
         HBox row = new HBox(15);
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("user-row-box"); 
-        row.setPadding(new Insets(10, 15, 10, 15)); // Tambahan padding agar jarak dalam baris lebih rapi
+        row.setPadding(new Insets(10, 15, 10, 15)); 
 
         // Ikon Penyelenggara 
         Label icon = new Label("👤");
@@ -93,16 +124,16 @@ public class DaftarPenyelenggara {
 
         // Tombol Detail
         Button btnDetail = new Button("Detail");
-        btnDetail.getStyleClass().add("btn-detail"); // Pastikan di CSS kamu ada ".btn-detail" atau ubah ke ".btn-lihat"
+        btnDetail.getStyleClass().add("btn-detail"); 
         btnDetail.setCursor(javafx.scene.Cursor.HAND);
 
         // ✅ 3. SEKARANG LOGIKA INI SUDAH BISA MEMBACA VARIABEL dariBeranda
         btnDetail.setOnAction(event -> {
-            if (Dashboard.getInstance() != null) {
+            if (DashboardAdmin.getInstance() != null) {
                 if (dariBeranda) {
-                    Dashboard.getInstance().pindahKeProfilPenyelenggara(); 
+                    DashboardAdmin.getInstance().pindahKeProfilPenyelenggara(); 
                 } else {
-                    Dashboard.getInstance().pindahKeDetailPenyelenggara(); 
+                    DashboardAdmin.getInstance().pindahKeDetailPenyelenggara(); 
                 }
             }
         });

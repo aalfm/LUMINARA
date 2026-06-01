@@ -1,5 +1,9 @@
 package gradleproject;
 
+import gradleproject.dao.UserDAO;
+import gradleproject.models.Event;
+import gradleproject.models.User;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -36,128 +40,136 @@ public class DashboardUser {
 
     private static DashboardUser instance;
 
-    // Jalur navigasi menuju detail tiket saya penuh
+    // =====================================================================
+    // FUNGSI NAVIGASI MENU (JEMBATAN ANTAR HALAMAN)
+    // =====================================================================
+
     public void pindahKeTiketSaya() {
-        TiketSaya halTiket = new TiketSaya();
+        TiketSaya halTiket = new TiketSaya(); 
         root.setCenter(halTiket.getView());
-        
-        // Otomatis sorot submenu Tiket Saya menjadi oranye aktif di sidebar
-        setMenuSelection(mnuTiketSaya);
     }
 
-    // Jalur navigasi menuju daftar rekomendasi kegiatan grid penuh
     public void pindahKeRekomendasiKegiatanPenuh() {
         RekomendasiKegiatan halRekomendasi = new RekomendasiKegiatan();
         root.setCenter(halRekomendasi.getView());
-        
-        // Tandai otomatis submenu Rekomendasi Kegiatan menjadi aktif di sidebar kiri
         setMenuSelection(mnuRekomendasiKegiatan);
     }
 
-    // Jalur navigasi untuk memuat tampilan Detail Deskripsi Rekomendasi Event Budaya
-    public void pindahKeDetailRekomendasi() {
-        DetailRekomendasi halDetail = new DetailRekomendasi();
-        root.setCenter(halDetail.getView());
-        
-        // Tetap nyalakan warna aktif menu Rekomendasi Kegiatan di sidebar kiri
+    public void pindahKeDetailRekomendasi(Event acara) {
+        DetailRekomendasi detail = new DetailRekomendasi(acara);
+        root.setCenter(detail.getView());
         setMenuSelection(mnuRekomendasiKegiatan);
     }
 
-    // Jalur rute untuk membuka halaman galeri Sorotan Budaya penuh di tengah screen
     public void pindahKeSorotanBudayaPenuh() {
         SorotanBudaya halSorotan = new SorotanBudaya();
         root.setCenter(halSorotan.getView());
-        
-        // Nyalakan warna aktif menu Sorotan Budaya di sidebar kiri
         setMenuSelection(mnuSorotanBudaya);
     }
 
-    // Jalur rute untuk memuat halaman Detail Sorotan Budaya penuh di area tengah screen
     public void pindahKeDetailSorotan() {
         DetailSorotan halDetailSorotan = new DetailSorotan();
         root.setCenter(halDetailSorotan.getView());
-        
-        // Tetap kunci warna aktif menu Sorotan Budaya di sidebar kiri
         setMenuSelection(mnuSorotanBudaya);
     }
 
     public void pindahKeKategoriUser() {
         KategoriUser halKategori = new KategoriUser();
         root.setCenter(halKategori.getView());
-        setMenuSelection(mnuKategori); // Sorot submenu Kategori menjadi oranye aktif
+        setMenuSelection(mnuKategori);
     }
 
     public void pindahKeDetailKategori(String namaKategori) {
         DetailKategori halDetailKat = new DetailKategori(namaKategori);
         root.setCenter(halDetailKat.getView());
-        setMenuSelection(mnuKategori); // Tetap kunci sorotan aktif di submenu Kategori
+        setMenuSelection(mnuKategori); 
     }
 
     public void pindahKeBiayaUser() {
         BiayaUser halBiaya = new BiayaUser();
         root.setCenter(halBiaya.getView());
-        setMenuSelection(mnuBiaya); // Mengunci sorotan aktif pada submenu Biaya
+        setMenuSelection(mnuBiaya); 
     }
 
-    // Jalur rute untuk membuka halaman Detail dari menu Biaya Kegiatan
     public void pindahKeDetailBiaya(String statusBiaya) {
         DetailBiaya halDetailBiaya = new DetailBiaya(statusBiaya);
         root.setCenter(halDetailBiaya.getView());
-        setMenuSelection(mnuBiaya); // Tetap mengunci sorotan aktif pada submenu Biaya
+        setMenuSelection(mnuBiaya); 
     }
+
+    // ---------------------------------------------------------------------
+    // JALUR PEMESANAN & PEMBAYARAN 
+    // ---------------------------------------------------------------------
 
     public void pindahKePesanTiket() {
-        PesanTiketUser halPesan = new PesanTiketUser();
-        root.setCenter(halPesan.getView());
-        setMenuSelection(null); // 🎯 Set null agar menu sidebar meredup semua saat user fokus mengisi form
+        Event acaraDummy = new Event(); 
+        acaraDummy.setId(1);
+        pindahKePesanTiket();
     }
 
-    // Jalur rute untuk memuat Halaman Input Nominal Konfirmasi Pembayaran
-    public void pindahKePembayaran(String totalHarga) {
-        PembayaranUser halBayar = new PembayaranUser(totalHarga);
-        root.setCenter(halBayar.getView());
-        setMenuSelection(null); // Tetap padamkan sidebar agar pengguna fokus bertransaksi
+    public void pindahKePesanTiket(String totalHarga) {
+        Event acaraDummy = new Event(); 
+        acaraDummy.setId(1);
+        pindahKePesanTiket(acaraDummy, totalHarga);
     }
+
+    public void pindahKePesanTiket(Event acara, String totalHarga) {
+        PesanTiketUser halPesan = new PesanTiketUser(acara, totalHarga);
+        root.setCenter(halPesan.getView());
+        setMenuSelection(null); 
+    }
+
+    public void pindahKePembayaran(String totalHarga) {
+        Event acaraDummy = new Event(); 
+        acaraDummy.setId(1);
+        pindahKePembayaran(acaraDummy, totalHarga);
+    }
+
+    public void pindahKePembayaran(Event acara, String totalHarga) {
+        PembayaranUser halBayar = new PembayaranUser(acara, totalHarga);
+        root.setCenter(halBayar.getView());
+        setMenuSelection(null); 
+    }
+    // ---------------------------------------------------------------------
 
     public void pindahKeBeranda() {
-        // 1. Kembalikan konten tengah ke halaman beranda awal
+        BerandaUser halBeranda = new BerandaUser();
+        homeContent = (ScrollPane) halBeranda.getView();
+        
         root.setCenter(homeContent);
         
-        // 2. Pastikan submenu Beranda terbuka rapi kembali saat pulang ke beranda
         if (submenuBerandaBox != null) {
             submenuBerandaBox.setVisible(true);
             submenuBerandaBox.setManaged(true);
         }
         
-        // 3. Tutup otomatis submenu Kegiatan agar sidebar tidak kepenuhan
         if (submenuKegiatanBox != null) {
             submenuKegiatanBox.setVisible(false);
             submenuKegiatanBox.setManaged(false);
         }
         
-        // 4. Nyalakan kembali kapsul sorotan aktif pada menu Beranda
         setMenuSelection(mnuBeranda);
     }
 
-    // Jalur rute pembantu untuk memuat halaman Riwayat Kegiatan milik pengguna
     public void pindahKeRiwayatKegiatan() {
         RiwayatKegiatanUser halRiwayat = new RiwayatKegiatanUser();
         root.setCenter(halRiwayat.getView());
-        setMenuSelection(mnuRiwayatKegiatan); // Nyalakan warna aktif jingga pada submenu riwayat
+        setMenuSelection(mnuRiwayatKegiatan);
     }
 
-    // Jalur rute untuk memuat Halaman Formulir Pengisian Ulasan Kegiatan
-    public void pindahKeUlasan(String namaKegiatan) {
-        UlasanUser halUlasan = new UlasanUser(namaKegiatan);
-        root.setCenter(halUlasan.getView());
-        setMenuSelection(mnuRiwayatKegiatan); // Tetap kunci sorotan menyala jingga di submenu Riwayat Kegiatan
+    public void pindahKeUlasan(int eventId, String namaKegiatan) {
+        UlasanUser halamanUlasan = new UlasanUser(eventId, namaKegiatan);
+        root.setCenter(halamanUlasan.getView()); // Ganti mainBorderPane menjadi root
     }
+
+    // =====================================================================
+    // KONSTRUKTOR & PEMBUATAN UI DASHBOARD
+    // =====================================================================
 
     public DashboardUser() {
         instance = this; 
         root = new BorderPane();
         
-        // Membuka halaman BerandaUser bawaan saat pertama kali aplikasi dibuka
         BerandaUser halBeranda = new BerandaUser();
         homeContent = (ScrollPane) halBeranda.getView();
         root.setCenter(homeContent);
@@ -193,30 +205,36 @@ public class DashboardUser {
         brandBox.setAlignment(Pos.TOP_LEFT);
         brandBox.setPadding(new Insets(0, 0, 15, 0)); 
 
-        Label lblRole = new Label("Pengguna");
+        // 👉 PERBAIKAN: Menarik Data Nama untuk disapa di Sidebar Dashboard
+        String sapaanSidebar = "Pengguna";
+        if (UserSession.getInstance() != null) {
+            UserDAO userDAO = new UserDAO();
+            User currentUser = userDAO.findById(UserSession.getInstance().getUserId());
+            if (currentUser != null && currentUser.getUsername() != null) {
+                // Ambil kata pertama saja agar rapi di sidebar (misal "Andi Alifah" jadi "Andi")
+                sapaanSidebar = currentUser.getUsername().split(" ")[0]; 
+            }
+        }
+
+        Label lblRole = new Label("Halo, " + sapaanSidebar);
         lblRole.setStyle("-fx-text-fill: #A0A9B5; -fx-font-family: 'Poppins'; -fx-font-size: 12px;");
         brandBox.getChildren().addAll(logoView, lblRole);
 
         VBox menuBox = new VBox(5); 
         
-        // Pembuatan Menu Utama Sesuai Gambar Mockup User
         mnuBeranda = createMenuItem("/aset/iconLuminara/icon-beranda.png", "/aset/iconLuminara/branda-biru.png", "Beranda", true); 
         mnuKegiatan = createMenuItem("/aset/iconLuminara/acara-putih.png", "/aset/iconLuminara/icon-manajemen-acara.png", "Kegiatan", false);
         mnuProfil = createMenuItem("/aset/iconLuminara/icon-user.png", "/aset/iconLuminara/profil-biru.png", "Profil", false);
 
-        // Pembuatan Submenu Beranda (Tiket Saya, Rekomendasi, Sorotan)
         submenuBerandaBox = new VBox(3);
         mnuTiketSaya = createSubmenuItem("/aset/iconLuminara/icon-tiket.png", "/aset/iconLuminara/tiket-biru.png", "Tiket Saya");
         mnuRekomendasiKegiatan = createSubmenuItem("/aset/iconLuminara/acara-putih.png", "/aset/iconLuminara/icon-manajemen-acara.png", "Rekomendasi");
         mnuSorotanBudaya = createSubmenuItem("/aset/iconLuminara/budaya-puith.png", "/aset/iconLuminara/icon-budaya.png", "Sorotan");
         
         submenuBerandaBox.getChildren().addAll(mnuTiketSaya, mnuRekomendasiKegiatan, mnuSorotanBudaya);
-        
-        // Set default terbuka rapi seperti pada gambar mockup
         submenuBerandaBox.setVisible(true);
         submenuBerandaBox.setManaged(true);
 
-        // Pengaturan Aksi Navigasi Klik
         mnuBeranda.setOnMouseClicked(event -> {
             boolean isExpanded = submenuBerandaBox.isVisible();
             submenuBerandaBox.setVisible(!isExpanded);
@@ -227,93 +245,94 @@ public class DashboardUser {
         });
         mnuBeranda.setCursor(javafx.scene.Cursor.HAND);
 
-        mnuTiketSaya.setOnMouseClicked(event -> {
-            pindahKeTiketSaya(); // Panggil fungsi jembatan pemindah halaman tengah
-        }); 
+        mnuTiketSaya.setOnMouseClicked(event -> pindahKeTiketSaya()); 
+        mnuRekomendasiKegiatan.setOnMouseClicked(event -> pindahKeRekomendasiKegiatanPenuh());
+        mnuSorotanBudaya.setOnMouseClicked(event -> pindahKeSorotanBudayaPenuh());
 
-        mnuRekomendasiKegiatan.setOnMouseClicked(event -> {
-            pindahKeRekomendasiKegiatanPenuh();
-        });
-
-        mnuSorotanBudaya.setOnMouseClicked(event -> {
-            pindahKeSorotanBudayaPenuh();
-        });
-
-        // Pembuatan Submenu Kegiatan (Kategori & Biaya)
         submenuKegiatanBox = new VBox(3);
         mnuKategori = createSubmenuItem("/aset/iconLuminara/kategori-putih.png", "/aset/iconLuminara/kategori-biru.png", "Kategori");
         mnuBiaya = createSubmenuItem("/aset/iconLuminara/biaya-putih.png", "/aset/iconLuminara/biaya-biru.png", "Biaya");
         
         submenuKegiatanBox.getChildren().addAll(mnuKategori, mnuBiaya);
-        submenuKegiatanBox.setVisible(false); // Default tertutup aman
+        submenuKegiatanBox.setVisible(false);
         submenuKegiatanBox.setManaged(false);
 
-        // Atur Aksi Klik pada Menu Utama Kegiatan
         mnuKegiatan.setOnMouseClicked(event -> {
             boolean isExpanded = submenuKegiatanBox.isVisible();
             submenuKegiatanBox.setVisible(!isExpanded);
             submenuKegiatanBox.setManaged(!isExpanded);
             
-            // Tutup submenu beranda jika menu kegiatan dibuka
             if (submenuBerandaBox != null) { submenuBerandaBox.setVisible(false); submenuBerandaBox.setManaged(false); }
             
-            // Tampilkan halaman utama KegiatanUser di tengah screen
             KegiatanUser halKegiatan = new KegiatanUser();
             root.setCenter(halKegiatan.getView());
             setMenuSelection(mnuKegiatan);
         });
         mnuKegiatan.setCursor(javafx.scene.Cursor.HAND);
 
-        // Atur Aksi Klik pada Submenu Anak
-        mnuKategori.setOnMouseClicked(event -> {
-            pindahKeKategoriUser();
-        });
+        mnuKategori.setOnMouseClicked(event -> pindahKeKategoriUser());
         mnuKategori.setCursor(javafx.scene.Cursor.HAND);
 
-        mnuBiaya.setOnMouseClicked(event -> {
-            pindahKeBiayaUser();
-        });
+        mnuBiaya.setOnMouseClicked(event -> pindahKeBiayaUser());
         mnuBiaya.setCursor(javafx.scene.Cursor.HAND);
 
-        // Inisialisasi Submenu Bersarang khusus Profil
         submenuProfilBox = new VBox(3);
         mnuEditProfil = createSubmenuItem("/aset/iconLuminara/tiket-putih.png", "/aset/iconLuminara/tiket-biru.png", "Edit Profil");
         mnuRiwayatKegiatan = createSubmenuItem("/aset/iconLuminara/rekomendasi-putih.png", "/aset/iconLuminara/rekomendasi-biru.png", "Riwayat Kegiatan");
         mnuKeluar = createSubmenuItem("/aset/iconLuminara/sorotan-putih.png", "/aset/iconLuminara/sorotan-biru.png", "Keluar");
         submenuProfilBox.getChildren().addAll(mnuEditProfil, mnuRiwayatKegiatan, mnuKeluar);
-        submenuProfilBox.setVisible(false); // Default tertutup aman di awal program
+        submenuProfilBox.setVisible(false); 
         submenuProfilBox.setManaged(false);
 
-        // Atur Aksi Klik Menu Utama Profil
-        // Saat menu utama Profil diklik -> Amankan menjadi FALSE (Tombol HILANG)
         mnuProfil.setOnMouseClicked(event -> {
             boolean isExpanded = submenuProfilBox.isVisible();
+
             submenuProfilBox.setVisible(!isExpanded);
             submenuProfilBox.setManaged(!isExpanded);
-            
-            if (submenuBerandaBox != null) { submenuBerandaBox.setVisible(false); submenuBerandaBox.setManaged(false); }
-            if (submenuKegiatanBox != null) { submenuKegiatanBox.setVisible(false); submenuKegiatanBox.setManaged(false); }
-            
-            ProfilUser halProfil = new ProfilUser(false); // 🎯 FALSE = Sembunyikan tombol
-            root.setCenter(halProfil.getView());
+
+            if (submenuBerandaBox != null) {
+                submenuBerandaBox.setVisible(false);
+                submenuBerandaBox.setManaged(false);
+            }
+
+            if (submenuKegiatanBox != null) {
+                submenuKegiatanBox.setVisible(false);
+                submenuKegiatanBox.setManaged(false);
+            }
+
+            root.setCenter(new ProfilUser(false).getView());
             setMenuSelection(mnuProfil);
         });
 
-        // Saat anak menu Edit Profil diklik -> Atur menjadi TRUE (Tombol MUNCUL)
         mnuEditProfil.setOnMouseClicked(event -> {
-            ProfilUser halProfil = new ProfilUser(true); // 🎯 TRUE = Munculkan tombol simpan
-            root.setCenter(halProfil.getView());
+            // 1. Buat instance baru dengan parameter 'true'
+            ProfilUser halProfil = new ProfilUser(true); 
+            
+            // 2. Pastikan Anda mengambil .getView() dari instance halProfil tersebut
+            root.setCenter(halProfil.getView()); 
+            
             setMenuSelection(mnuEditProfil);
         });
         
-        mnuRiwayatKegiatan.setOnMouseClicked(event -> setMenuSelection(mnuRiwayatKegiatan));
+        mnuRiwayatKegiatan.setOnMouseClicked(event -> pindahKeRiwayatKegiatan());
         
         mnuKeluar.setOnMouseClicked(event -> {
-            System.out.println("User berhasil keluar dari sistem Luminara.");
-            // Skenario: Anda dapat menambahkan logika penutupan stage jendela login kembali di sini
+            System.out.println("Sistem: User berhasil keluar dari sistem Luminara.");
+            try {
+                javafx.stage.Stage jendelaBaru = new javafx.stage.Stage();
+                IntroPage3 introPage = new IntroPage3();
+                introPage.start(jendelaBaru); 
+                
+                javafx.stage.Stage jendelaSaatIni = (javafx.stage.Stage) root.getScene().getWindow();
+                if (jendelaSaatIni != null) jendelaSaatIni.close(); 
+                
+                System.out.println("✅ Logout berhasil. Layar awal ditampilkan.");
+            } catch (Exception e) {
+                System.out.println("⚠️ Gagal logout: ");
+                e.printStackTrace();
+            }
         });
 
-        // PENGAMAN ABSOLUT: Masukkan komponen ke dalam Box satu per satu (Anti-Null)
         if (mnuBeranda != null) menuBox.getChildren().add(mnuBeranda);
         if (submenuBerandaBox != null) menuBox.getChildren().add(submenuBerandaBox);
 
@@ -323,7 +342,6 @@ public class DashboardUser {
         if (mnuProfil != null) menuBox.getChildren().add(mnuProfil);
         if (submenuProfilBox != null) menuBox.getChildren().add(submenuProfilBox);
 
-        // Penampung Logo Kembang Putih di Sudut Paling Bawah
         HBox bottomLogoBox = new HBox();
         bottomLogoBox.setAlignment(Pos.CENTER);
         ImageView smallLogoView = new ImageView();
@@ -350,7 +368,6 @@ public class DashboardUser {
     }
 
     private void setMenuSelection(HBox selectedMenu) {
-        // Tutup otomatis submenu Beranda jika menu utama lain yang diklik oleh user
         if (selectedMenu != mnuBeranda && selectedMenu != mnuTiketSaya && selectedMenu != mnuRekomendasiKegiatan && selectedMenu != mnuSorotanBudaya) {
             if (submenuBerandaBox != null) {
                 submenuBerandaBox.setVisible(false);
@@ -375,7 +392,6 @@ public class DashboardUser {
         for (HBox menu : allMenus) {
             if (menu == null) continue;
             
-            // Setel ulang latar belakang menu tidak terpilih
             menu.setStyle("-fx-background-color: transparent; -fx-background-radius: 10;");
             
             if (!menu.getChildren().isEmpty() && menu.getChildren().get(0) instanceof StackPane) {
@@ -402,10 +418,8 @@ public class DashboardUser {
             }
         }
         
-        // Memasang style aktif pada elemen yang dipilih
         if (selectedMenu != null) {
             if (selectedMenu.getStyleClass().contains("submenu-item")) {
-                // Style Teks Menyala Oranye saat Submenu Aktif dipilih
                 for (javafx.scene.Node node : selectedMenu.getChildren()) {
                     if (node instanceof Label) {
                         Label lbl = (Label) node;
@@ -413,7 +427,6 @@ public class DashboardUser {
                     }
                 }
             } else {
-                // Kapsul Abu Terang Aktif untuk Menu Utama yang dipilih
                 selectedMenu.setStyle("-fx-background-color: #D3D9DE; -fx-background-radius: 10;");
                 
                 if (!selectedMenu.getChildren().isEmpty() && selectedMenu.getChildren().get(0) instanceof StackPane) {
@@ -446,8 +459,6 @@ public class DashboardUser {
             }
         }
     }
-
-    
 
     private HBox createMenuItem(String iconPutihPath, String iconBiruPath, String text, boolean isActive) {
         HBox menuItem = new HBox(10); 

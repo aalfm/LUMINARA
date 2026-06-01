@@ -62,7 +62,7 @@ sidebar.getChildren().add(bottomLogoContainer);
         // Kumpulan Tombol Navigasi
         VBox menuBox = new VBox(8);
         menuBox.getChildren().addAll(
-            createMenuButton("Tentang Kami", activeMenu.equals("Tentang Kami"), stage),
+            createMenuButton("Beranda", activeMenu.equals("Beranda"), stage),
             createMenuButton("Budaya", activeMenu.equals("Budaya"), stage),
             createMenuButton("Festival", activeMenu.equals("Festival"), stage),
             createMenuButton("Lokakarya", activeMenu.equals("Lokakarya"), stage),
@@ -102,8 +102,8 @@ sidebar.getChildren().add(bottomLogoContainer);
         if (isActive) {
         // 👉 JIKA MENU AKTIF: Gunakan ikon versi berwarna (Biru / Gambar aktif)
             switch (text) {
-                case "Tentang Kami":      iconPath = "/aset/iconLuminara/branda-biru.png"; break;
-                case "Budaya":            iconPath = "/aset/iconLuminara/budaya-puith.png"; break;
+                case "Beranda":           iconPath = "/aset/iconLuminara/branda-biru.png"; break;
+                case "Budaya":            iconPath = "/aset/iconLuminara/icon-budaya.png"; break;
                 case "Festival":          iconPath = "/aset/iconLuminara/icon-fest.png"; break;
                 case "Lokakarya":         iconPath = "/aset/iconLuminara/icon-workshop.png"; break;
                 case "Musik":             iconPath = "/aset/iconLuminara/icon-musik.png"; break;
@@ -113,7 +113,7 @@ sidebar.getChildren().add(bottomLogoContainer);
         } else {
             // 👉 JIKA MENU TIDAK AKTIF: Gunakan ikon versi putih biasa
             switch (text) {
-                case "Tentang Kami":      iconPath = "/aset/iconLuminara/icon-beranda.png"; break;
+                case "Beranda":           iconPath = "/aset/iconLuminara/icon-beranda.png"; break;
                 case "Budaya":            iconPath = "/aset/iconLuminara/budaya-puith.png"; break;
                 case "Festival":          iconPath = "/aset/iconLuminara/fest-putih.png"; break;
                 case "Lokakarya":         iconPath = "/aset/iconLuminara/lokakarya-putih.png"; break;
@@ -150,7 +150,7 @@ sidebar.getChildren().add(bottomLogoContainer);
         // Logika perpindahan halaman saat menu samping diklik
         btn.setOnAction(e -> {
             switch (text) {
-                case "Tentang Kami":      new DashboardPage().start(stage); break;
+                case "Beranda":           new DashboardPage().start(stage); break;
                 case "Budaya":            new BudayaPage().start(stage); break;
                 case "Festival":          new FestivalPage().start(stage); break;
                 case "Lokakarya":         new LokakaryaPage().start(stage); break;

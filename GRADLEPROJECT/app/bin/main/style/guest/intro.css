@@ -8,12 +8,10 @@
 .tagline-text {
     font-family: "Poppins";
     font-size: 16px;
-    font-weight: bold;
     color: #ffffff; /* Warna putih */
 
     -fx-font-family: "Poppins";
     -fx-font-size: 16px;
-    -fx-font-weight: bold;
     -fx-text-fill: #ffffff; /* Warna putih */
     -fx-text-alignment: center;
     -fx-line-spacing: 6px;
@@ -32,7 +30,8 @@
 
     -fx-background-color: #ff9100; /* Warna jingga/orange */
     -fx-text-fill: #ffffff;         /* Teks putih */
-    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-family: "Poppins";
+    -fx-effect: dropshadow(gaussian, rgb(255, 132, 0), 10, 0, 0, 5);
     -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-padding: 12px 45px;         /* Ukuran tombol atas-bawah & kiri-kanan */
@@ -178,6 +177,7 @@
 /* Kartu Review/Testimoni */
 .testimonial-card {
     background-color: #0A3C73;
+    
     
     -fx-background-color: #0A3C73; /* Warna biru gelap pekat untuk kartu */
     -fx-background-radius: 12px;

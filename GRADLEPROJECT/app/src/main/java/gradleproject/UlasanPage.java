@@ -79,7 +79,7 @@ public class UlasanPage {
         mainLayout.getChildren().addAll(sidebar, rightArea);
         root.getChildren().add(mainLayout);
 
-        Scene scene = new Scene(root, 1024, 720);
+        Scene scene = new Scene(root, 1280, 650);
         try {
             scene.getStylesheets().add(getClass().getResource("/style/guest/intro.css").toExternalForm());
         } catch (Exception e) {}

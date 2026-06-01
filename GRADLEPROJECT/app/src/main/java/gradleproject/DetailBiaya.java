@@ -91,6 +91,11 @@ public class DetailBiaya {
         lblDescription.setWrapText(true);
         lblDescription.setTextAlignment(javafx.scene.text.TextAlignment.JUSTIFY);
 
+        // 👉 CEK STATUS GRATIS ATAU BERBAYAR
+        boolean isGratis = statusBiaya != null && (statusBiaya.equalsIgnoreCase("Gratis") || statusBiaya.equalsIgnoreCase("Free"));
+        String labelHargaUI = isGratis ? "Gratis" : "Rp25.000";
+        String nilaiHargaUntukSistem = isGratis ? "0" : "25000";
+
         GridPane gridInfo = new GridPane();
         gridInfo.setHgap(80); 
         gridInfo.setVgap(12); 
@@ -98,7 +103,7 @@ public class DetailBiaya {
 
         gridInfo.add(createMetaBlock("Lokasi:", "Trans Studio Mall Makassar"), 0, 0);
         gridInfo.add(createMetaBlock("Tanggal:", "20-22 Mei 2026"), 1, 0);
-        gridInfo.add(createMetaBlock("Harga:", "Rp25.000"), 0, 1);
+        gridInfo.add(createMetaBlock("Harga:", labelHargaUI), 0, 1); // Nominal harga di UI menjadi dinamis
         gridInfo.add(createMetaBlock("Kuota:", "100 orang"), 1, 1);
 
         HBox actionRow = new HBox(12);
@@ -106,15 +111,19 @@ public class DetailBiaya {
 
         Button btnBeli = new Button("Beli Tiket");
         btnBeli.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 6 22;");
+        btnBeli.setCursor(javafx.scene.Cursor.HAND);
+        
+        // 👉 PERBAIKAN: Mengirim nominal harga ke formulir pesanan
         btnBeli.setOnAction(event -> {
-            if (DashboardUser.getInstance() != null) DashboardUser.getInstance().pindahKePesanTiket();
+            if (DashboardUser.getInstance() != null) {
+                DashboardUser.getInstance().pindahKePesanTiket(nilaiHargaUntukSistem);
+            }
         });
 
         Button btnKembali = new Button("Kembali");
         btnKembali.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 6 22;");
         btnKembali.setCursor(javafx.scene.Cursor.HAND);
         
-        // 👉 KUNCI STABILITAS: Kembali murni ke BiayaUser
         btnKembali.setOnAction(event -> {
             if (DashboardUser.getInstance() != null) {
                 DashboardUser.getInstance().pindahKeBiayaUser();

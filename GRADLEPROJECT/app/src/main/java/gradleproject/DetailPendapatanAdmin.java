@@ -1,5 +1,6 @@
 package gradleproject;
 
+import gradleproject.dao.TransactionDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -11,35 +12,47 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.Map;
+
 public class DetailPendapatanAdmin {
 
     private VBox view;
+    private TransactionDAO transactionDAO;
+    private NumberFormat rupiahFormat;
 
     public DetailPendapatanAdmin() {
+        // Inisialisasi DAO dan Format Rupiah
+        transactionDAO = new TransactionDAO();
+        rupiahFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+        rupiahFormat.setMaximumFractionDigits(0);
+
         view = new VBox(25);
-        view.setPadding(new Insets(40, 50, 40, 50)); // Padding longgar khas admin panel
+        view.setPadding(new Insets(40, 50, 40, 50)); 
         view.setAlignment(Pos.TOP_LEFT);
         view.setStyle("-fx-background-color: #F8F9FA;");
 
-        // 1. TOP HEADER ROW (Judul "Pendapatan" + Filter Tahun Oranye)
+        // 1. TOP HEADER ROW
         HBox headerRow = new HBox();
         headerRow.setAlignment(Pos.CENTER_LEFT);
 
-        Label lblTitle = new Label("Pendapatan");
+        Label lblTitle = new Label("Pendapatan (Pajak 10%)");
         lblTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 26px; -fx-text-fill: #0A3B5C;");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Tombol Filter Tahun (Sesuai mockup [2026 >])
-        Button btnYear = new Button("2026  >");
+        // Filter Tahun (Saat ini di-set statis ke 2026 sebagai default)
+        int tahunAktif = 2026; 
+        Button btnYear = new Button(tahunAktif + "  >");
         btnYear.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 12px; -fx-background-radius: 8; -fx-padding: 5 15;");
         btnYear.setCursor(javafx.scene.Cursor.HAND);
 
         headerRow.getChildren().addAll(lblTitle, spacer, btnYear);
 
         // =====================================================================
-        // 2. KARTU PUTIH UTAMA LIST BULANAN (CENTRAL CARD TWO-COLUMNS)
+        // 2. KARTU PUTIH UTAMA LIST BULANAN 
         // =====================================================================
         VBox whiteCard = new VBox(20);
         whiteCard.setPadding(new Insets(40, 45, 40, 45));
@@ -47,25 +60,32 @@ public class DetailPendapatanAdmin {
         VBox.setVgrow(whiteCard, Priority.ALWAYS);
 
         GridPane gridPendapatan = new GridPane();
-        gridPendapatan.setHgap(40); // Jarak horizontal antar kolom kanan-kiri
-        gridPendapatan.setVgap(15); // Jarak vertikal antar baris bulan
+        gridPendapatan.setHgap(40); 
+        gridPendapatan.setVgap(15); 
         gridPendapatan.setAlignment(Pos.TOP_CENTER);
 
-        // Kolom Kiri (Januari - Juni)
-        gridPendapatan.add(createMonthRow("Jan:", "Rp7.250.000"), 0, 0);
-        gridPendapatan.add(createMonthRow("Feb:", "Rp10.000.000"), 0, 1);
-        gridPendapatan.add(createMonthRow("Mar:", "Rp7.775.000"), 0, 2);
-        gridPendapatan.add(createMonthRow("Apr:", "Rp4.500.000"), 0, 3);
-        gridPendapatan.add(createMonthRow("Mei:", "Rp7.775.000"), 0, 4);
-        gridPendapatan.add(createMonthRow("Jun:", "Rp4.500.000"), 0, 5);
+        // 🔥 AMBIL DATA PENDAPATAN DARI DATABASE
+        Map<Integer, Double> monthlyTax = transactionDAO.getMonthlyTaxRevenue(tahunAktif);
 
-        // Kolom Kanan (Juli - Desember)
-        gridPendapatan.add(createMonthRow("Jul:", "Rp7.250.000"), 1, 0);
-        gridPendapatan.add(createMonthRow("Agu:", "Rp10.000.000"), 1, 1);
-        gridPendapatan.add(createMonthRow("Sep:", "Rp7.775.000"), 1, 2);
-        gridPendapatan.add(createMonthRow("Okt:", "Rp4.500.000"), 1, 3);
-        gridPendapatan.add(createMonthRow("Nov:", "Rp7.775.000"), 1, 4);
-        gridPendapatan.add(createMonthRow("Des:", "Rp4.500.000"), 1, 5);
+        // Array nama bulan
+        String[] namaBulan = {"Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"};
+
+        // Loop untuk menyusun 12 bulan ke dalam Grid (2 Kolom)
+        for (int i = 0; i < 12; i++) {
+            int nomorBulan = i + 1;
+            
+            // Ambil total pajak, jika null/tidak ada transaksi maka default 0.0
+            double totalPajak = monthlyTax.getOrDefault(nomorBulan, 0.0);
+            
+            // Format ke string Rupiah (Contoh: "Rp 15.000")
+            String formattedAmount = rupiahFormat.format(totalPajak).replace("Rp", "Rp");
+
+            // Tentukan posisi kolom dan baris
+            int kolom = (i < 6) ? 0 : 1; // 0-5 di kiri, 6-11 di kanan
+            int baris = (i < 6) ? i : (i - 6);
+
+            gridPendapatan.add(createMonthRow(namaBulan[i] + ":", formattedAmount), kolom, baris);
+        }
 
         // Mengatur agar kedua kolom melebar secara seimbang (50:50)
         gridPendapatan.getChildren().forEach(node -> GridPane.setHgrow(node, Priority.ALWAYS));
@@ -74,7 +94,7 @@ public class DetailPendapatanAdmin {
         view.getChildren().addAll(headerRow, whiteCard);
     }
 
-    // Method Helper untuk membuat baris kapsul list pendapatan bulanan
+    // Method Helper 
     private HBox createMonthRow(String monthName, String totalAmount) {
         HBox row = new HBox(15);
         row.setAlignment(Pos.CENTER_LEFT);

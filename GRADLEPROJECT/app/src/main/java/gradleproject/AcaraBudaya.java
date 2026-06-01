@@ -7,19 +7,20 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane; // <--- Tambahan import
+import javafx.scene.layout.StackPane; 
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;    // <--- Tambahan import
+import javafx.scene.shape.Circle;    
 
 public class AcaraBudaya {
     
-    private VBox view;
+    private ScrollPane view;
 
     public AcaraBudaya() {
-        view = new VBox(25);
-        view.setPadding(new Insets(20, 20, 20, 80)); 
-        view.setAlignment(Pos.TOP_LEFT);
+        // Kontainer utama penampung komponen UI
+        VBox contentBox = new VBox(25);
+        contentBox.setPadding(new Insets(20, 20, 30, 80)); 
+        contentBox.setAlignment(Pos.TOP_LEFT);
+        contentBox.setStyle("-fx-background-color: transparent;"); 
 
         // 1. HEADER
         VBox header = new VBox(-5);
@@ -33,17 +34,13 @@ public class AcaraBudaya {
         Label lblTitle = new Label("Kategori Budaya");
         lblTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #1A3C5A;");
 
-        // 3. WADAH TABEL
+        // 3. WADAH TABEL UTAMA
         VBox tableBox = new VBox(0);
         tableBox.setMaxWidth(770);
-        
-        // 👉 PERBAIKAN: Background putih & Border radius utuh
         tableBox.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 8; -fx-border-color: #D3D9DE; -fx-border-radius: 8;");
-        VBox.setVgrow(tableBox, Priority.ALWAYS); // Memaksa wadah tabel ke bawah layar
 
         // HEADER TABEL
         HBox tableHeader = new HBox();
-        // 👉 PERBAIKAN: Radius melengkung HANYA di atas
         tableHeader.setStyle("-fx-background-color: #D3D9DE; -fx-background-radius: 8 8 0 0;"); 
         tableHeader.setAlignment(Pos.CENTER_LEFT);
         tableHeader.setPadding(new Insets(12, 25, 12, 25)); 
@@ -64,154 +61,144 @@ public class AcaraBudaya {
 
         tableHeader.getChildren().addAll(colNama, colDetail, colStatus);
 
-        // ISI TABEL (Data Budaya)
+        // ISI DATA TABEL
         VBox tableBody = new VBox(15);
         tableBody.setPadding(new Insets(20, 25, 20, 25));
         tableBody.setStyle("-fx-background-color: transparent;");
         
-        String[] budayaEvents = {
-            "Maudu Lompoa Cikoang",
-            "Festival Budaya F8 Makassar",
-            "Pesta Adat Appalili",
-            "Kirab Budaya Nusantara"
-        };
+        // Ambil Data Dinamis dari SQLite
+        gradleproject.dao.EventDAO eventDAO = new gradleproject.dao.EventDAO();
+        java.util.List<gradleproject.models.Event> daftarAcaraBudaya = eventDAO.findByCategory("Budaya");
 
-        // Diulang 3 kali agar tabelnya panjang dan scroll-nya aktif
-        for (int i = 0; i < 3; i++) {
-            for (String event : budayaEvents) {
-                tableBody.getChildren().add(createRow(event, "Kab. Takalar & Makassar"));
+        boolean adaDataDraft = false;
+
+        for (gradleproject.models.Event acara : daftarAcaraBudaya) {
+            if (acara.getStatus().equalsIgnoreCase("Draft")) {
+                tableBody.getChildren().add(createRow(acara));
+                adaDataDraft = true;
             }
         }
 
-        // =====================================================================
-        // 4. SCROLL PANE 
-        // =====================================================================
+        if (!adaDataDraft) {
+            Label lblKosong = new Label("Tidak ada acara baru yang menunggu persetujuan.");
+            lblKosong.setStyle("-fx-font-family: 'Poppins'; -fx-text-fill: #A0A9B5; -fx-font-style: italic;");
+            tableBody.getChildren().add(lblKosong);
+        }
+
+        // 4. SUB-SCROLL PANE (Untuk Baris Internal Tabel)
         ScrollPane scrollTable = new ScrollPane(tableBody);
         scrollTable.setFitToWidth(true); 
-        
-        // 👉 PERBAIKAN: Sembunyikan scrollbar
-        scrollTable.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); 
+        scrollTable.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED); 
         scrollTable.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); 
-        
-        // 👉 PERBAIKAN: Radius melengkung HANYA di bawah area scroll
         scrollTable.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent; -fx-background-radius: 0 0 8 8;");
         
-        VBox.setVgrow(scrollTable, Priority.ALWAYS); // Memaksa scroll mengisi layar
-        // =====================================================================
+        // Batasi tinggi maksimal tabel agar layout tidak merusak sensor klik
+        scrollTable.setMinHeight(200);
+        scrollTable.setMaxHeight(400);
 
         tableBox.getChildren().addAll(tableHeader, scrollTable);
-        view.getChildren().addAll(header, lblTitle, tableBox);
+        contentBox.getChildren().addAll(header, lblTitle, tableBox);
+
+        // 5. BUNGKUS DENGAN SCROLLPANE UTAMA LUAR
+        view = new ScrollPane(contentBox);
+        view.setFitToWidth(true);
+        view.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        view.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        view.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;");
     }
 
-    private HBox createRow(String title, String location) {
+    private HBox createRow(gradleproject.models.Event acara) {
         HBox row = new HBox();
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(10, 0, 10, 0));
 
         VBox nameBox = new VBox(3);
         nameBox.setPrefWidth(400); 
-        Label lblTitle = new Label(title);
+        
+        Label lblTitle = new Label(acara.getTitle());
         lblTitle.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-text-fill: #1A3C5A; -fx-font-size: 13px;");
-        Label lblLocation = new Label(location);
+        
+        Label lblLocation = new Label(acara.getCategory()); 
         lblLocation.setStyle("-fx-font-family: 'Poppins'; -fx-text-fill: #5A7184; -fx-font-size: 11px;");
         nameBox.getChildren().addAll(lblTitle, lblLocation);
 
         HBox detailBox = new HBox();
         detailBox.setPrefWidth(150);
         detailBox.setAlignment(Pos.CENTER);
+        
         Button btnLihat = new Button("Lihat");
         btnLihat.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 3 15; -fx-font-size: 11px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 5, 0, 0, 2);");
         btnLihat.setCursor(javafx.scene.Cursor.HAND);
         
+        // 🎯 FIX: Sinkronisasi pengiriman parameter objek 'acara' ke DashboardAdmin
         btnLihat.setOnAction(event -> {
-            if (Dashboard.getInstance() != null) {
-                Dashboard.getInstance().pindahKeDetailAcaraBudaya();
+            if (DashboardAdmin.getInstance() != null) {
+                DashboardAdmin.getInstance().pindahKeDetailAcaraBudaya(acara);
             }
         });
-
         detailBox.getChildren().add(btnLihat);
 
-
-        // =======================================================================
-        // KOLOM 3: LOGIKA PERUBAHAN STATUS (StackPane)
-        // =======================================================================
+        // KOLOM 3: LOGIKA PERUBAHAN STATUS
         StackPane statusContainer = new StackPane();
         statusContainer.setPrefWidth(150);
 
-        // WADAH A: Berisi Tombol Terima & Tolak
         VBox actionButtonsBox = new VBox(6);
         actionButtonsBox.setAlignment(Pos.CENTER);
         
         Button btnTerima = new Button("Terima");
-        btnTerima.setStyle(
-            "-fx-background-color: #FF9800; " +
-            "-fx-text-fill: white; " +
-            "-fx-background-radius: 20; " +
-            "-fx-padding: 5 15; " +
-            "-fx-font-family: 'Poppins'; " +
-            "-fx-font-size: 12px; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(255,152,0,0.6), 8, 0, 0, 3);"
-        );
+        btnTerima.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 5 15; -fx-font-family: 'Poppins'; -fx-font-size: 12px; -fx-effect: dropshadow(three-pass-box, rgba(255,152,0,0.6), 8, 0, 0, 3);");
         btnTerima.setPrefWidth(85);
         btnTerima.setCursor(javafx.scene.Cursor.HAND);
         
         Button btnTolak = new Button("Tolak");
-        btnTolak.setStyle(
-            "-fx-background-color: #FFFFFF; " +
-            "-fx-text-fill: #1A3C5A; " +
-            "-fx-background-radius: 20; " +
-            "-fx-padding: 5 15; " +
-            "-fx-font-family: 'Poppins'; " +
-            "-fx-font-size: 12px; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 8, 0, 0, 3);"
-        );
+        btnTolak.setStyle("-fx-background-color: #FFFFFF; -fx-text-fill: #1A3C5A; -fx-background-radius: 20; -fx-padding: 5 15; -fx-font-family: 'Poppins'; -fx-font-size: 12px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 8, 0, 0, 3);");
         btnTolak.setPrefWidth(85);
         btnTolak.setCursor(javafx.scene.Cursor.HAND);
-
         actionButtonsBox.getChildren().addAll(btnTerima, btnTolak);
 
-        // WADAH B: Berisi Hasil Status (Titik warna + Teks) -> Awalnya disembunyikan
         HBox resultStatusBox = new HBox(8);
         resultStatusBox.setAlignment(Pos.CENTER);
-        
         Circle dotIndicator = new Circle(4);
         Label lblStatusText = new Label();
         lblStatusText.setStyle("-fx-font-family: 'Poppins'; -fx-font-weight: bold; -fx-font-size: 12px; -fx-text-fill: #1A3C5A;");
-        
         resultStatusBox.getChildren().addAll(dotIndicator, lblStatusText);
-        resultStatusBox.setVisible(false);  // Sembunyikan visualnya
-        resultStatusBox.setManaged(false); // Jangan ambil ruang tata letak
+        resultStatusBox.setVisible(false);  
+        resultStatusBox.setManaged(false); 
 
-        // LOGIKA KLIK TOMBOL TERIMA
         btnTerima.setOnAction(e -> {
-            actionButtonsBox.setVisible(false);
-            actionButtonsBox.setManaged(false);
+            gradleproject.dao.EventDAO eventDAO = new gradleproject.dao.EventDAO();
+            boolean suksesUpdate = eventDAO.updateStatus(acara.getId(), "Active");
             
-            dotIndicator.setStyle("-fx-fill: #4CAF50;"); // Warna Hijau
-            lblStatusText.setText("Diterima");
-            
-            resultStatusBox.setVisible(true);
-            resultStatusBox.setManaged(true);
+            if (suksesUpdate) {
+                actionButtonsBox.setVisible(false);
+                actionButtonsBox.setManaged(false);
+                dotIndicator.setStyle("-fx-fill: #4CAF50;"); 
+                lblStatusText.setText("Diterima");
+                resultStatusBox.setVisible(true);
+                resultStatusBox.setManaged(true);
+            }
         });
 
-        // LOGIKA KLIK TOMBOL TOLAK
         btnTolak.setOnAction(e -> {
-            actionButtonsBox.setVisible(false);
-            actionButtonsBox.setManaged(false);
+            gradleproject.dao.EventDAO eventDAO = new gradleproject.dao.EventDAO();
+            boolean suksesUpdate = eventDAO.updateStatus(acara.getId(), "Past"); 
             
-            dotIndicator.setStyle("-fx-fill: #FF9800;"); // Warna Oranye
-            lblStatusText.setText("Ditolak");
-            
-            resultStatusBox.setVisible(true);
-            resultStatusBox.setManaged(true);
+            if (suksesUpdate) {
+                actionButtonsBox.setVisible(false);
+                actionButtonsBox.setManaged(false);
+                dotIndicator.setStyle("-fx-fill: #FF9800;"); 
+                lblStatusText.setText("Ditolak");
+                resultStatusBox.setVisible(true);
+                resultStatusBox.setManaged(true);
+            }
         });
 
         statusContainer.getChildren().addAll(actionButtonsBox, resultStatusBox);
-        // =======================================================================
-
         row.getChildren().addAll(nameBox, detailBox, statusContainer);
         return row;
     }
 
-    public Parent getView() { return view; }
+    public Parent getView() { 
+        return view; 
+    }
 }

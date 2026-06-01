@@ -6,14 +6,27 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    // 🎯 1. Buat wadah untuk menyimpan ID user yang sedang login
+    private int loggedInUserId;
+
+    // 🎯 2. Constructor default (Bawaan JavaFX saat aplikasi pertama kali di-run)
+    public Main() {
+        this.loggedInUserId = 0; // Fallback jika tidak ada ID
+    }
+
+    // 🎯 3. Constructor khusus (Dipakai oleh SignInPage untuk mengirim ID)
+    public Main(int userId) {
+        this.loggedInUserId = userId;
+    }
+
     @Override
     public void start(Stage primaryStage) {
-        // Cukup panggil ManajemenAcaraView karena dia sudah menjadi kontainer utama 
-        // yang menampung sidebar, beranda, dan halaman list detail acara sekaligus.
-        ManajemenAcaraView mainView = new ManajemenAcaraView();
+        
+        // 🎯 4. Sekarang variabel loggedInUserId sudah sah dan berisi data!
+        ManajemenAcaraView mainView = new ManajemenAcaraView(this.loggedInUserId); 
 
         // Tampilkan Scene Utama dengan ukuran 1280x720
-        Scene scene = new Scene(mainView, 1280, 720);
+        Scene scene = new Scene(mainView, 1280, 650);
         
         // Memuat file CSS agar semua style, hover, dan font bold teraplikasikan sempurna
         try {

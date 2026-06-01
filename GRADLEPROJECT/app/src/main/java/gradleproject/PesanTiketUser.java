@@ -1,5 +1,10 @@
 package gradleproject;
 
+import java.util.List;
+
+import gradleproject.dao.TicketTierDAO;
+import gradleproject.models.Event;
+import gradleproject.models.TicketTier;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -25,7 +30,10 @@ public class PesanTiketUser {
     private Label lblNotifTitle;
     private Label lblNotifMessage;
 
-    public PesanTiketUser() {
+
+    // 👉 TAMBAHAN 2: Minta objek acara dan harga tiket saat halaman ini dipanggil
+    public PesanTiketUser(Event acara, String hargaTiket) {
+        
         view = new StackPane();
         view.setStyle("-fx-background-color: #F8F9FA;");
 
@@ -119,23 +127,78 @@ public class PesanTiketUser {
         // LOGIKA VALIDASI INTERAKTIF TOMBOL BAYAR
         // =====================================================================
         btnBayar.setOnAction(event -> {
-            String nama = txtNama.getText().trim();
-            String kontak = txtKontak.getText().trim();
-            String email = txtEmail.getText().trim();
 
-            // Cek jika salah satu atau semua kolom teks masih kosong
-            if (nama.isEmpty() || kontak.isEmpty() || email.isEmpty()) {
-                lblNotifTitle.setText("Peringatan"); // Judul dinamis otomatis berubah
-                lblNotifMessage.setText("Semua kolom input data diri harus diisi terlebih dahulu!");
-                overlayNotif.setVisible(true); // Munculkan boks peringatan
-            } else {
-                // Skenario lolos validasi: Berhasil mengalirkan data menuju proses pembayaran
-                if (DashboardUser.getInstance() != null) {
-                    DashboardUser.getInstance().pindahKePembayaran("25000"); 
-                }
-            }
-        });
+    String nama = txtNama.getText().trim();
+    String kontak = txtKontak.getText().trim();
+    String email = txtEmail.getText().trim();
+
+    if (nama.isEmpty() || kontak.isEmpty() || email.isEmpty()) {
+        lblNotifTitle.setText("Peringatan");
+        lblNotifMessage.setText("Semua kolom harus diisi!");
+        overlayNotif.setVisible(true);
+        return;
     }
+
+    try {
+        TicketTierDAO tierDAO = new TicketTierDAO();
+        List<TicketTier> daftarTier = tierDAO.findByEventId(acara.getId());
+
+        TicketTier tier;
+
+        // =========================
+        // JIKA TIDAK ADA TIER
+        // =========================
+        if (daftarTier.isEmpty()) {
+            TicketTier newTier = new TicketTier(
+                    acara.getId(),
+                    acara.getTicketType(),
+                    acara.getPrice(),
+                    acara.getQuota()
+            );
+
+            boolean sukses = tierDAO.insert(newTier);
+
+            if (!sukses) {
+                showNotif("Error", "Gagal membuat ticket tier");
+                return;
+            }
+
+            // karena insert() tidak return ID → kita ambil lagi dari DB
+            daftarTier = tierDAO.findByEventId(acara.getId());
+
+            if (daftarTier.isEmpty()) {
+                showNotif("Error", "Ticket tier tidak terbaca setelah insert");
+                return;
+            }
+
+            tier = daftarTier.get(0);
+
+        } else {
+            tier = daftarTier.get(0);
+        }
+
+        // =========================
+        // KE PEMBAYARAN
+        // =========================
+        if (DashboardUser.getInstance() != null) {
+            DashboardUser.getInstance().pindahKePembayaran(
+                    acara,
+                    String.valueOf(tier.getPrice())
+            );
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        showNotif("Error", "Terjadi kesalahan sistem");
+    }
+});
+} 
+
+     private void showNotif(String title, String message) {
+         lblNotifTitle.setText(title);
+         lblNotifMessage.setText(message);
+         overlayNotif.setVisible(true);
+     }
 
     // --- METHOD HELPER 1: Membuat Desain Cetakan Boks Dialog Peringatan Terkunci ---
     private void createCustomNotificationOverlay() {

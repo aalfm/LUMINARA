@@ -122,8 +122,13 @@ public class DetailKategori {
 
         Button btnBeli = new Button("Beli Tiket");
         btnBeli.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-family: 'Poppins'; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 6 22;");
+        btnBeli.setCursor(javafx.scene.Cursor.HAND);
+        
+        // 👉 PERBAIKAN: Menambahkan nominal "25000" ke dalam pemanggilan method
         btnBeli.setOnAction(event -> {
-            if (DashboardUser.getInstance() != null) DashboardUser.getInstance().pindahKePesanTiket();
+            if (DashboardUser.getInstance() != null) {
+                DashboardUser.getInstance().pindahKePesanTiket("25000");
+            }
         });
 
         Button btnKembali = new Button("Kembali");

@@ -60,6 +60,7 @@ public class FestivalPage {
             "Ruang pementasan cerita rakyat dan sejarah Makassar melalui seni tutur lisan yang interaktif. Menggabungkan sinrilik, musik tradisional, dan storytelling modern, kegiatan ini menghadirkan kisah-kisah legenda secara dekat, hangat, dan edukatif bagi generasi muda.",
             "/aset/gambarLuminara/fest-story.png", "Festival", primaryStage);
 
+        // Controller akan otomatis menangani ketidaklengkapan nama file ".png" di bawah ini secara aman
         VBox card3 = createEventCard("Makassar Traditional Costume Showcase", 
             "Pementasan yang menampilkan busana adat Makassar dan Sulawesi Selatan. Acara ini menonjolkan Baju Bodo, Baju Bella Dada, passapu, serta kain sutra...",
             "/aset/gambarLuminara/.png", "Festival", primaryStage);
@@ -79,7 +80,7 @@ public class FestivalPage {
         mainLayout.getChildren().addAll(sidebar, rightArea);
         root.getChildren().add(mainLayout);
 
-        Scene scene = new Scene(root, 1024, 720);
+        Scene scene = new Scene(root, 1280, 650);
         scene.getStylesheets().add(getClass().getResource("/style/guest/intro.css").toExternalForm());
 
         primaryStage.setTitle("Luminara - Festival Preview");
@@ -87,7 +88,27 @@ public class FestivalPage {
         primaryStage.show();
     }
 
-    // Fungsi Pengrajin Komponen Kartu yang Fleksibel dan Digunakan Bersama Oleh MusikPage
+    // =========================================================================
+    // LOGIKA CONTROLLER (INTERNAL METHODS)
+    // =========================================================================
+
+    /**
+     * Mengontrol aksi navigasi saat kartu event ditekan menuju halaman Detail
+     */
+    private static void handleLihatDetail(String title, String description, String imagePath, String contextCategory, Stage stage) {
+        System.out.println("Log Controller: Membuka detail item -> " + title);
+        
+        DetailEventPage detailPage = new DetailEventPage(title, description, imagePath, contextCategory);
+        detailPage.start(stage);
+    }
+
+    // =========================================================================
+    // UI BUILDER HELPER
+    // =========================================================================
+
+    /**
+     * Fungsi Pengrajin Komponen Kartu yang Fleksibel dan Digunakan Bersama Oleh MusikPage
+     */
     public static VBox createEventCard(String title, String description, String imagePath, String contextCategory, Stage stage) {
         VBox cardRoot = new VBox();
         cardRoot.getStyleClass().add("budaya-card");
@@ -97,14 +118,21 @@ public class FestivalPage {
         StackPane imageHolder = new StackPane();
         imageHolder.getStyleClass().add("budaya-card-image-box");
 
-        try {
-            String imgStyle = "-fx-background-image: url('" + FestivalPage.class.getResource(imagePath).toExternalForm() + "'); " +
-                              "-fx-background-repeat: no-repeat; " +
-                              "-fx-background-size: cover; " +
-                              "-fx-background-position: center center; " +
-                              "-fx-background-radius: 16px 16px 0px 0px;";
-            imageHolder.setStyle(imgStyle);
-        } catch (Exception e) {
+        // Controller Protection: Validasi string agar terhindar dari pemanggilan path aset ilegal/kosong
+        if (imagePath != null && !imagePath.trim().isEmpty() && !imagePath.equals("/aset/gambarLuminara/.png")) {
+            try {
+                String imgStyle = "-fx-background-image: url('" + FestivalPage.class.getResource(imagePath).toExternalForm() + "'); " +
+                                  "-fx-background-repeat: no-repeat; " +
+                                  "-fx-background-size: cover; " +
+                                  "-fx-background-position: center center; " +
+                                  "-fx-background-radius: 16px 16px 0px 0px;";
+                imageHolder.setStyle(imgStyle);
+            } catch (Exception e) {
+                // Fallback jika file tidak ditemukan secara fisik di folder resource
+                imageHolder.setStyle("-fx-background-color: #CBD5E0; -fx-background-radius: 16px 16px 0px 0px;");
+            }
+        } else {
+            // Fallback default color jika format teks path tidak valid atau kosong
             imageHolder.setStyle("-fx-background-color: #CBD5E0; -fx-background-radius: 16px 16px 0px 0px;");
         }
 
@@ -128,9 +156,8 @@ public class FestivalPage {
         btnDetail.getStyleClass().add("budaya-btn-detail");
         btnDetail.setCursor(javafx.scene.Cursor.HAND);
         
-        btnDetail.setOnAction(e -> {
-            new DetailEventPage(title, description, imagePath, contextCategory).start(stage);
-        });
+        // BINDING CONTROLLER: Menghubungkan klik tombol ke method handleLihatDetail
+        btnDetail.setOnAction(e -> handleLihatDetail(title, description, imagePath, contextCategory, stage));
 
         actionRow.getChildren().add(btnDetail);
         infoContent.getChildren().addAll(lblTitle, lblDesc, actionRow);
